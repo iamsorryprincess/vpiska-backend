@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using Vpiska.Mongo.Interfaces;
-using Vpiska.Mongo.Models;
+using Vpiska.Domain.Interfaces;
+using Vpiska.Domain.Models;
 
 namespace Vpiska.Mongo.Storage
 {

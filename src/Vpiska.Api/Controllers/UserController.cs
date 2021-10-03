@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using AutoMapper;
-using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Vpiska.Api.Auth;
 using Vpiska.Api.Dto;
-using Vpiska.Mongo.Interfaces;
-using Vpiska.Mongo.Models;
+using Vpiska.Domain.Interfaces;
+using Vpiska.Domain.Models;
 
 namespace Vpiska.Api.Controllers
 {
@@ -19,13 +17,11 @@ namespace Vpiska.Api.Controllers
     {
         private static readonly Random Random = new Random();
 
-        private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IUserStorage _storage;
 
-        public UserController(ILogger<UserController> logger, IMapper mapper, IUserStorage storage)
+        public UserController(IMapper mapper, IUserStorage storage)
         {
-            _logger = logger;
             _mapper = mapper;
             _storage = storage;
         }
@@ -106,7 +102,7 @@ namespace Vpiska.Api.Controllers
         [ProducesResponseType(typeof(Dictionary<string, string>), 400)]
         [ProducesResponseType(typeof(Dictionary<string, string>), 404)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<IActionResult> SetVerificationCode([FromBody] CodeRequest request)
+        public async Task<IActionResult> SetVerificationCode([FromServices] INotificationService notificationService, [FromBody] CodeRequest request)
         {
             var code = Random.Next(111111, 777777);
             var isSuccess = await _storage.SetVerificationCode(request.Phone, code);
@@ -116,24 +112,9 @@ namespace Vpiska.Api.Controllers
                 return NotFound(new Dictionary<string, string>()
                     { { "phone", "Пользователь с таким номером не найден" } });
             }
-            
-            var message = new Message()
-            {
-                Data = new Dictionary<string, string>()
-                {
-                    { "myData", code.ToString() }
-                },
-                Token = request.FirebaseToken,
-                Notification = new Notification()
-                {
-                    Title = "Код подтверждения",
-                    Body = "Введите код для входа"
-                }
-            };
 
-            var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-            _logger.LogInformation(response);
-            return Ok();
+            await notificationService.SendVerificationCode(code, request.FirebaseToken);
+            return NoContent();
         }
         
         [HttpGet("code")]
@@ -185,7 +166,7 @@ namespace Vpiska.Api.Controllers
                     { { "id", "Пользователь с таким id не найден" } });
             }
 
-            return Ok();
+            return NoContent();
         }
 
         [Authorize]
@@ -195,27 +176,35 @@ namespace Vpiska.Api.Controllers
         [ProducesResponseType(typeof(Dictionary<string, string>), 400)]
         [ProducesResponseType(typeof(Dictionary<string, string>), 404)]
         [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<IActionResult> UpdateUser([FromQuery] UpdateUserRequest request)
+        public async Task<IActionResult> UpdateUser([FromServices] IFileStorage fileStorage, [FromForm] UpdateUserRequest request)
         {
-            string imageUrl = null;
-            if (request.Image != null)
-            {
-                using (var stream = new MemoryStream())
-                {
-                    await request.Image.CopyToAsync(stream);
-                    var bytes = stream.ToArray();
-                }
-            }
+            var user = await _storage.GetById(request.Id);
 
-            var isSuccess = await _storage.Update(request.Id, request.Name, request.Phone, imageUrl);
-
-            if (!isSuccess)
+            if (user == null)
             {
                 return NotFound(new Dictionary<string, string>()
                     { { "id", "Пользователь с таким id не найден" } });
             }
+
+            string imageUrl = null;
             
-            return Ok();
+            if (request.Image != null)
+            {
+                await using var stream = new MemoryStream();
+                await request.Image.CopyToAsync(stream);
+                
+                if (!string.IsNullOrWhiteSpace(user.ImageUrl))
+                {
+                    imageUrl = await fileStorage.UploadFile(user.ImageUrl, request.Image.ContentType, stream);
+                }
+                else
+                {
+                    imageUrl = await fileStorage.UploadFile(Guid.NewGuid().ToString("N"), request.Image.ContentType, stream);
+                }
+            }
+
+            await _storage.Update(request.Id, request.Name, request.Phone, imageUrl);
+            return NoContent();
         }
     }
 }

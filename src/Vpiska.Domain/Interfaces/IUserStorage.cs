@@ -1,12 +1,12 @@
 using System.Threading.Tasks;
-using Vpiska.Mongo.Models;
+using Vpiska.Domain.Models;
 
-namespace Vpiska.Mongo.Interfaces
+namespace Vpiska.Domain.Interfaces
 {
     public interface IUserStorage
     {
         Task<User> GetById(string id);
-        
+
         Task<string> Create(User user);
 
         Task<bool> Update(string id, string name, string phone, string imageUrl);

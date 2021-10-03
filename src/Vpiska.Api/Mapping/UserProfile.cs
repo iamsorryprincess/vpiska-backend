@@ -2,7 +2,7 @@ using System;
 using AutoMapper;
 using Vpiska.Api.Auth;
 using Vpiska.Api.Dto;
-using Vpiska.Mongo.Models;
+using Vpiska.Domain.Models;
 
 namespace Vpiska.Api.Mapping
 {

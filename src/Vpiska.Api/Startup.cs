@@ -1,19 +1,16 @@
 using AutoMapper;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Driver;
+using Serilog;
 using Vpiska.Api.Auth;
 using Vpiska.Api.Filters;
 using Vpiska.Api.Mapping;
-using Vpiska.Mongo.Interfaces;
-using Vpiska.Mongo.Storage;
+using Vpiska.Firebase;
+using Vpiska.Mongo;
 
 namespace Vpiska.Api
 {
@@ -44,22 +41,13 @@ namespace Vpiska.Api
                     };
                 });
             
-            services.AddSingleton(new MapperConfiguration(opt => opt.AddProfile(new UserProfile())).CreateMapper());
-            
-            services.AddSingleton(_ =>
-            {
-                var conventionPack = new ConventionPack { new CamelCaseElementNameConvention() };
-                ConventionRegistry.Register("default", conventionPack, t => true);
-                return new MongoClient(_configuration["Mongo:ConnectionString"]);
-            });
+            services.AddSingleton(_ => Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day,
+                    outputTemplate:
+                    "{Timestamp:HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger());
 
-            services.AddSingleton(FirebaseApp.Create(new AppOptions()
-            {
-                Credential = GoogleCredential.FromFile("firebase.json")
-            }));
-            
-            services.AddTransient<IUserStorage, UserStorage>();
-            
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
@@ -74,6 +62,10 @@ namespace Vpiska.Api
                 options.Filters.Add<ExceptionFilter>();
                 options.Filters.Add<ValidationFilter>();
             });
+            
+            services.AddSingleton(new MapperConfiguration(opt => opt.AddProfile(new UserProfile())).CreateMapper());
+            services.AddMongo(_configuration.GetSection("Mongo"));
+            services.AddFirebase();
         }
         
         public void Configure(IApplicationBuilder app)

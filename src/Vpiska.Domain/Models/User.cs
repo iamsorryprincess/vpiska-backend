@@ -1,10 +1,7 @@
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace Vpiska.Mongo.Models
+namespace Vpiska.Domain.Models
 {
     public sealed class User
     {
-        [BsonId]
         public string Id { get; set; }
         
         public string Name { get; set; }

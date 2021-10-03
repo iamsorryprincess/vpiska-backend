@@ -1,4 +1,4 @@
-namespace Vpiska.Mongo.Models
+namespace Vpiska.Domain.Models
 {
     public sealed class NamePhoneCheckResult
     {
