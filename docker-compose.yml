@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  mongo:
+    container_name: vpiska_mongo
+    image: mongo:5.0.3-focal
+    restart: on-failure
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: kekit*
+      MONGO_INITDB_ROOT_PASSWORD: qweasd123*
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data/db:/data/db
+
+  api:
+    container_name: vpiska_api
+    image: api
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: src/Vpiska.Api/Dockerfile
+    environment:
+      - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
+    ports:
+      - "5000:80"
+    volumes:
+      - /data/logs/api:/logs
