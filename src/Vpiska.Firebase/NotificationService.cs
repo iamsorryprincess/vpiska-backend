@@ -8,6 +8,8 @@ namespace Vpiska.Firebase
 {
     public sealed class NotificationService : INotificationService
     {
+        private const string FirebaseToken = "test";
+        
         private readonly ILogger _logger;
 
         public NotificationService(ILogger logger)
@@ -15,7 +17,7 @@ namespace Vpiska.Firebase
             _logger = logger;
         }
         
-        public async Task SendVerificationCode(int code, string firebaseToken)
+        public async Task SendVerificationCode(int code)
         {
             var message = new Message()
             {
@@ -23,7 +25,7 @@ namespace Vpiska.Firebase
                 {
                     { "code", code.ToString() }
                 },
-                Token = firebaseToken,
+                Token = FirebaseToken,
                 Notification = new Notification()
                 {
                     Title = "Код подтверждения",

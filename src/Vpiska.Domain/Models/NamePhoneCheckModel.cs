@@ -1,6 +1,6 @@
 namespace Vpiska.Domain.Models
 {
-    public sealed class NamePhoneCheckResult
+    public sealed class NamePhoneCheckModel
     {
         public bool IsNameExist { get; set; }
         

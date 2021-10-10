@@ -1,6 +1,6 @@
 namespace Vpiska.Domain.Models
 {
-    public sealed class User
+    public sealed class UserModel
     {
         public string Id { get; set; }
         

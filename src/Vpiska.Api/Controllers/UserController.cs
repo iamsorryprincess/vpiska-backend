@@ -1,123 +1,40 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vpiska.Api.Auth;
-using Vpiska.Api.Dto;
 using Vpiska.Domain.Interfaces;
-using Vpiska.Domain.Models;
+using Vpiska.Domain.Requests;
+using Vpiska.Domain.Responses;
 
 namespace Vpiska.Api.Controllers
 {
     [Route("api/users")]
     public sealed class UserController : ControllerBase
     {
-        private static readonly Random Random = new Random();
-
-        private readonly IMapper _mapper;
-        private readonly IUserStorage _storage;
-
-        public UserController(IMapper mapper, IUserStorage storage)
-        {
-            _mapper = mapper;
-            _storage = storage;
-        }
-
         [HttpPost]
         [Produces("application/json")]
         [Consumes("application/json")]
-        [ProducesResponseType(typeof(LoginResponse), 201)]
-        [ProducesResponseType(typeof(Dictionary<string, string>), 400)]
-        [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<IActionResult> RegisterUser([FromBody] CreateUserRequest request)
-        {
-            var checkResult = await _storage.CheckInfo(request.Name, request.Phone);
-
-            if (checkResult != null)
-            {
-                var dictResult = new Dictionary<string, string>();
-                
-                if (checkResult.IsPhoneExist)
-                {
-                    dictResult.Add("phone", "Номер телефона занят");
-                }
-                
-                if (checkResult.IsNameExist)
-                {
-                    dictResult.Add("name", "Имя пользователя занято");
-                }
-
-                return BadRequest(dictResult);
-            }
-            
-            var user = _mapper.Map<User>(request);
-            await _storage.Create(user);
-            var result = new LoginResponse()
-            {
-                UserId = user.Id,
-                AccessToken = JwtOptions.GetEncodedJwt(user.Id, user.Name, user.ImageUrl),
-            };
-            return StatusCode(201, result);
-        }
+        [ProducesResponseType(typeof(DomainResponse<LoginResponse>), 200)]
+        public Task<DomainResponse<LoginResponse>> RegisterUser(
+            [FromServices] ICommandHandler<CreateUserRequest, LoginResponse> commandHandler,
+            [FromBody] CreateUserRequest request) => commandHandler.Handle(request);
 
         [HttpPost("login")]
         [Produces("application/json")]
         [Consumes("application/json")]
-        [ProducesResponseType(typeof(LoginResponse), 200)]
-        [ProducesResponseType(typeof(Dictionary<string, string>), 400)]
-        [ProducesResponseType(typeof(Dictionary<string, string>), 404)]
-        [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
-        {
-            var user = await _storage.GetUserByPhone(request.Phone);
+        [ProducesResponseType(typeof(DomainResponse<LoginResponse>), 200)]
+        public Task<DomainResponse<LoginResponse>> Login(
+            [FromServices] ICommandHandler<LoginRequest, LoginResponse> commandHandler,
+            [FromBody] LoginRequest request) => commandHandler.Handle(request);
 
-            if (user == null)
-            {
-                return NotFound(new Dictionary<string, string>()
-                    { { "phone", "Пользователь с таким номером не найден" } });
-            }
-
-            if (!user.Password.CheckHashPassword(request.Password))
-            {
-                return BadRequest(new Dictionary<string, string>()
-                    { { "password", "Неверный пароль" } });
-            }
-
-            var result = new LoginResponse()
-            {
-                UserId = user.Id,
-                AccessToken = JwtOptions.GetEncodedJwt(user.Id, user.Name, user.ImageUrl)
-            };
-
-            return Ok(result);
-        }
-        
         [HttpPost("code")]
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(typeof(Dictionary<string, string>), 400)]
-        [ProducesResponseType(typeof(Dictionary<string, string>), 404)]
-        [ProducesResponseType(typeof(ErrorResponse), 500)]
-        public async Task<IActionResult> SetVerificationCode([FromServices] INotificationService notificationService, [FromBody] CodeRequest request)
-        {
-            var code = Random.Next(111111, 777777);
-            var isSuccess = await _storage.SetVerificationCode(request.Phone, code);
+        [ProducesResponseType(typeof(DomainResponse), 500)]
+        public Task<DomainResponse> SetVerificationCode(
+            [FromServices] ICommandHandler<CodeRequest> commandHandler,
+            [FromBody] CodeRequest request) => commandHandler.Handle(request);
 
-            if (!isSuccess)
-            {
-                return NotFound(new Dictionary<string, string>()
-                    { { "phone", "Пользователь с таким номером не найден" } });
-            }
-
-            await notificationService.SendVerificationCode(code, request.FirebaseToken);
-            return NoContent();
-        }
-        
-        [HttpGet("code")]
+        /*[HttpGet("code")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(LoginResponse), 200)]
         [ProducesResponseType(typeof(Dictionary<string, string>), 400)]
@@ -205,6 +122,6 @@ namespace Vpiska.Api.Controllers
 
             await _storage.Update(request.Id, request.Name, request.Phone, imageUrl);
             return NoContent();
-        }
+        }*/
     }
 }

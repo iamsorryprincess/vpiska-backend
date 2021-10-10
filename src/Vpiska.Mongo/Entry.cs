@@ -16,7 +16,7 @@ namespace Vpiska.Mongo
             var conventionPack = new ConventionPack { new CamelCaseElementNameConvention() };
             ConventionRegistry.Register("default", conventionPack, t => true);
             
-            BsonClassMap.RegisterClassMap<User>(cm => 
+            BsonClassMap.RegisterClassMap<UserModel>(cm => 
             {
                 cm.AutoMap();
                 cm.MapIdMember(c => c.Id);
