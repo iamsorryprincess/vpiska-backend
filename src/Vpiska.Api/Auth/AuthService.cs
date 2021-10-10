@@ -4,15 +4,20 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Vpiska.Domain.Interfaces;
+using Vpiska.Domain;
 
 namespace Vpiska.Api.Auth
 {
-    public sealed class AuthService : IAuthService
+    internal sealed class AuthService : IAuth
     {
         private const int LifetimeDays = 3;
-        
-        public string GetEncodedJwt(string userId, string username, string imageUrl)
+
+        public string HashPassword(string password) => Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
+
+        public bool CheckPassword(string hash, string password) =>
+            hash == Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
+
+        public string GetToken(string userId, string username, string imageUrl)
         {
             var claims = new List<Claim>
             {
@@ -39,10 +44,5 @@ namespace Vpiska.Api.Auth
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             return encodedJwt;
         }
-
-        public string HashPassword(string password) => Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
-
-        public bool CheckPassword(string hash, string password) =>
-            hash == Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
     }
 }

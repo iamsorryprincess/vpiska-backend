@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Google;
 using Google.Cloud.Storage.V1;
-using Vpiska.Domain.Interfaces;
+using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {

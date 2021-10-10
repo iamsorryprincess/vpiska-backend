@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
 using Serilog;
-using Vpiska.Domain.Interfaces;
+using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {

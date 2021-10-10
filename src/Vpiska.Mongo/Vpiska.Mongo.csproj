@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Vpiska.Domain\Vpiska.Domain.csproj" />
+      <ProjectReference Include="..\Vpiska.Domain\Vpiska.Domain.fsproj" />
     </ItemGroup>
 
 </Project>

@@ -1,8 +1,8 @@
-using System.IO;
+using Microsoft.AspNetCore.Http;
 
-namespace Vpiska.Domain.Requests
+namespace Vpiska.Api.Models
 {
-    public sealed class UpdateUserRequest
+    public sealed class UpdateUserArgs
     {
         public string Id { get; set; }
         
@@ -10,6 +10,6 @@ namespace Vpiska.Domain.Requests
         
         public string Phone { get; set; }
 
-        public Stream ImageStream { get; set; }
+        public IFormFile Image { get; set; }
     }
 }

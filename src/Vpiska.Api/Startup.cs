@@ -1,5 +1,3 @@
-using AutoMapper;
-using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -9,12 +7,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Vpiska.Api.Auth;
 using Vpiska.Api.Filters;
-using Vpiska.Domain.CommandHandlers;
-using Vpiska.Domain.Interfaces;
-using Vpiska.Domain.Mapping;
-using Vpiska.Domain.Requests;
-using Vpiska.Domain.Responses;
-using Vpiska.Domain.Validation;
+using Vpiska.Domain;
 using Vpiska.Firebase;
 using Vpiska.Mongo;
 
@@ -46,7 +39,7 @@ namespace Vpiska.Api
                         ValidateIssuerSigningKey = true
                     };
                 });
-            services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IAuth, AuthService>();
             
             services.AddSingleton(_ => Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
@@ -71,14 +64,7 @@ namespace Vpiska.Api
             
             services.AddMongo(_configuration.GetSection("Mongo"));
             services.AddFirebase();
-
-            services.AddSingleton(new MapperConfiguration(opt => opt.AddProfile(new UserProfile())).CreateMapper());
-            services.AddScoped<IValidator<CreateUserRequest>, CreateUserValidator>();
-            services.AddScoped<ICommandHandler<CreateUserRequest, LoginResponse>, CreateUserCommandHandler>();
-            services.AddScoped<IValidator<LoginRequest>, LoginUserValidator>();
-            services.AddScoped<ICommandHandler<LoginRequest, LoginResponse>, LoginCommandHandler>();
-            services.AddScoped<IValidator<CodeRequest>, CodeRequestValidator>();
-            services.AddScoped<ICommandHandler<CodeRequest>, NotificationsCommandHandler>();
+            services.AddTransient<CommandHandler>();
         }
         
         public void Configure(IApplicationBuilder app)

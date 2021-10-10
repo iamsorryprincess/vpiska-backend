@@ -2,7 +2,7 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using Microsoft.Extensions.DependencyInjection;
-using Vpiska.Domain.Interfaces;
+using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {
