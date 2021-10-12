@@ -8,7 +8,7 @@ using Vpiska.Domain.Models;
 
 namespace Vpiska.Mongo
 {
-    public sealed class UserRepository : IUserRepository
+    internal sealed class UserRepository : IUserRepository
     {
         private readonly IMongoCollection<User> _users;
         

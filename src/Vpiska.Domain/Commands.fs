@@ -1,7 +1,6 @@
 namespace Vpiska.Domain.Commands
 
 open System
-open System.IO
 
 [<CLIMutable>]
 type CreateUserArgs =
@@ -34,7 +33,7 @@ type UpdateUserArgs =
     { Id: string
       Name: string
       Phone: string
-      ImageStream: Stream voption
+      ImageData: byte[] voption
       ContentType: string }
     
 type Command =

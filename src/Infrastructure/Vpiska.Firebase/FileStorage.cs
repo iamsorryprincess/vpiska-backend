@@ -7,7 +7,7 @@ using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {
-    public sealed class FileStorage : IFileStorage
+    internal sealed class FileStorage : IFileStorage
     {
         private const string BucketName = "vpiska-a6e65.appspot.com";
         

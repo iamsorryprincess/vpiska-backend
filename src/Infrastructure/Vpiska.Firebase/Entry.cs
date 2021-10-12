@@ -11,7 +11,7 @@ namespace Vpiska.Firebase
         public static void AddFirebase(this IServiceCollection services)
         {
 #if DEBUG
-            const string path = "../Vpiska.Firebase/firebase.json";
+            const string path = "../Infrastructure/Vpiska.Firebase/firebase.json";
 #else
             const string path = "firebase.json";
 #endif

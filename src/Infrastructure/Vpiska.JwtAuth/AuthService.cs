@@ -6,7 +6,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Vpiska.Domain;
 
-namespace Vpiska.Api.Auth
+namespace Vpiska.JwtAuth
 {
     internal sealed class AuthService : IAuth
     {

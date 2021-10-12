@@ -1,7 +1,7 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Vpiska.Api.Auth
+namespace Vpiska.JwtAuth
 {
     internal static class JwtOptions
     {

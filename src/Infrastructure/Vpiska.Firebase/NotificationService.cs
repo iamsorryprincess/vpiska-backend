@@ -6,7 +6,7 @@ using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {
-    public sealed class NotificationService : INotificationService
+    internal sealed class NotificationService : INotificationService
     {
         private const string FirebaseToken = "test";
         

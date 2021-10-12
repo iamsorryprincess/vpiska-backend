@@ -23,7 +23,6 @@
       <Compile Include="Commands.fs" />
       <Compile Include="Responses.fs" />
       <Compile Include="Validation.fs" />
-      <Compile Include="Mapping.fs" />
       <Compile Include="Logic.fs" />
       <Compile Include="Interfaces.fs" />
       <Compile Include="CommandHandler.fs" />

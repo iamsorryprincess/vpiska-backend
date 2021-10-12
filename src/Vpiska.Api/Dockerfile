@@ -5,7 +5,7 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet publish src/Vpiska.Api/Vpiska.Api.csproj -c Release -o /app
+RUN dotnet publish src/Vpiska.Api/Vpiska.Api.fsproj -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
