@@ -18,14 +18,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Include="Models.fs" />
       <Compile Include="Errors.fs" />
       <Compile Include="Commands.fs" />
       <Compile Include="Responses.fs" />
       <Compile Include="Validation.fs" />
-      <Compile Include="Logic.fs" />
-      <Compile Include="Interfaces.fs" />
-      <Compile Include="CommandHandler.fs" />
+      <Compile Include="UserDomain.fs" />
     </ItemGroup>
 
 </Project>

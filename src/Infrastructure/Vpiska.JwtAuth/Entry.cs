@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Vpiska.Domain;
 
 namespace Vpiska.JwtAuth
 {
@@ -24,7 +23,7 @@ namespace Vpiska.JwtAuth
                         ValidateIssuerSigningKey = true
                     };
                 });
-            services.AddSingleton<IAuth, AuthService>();
+            services.AddSingleton<JwtAuthService>();
         }
     }
 }

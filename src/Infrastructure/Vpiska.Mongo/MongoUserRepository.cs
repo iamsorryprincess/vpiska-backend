@@ -4,15 +4,14 @@ using System.Threading.Tasks;
 using Microsoft.FSharp.Core;
 using MongoDB.Driver;
 using Vpiska.Domain;
-using Vpiska.Domain.Models;
 
 namespace Vpiska.Mongo
 {
-    internal sealed class UserRepository : IUserRepository
+    public sealed class MongoUserRepository
     {
         private readonly IMongoCollection<User> _users;
         
-        public UserRepository(MongoClient client)
+        public MongoUserRepository(MongoClient client)
         {
             var database = client.GetDatabase("vpiska");
             _users = database.GetCollection<User>("users");

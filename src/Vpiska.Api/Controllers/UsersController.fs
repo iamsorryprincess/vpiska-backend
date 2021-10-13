@@ -1,84 +1,80 @@
 namespace Vpiska.Api.Controllers
 
-open System
-open System.IO
 open Microsoft.AspNetCore.Authorization
-open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc
 open FSharp.Control.Tasks
 open Vpiska.Api
 open Vpiska.Domain
 open Vpiska.Domain.Commands
 open Vpiska.Domain.Responses
-
-[<CLIMutable>]
-type UpdateUserRequest =
-    { Id: string
-      Name: string
-      Phone: string
-      Image: IFormFile }
+open Vpiska.Firebase
+open Vpiska.JwtAuth
+open Vpiska.Mongo
 
 [<Route "api/users">]
-type UsersController(sp: IServiceProvider) =
+type UsersController() =
     inherit ControllerBase()
-    
-    let handle command =
-        task {
-            let! result = CommandHandler.handle sp command
-            return Http.mapResponse result
-        }
-        
-    let mapUpdateRequest (request: UpdateUserRequest) =
-        task {
-            if request.Image = null then
-                return { Id = request.Id; Name = request.Name; Phone = request.Phone
-                         ImageData = ValueNone; ContentType = null }
-            else
-                use stream = new MemoryStream()
-                do! request.Image.CopyToAsync(stream)
-                return { Id = request.Id; Name = request.Name; Phone = request.Phone
-                         ImageData = ValueSome (stream.ToArray()); ContentType = request.Image.ContentType }
-        }
     
     [<HttpPost "create">]
     [<Produces("application/json")>]
     [<Consumes("application/json")>]
     [<ProducesResponseType(typeof<Response<LoginResponse>>, 200)>]
-    member _.Create([<FromBody>] args: CreateUserArgs) = args |> Command.CreateUser |> handle
+    member _.Create([<FromServices>] db: MongoUserRepository, [<FromServices>] auth: JwtAuthService, [<FromBody>] args: CreateUserArgs) =
+        task {
+            let! response = UserDomain.createUser db.CheckInfo db.Create auth.HashPassword auth.GetToken args
+            return Http.mapResponse response
+        }
     
     [<HttpPost "login">]
     [<Produces("application/json")>]
     [<Consumes("application/json")>]
     [<ProducesResponseType(typeof<Response<LoginResponse>>, 200)>]
-    member _.Login([<FromBody>] args: LoginUserArgs) = args |> Command.LoginUser |> handle
+    member _.Login([<FromServices>] db: MongoUserRepository, [<FromServices>] auth: JwtAuthService, [<FromBody>] args: LoginUserArgs) =
+        task {
+            let! response = UserDomain.loginUser db.GetUserByPhone auth.CheckPassword auth.GetToken args
+            return Http.mapResponse response
+        }
     
     [<HttpPost "code/set">]
     [<Produces("application/json")>]
     [<Consumes("application/json")>]
     [<ProducesResponseType(typeof<Response>, 200)>]
-    member _.SetCode([<FromBody>] args: CodeArgs) = args |> Command.SetCode |> handle
+    member _.SetCode([<FromServices>] db: MongoUserRepository, [<FromServices>] notification: FirebaseCloudMessagingService, [<FromBody>] args: CodeArgs) =
+        task {
+            let! response = UserDomain.setVerificationCode db.SetVerificationCode notification.SendVerificationCode args
+            return Http.mapResponse response
+        }
     
     [<HttpPost "code/check">]
     [<Produces("application/json")>]
     [<Consumes("application/json")>]
     [<ProducesResponseType(typeof<Response<LoginResponse>>, 200)>]
-    member _.CheckVerificationCode([<FromBody>] args: CheckCodeArgs) = args |> Command.CheckCode |> handle
+    member _.CheckVerificationCode([<FromServices>] db: MongoUserRepository, [<FromServices>] auth: JwtAuthService, [<FromBody>] args: CheckCodeArgs) =
+        task {
+            let! response = UserDomain.checkVerificationCode db.GetUserByPhone auth.GetToken args
+            return Http.mapResponse response
+        }
     
     [<Authorize>]
     [<HttpPost "password">]
     [<Produces("application/json")>]
     [<Consumes("application/json")>]
     [<ProducesResponseType(typeof<Response>, 200)>]
-    member _.ChangePassword([<FromBody>] args: ChangePasswordArgs) = args |> Command.ChangePassword |> handle
+    member _.ChangePassword([<FromServices>] db: MongoUserRepository, [<FromServices>] auth: JwtAuthService, [<FromBody>] args: ChangePasswordArgs) =
+        task {
+            let! response = UserDomain.changePassword db.ChangePassword auth.HashPassword args
+            return Http.mapResponse response
+        }
     
     [<Authorize>]
     [<HttpPost "update">]
     [<Produces("application/json")>]
     [<Consumes("multipart/form-data")>]
     [<ProducesResponseType(typeof<Response>, 200)>]
-    member _.Update([<FromForm>] request: UpdateUserRequest) =
+    member _.Update([<FromServices>] db: MongoUserRepository, [<FromServices>] fileStorage: FirebaseFileStorage, [<FromForm>] request: UpdateUserRequest) =
         task {
-            let! args = mapUpdateRequest request
-            return! args |> Command.UpdateUser |> handle
+            let! args = Http.mapUpdateRequest request
+            let! response = UserDomain.updateUser db.GetById fileStorage.UploadFile db.Update args
+            return Http.mapResponse response
         }
     

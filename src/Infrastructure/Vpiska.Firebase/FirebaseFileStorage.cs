@@ -3,17 +3,16 @@ using System.Net;
 using System.Threading.Tasks;
 using Google;
 using Google.Cloud.Storage.V1;
-using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {
-    internal sealed class FileStorage : IFileStorage
+    public sealed class FirebaseFileStorage
     {
         private const string BucketName = "vpiska-a6e65.appspot.com";
         
         private readonly StorageClient _client;
 
-        public FileStorage(StorageClient client)
+        public FirebaseFileStorage(StorageClient client)
         {
             _client = client;
         }

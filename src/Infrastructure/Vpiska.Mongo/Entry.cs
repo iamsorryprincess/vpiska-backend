@@ -4,7 +4,6 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using Vpiska.Domain;
-using Vpiska.Domain.Models;
 
 namespace Vpiska.Mongo
 {
@@ -28,7 +27,7 @@ namespace Vpiska.Mongo
 
             var client = new MongoClient(mongoSection["ConnectionString"]);
             services.AddSingleton(client);
-            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<MongoUserRepository>();
         }
     }
 }

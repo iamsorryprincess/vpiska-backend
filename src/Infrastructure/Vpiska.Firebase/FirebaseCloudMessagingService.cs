@@ -2,17 +2,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
 using Serilog;
-using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {
-    internal sealed class NotificationService : INotificationService
+    public sealed class FirebaseCloudMessagingService
     {
         private const string FirebaseToken = "test";
         
         private readonly ILogger _logger;
 
-        public NotificationService(ILogger logger)
+        public FirebaseCloudMessagingService(ILogger logger)
         {
             _logger = logger;
         }

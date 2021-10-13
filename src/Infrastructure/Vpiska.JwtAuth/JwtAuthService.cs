@@ -4,11 +4,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Vpiska.Domain;
 
 namespace Vpiska.JwtAuth
 {
-    internal sealed class AuthService : IAuth
+    public sealed class JwtAuthService
     {
         private const int LifetimeDays = 3;
 

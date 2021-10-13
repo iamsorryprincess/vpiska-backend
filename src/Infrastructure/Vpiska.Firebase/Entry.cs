@@ -2,7 +2,6 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using Microsoft.Extensions.DependencyInjection;
-using Vpiska.Domain;
 
 namespace Vpiska.Firebase
 {
@@ -22,8 +21,8 @@ namespace Vpiska.Firebase
             }));
 
             services.AddSingleton(StorageClient.Create(GoogleCredential.FromFile(path)));
-            services.AddTransient<INotificationService, NotificationService>();
-            services.AddTransient<IFileStorage, FileStorage>();
+            services.AddTransient<FirebaseCloudMessagingService>();
+            services.AddTransient<FirebaseFileStorage>();
         }
     }
 }
