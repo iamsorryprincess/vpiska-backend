@@ -15,8 +15,8 @@ namespace Vpiska.JwtAuthentication
         {
             var claims = new List<Claim>
             {
-                new Claim("Id", userId.ToString()),
-                new Claim("Name", username)
+                new("Id", userId.ToString()),
+                new("Name", username)
             };
 
             if (!string.IsNullOrWhiteSpace(imageId))

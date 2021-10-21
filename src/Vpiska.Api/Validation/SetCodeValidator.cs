@@ -1,7 +1,8 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
 using Vpiska.Domain.Constants;
-using Vpiska.Domain.Requests;
+using Vpiska.Domain.UserAggregate.Constants;
+using Vpiska.Domain.UserAggregate.Requests;
 
 namespace Vpiska.Api.Validation
 {
@@ -17,6 +18,10 @@ namespace Vpiska.Api.Validation
                 .Must(x => Regex.IsMatch(x, UserConstants.PhoneRegex))
                 .When(x => x.Phone != null)
                 .WithMessage(ValidationErrorConstants.PhoneRegexInvalid);
+
+            RuleFor(x => x.FirebaseToken)
+                .NotEmpty()
+                .WithMessage(ValidationErrorConstants.FirebaseTokenIsEmpty);
         }
     }
 }

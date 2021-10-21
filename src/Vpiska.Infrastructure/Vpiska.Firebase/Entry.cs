@@ -22,7 +22,7 @@ namespace Vpiska.Firebase
             }));
 
             services.AddSingleton(StorageClient.Create(GoogleCredential.FromFile(path)));
-            services.AddTransient<IFirebaseCloudMessaging, FirebaseCloudMessagingService>();
+            services.AddTransient<IFirebaseCloudMessaging, FirebaseCloudMessaging>();
             services.AddTransient<IFirebaseStorage, FirebaseStorage>();
         }
     }

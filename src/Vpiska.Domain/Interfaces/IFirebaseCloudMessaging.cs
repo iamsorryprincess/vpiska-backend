@@ -4,6 +4,6 @@ namespace Vpiska.Domain.Interfaces
 {
     public interface IFirebaseCloudMessaging
     {
-        Task SendVerificationCode(int code);
+        Task SendVerificationCode(int code, string token);
     }
 }

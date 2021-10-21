@@ -8,7 +8,7 @@ namespace Vpiska.JwtAuthentication
     {
         public string HashPassword(string password) => Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
 
-        public bool CheckPassword(string hash, string password) =>
-            hash == Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
+        public bool IsPasswordInvalid(string hash, string password) =>
+            hash != Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
     }
 }

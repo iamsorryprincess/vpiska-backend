@@ -4,6 +4,6 @@ namespace Vpiska.Domain.Interfaces
     {
         string HashPassword(string password);
 
-        bool CheckPassword(string hash, string password);
+        bool IsPasswordInvalid(string hash, string password);
     }
 }

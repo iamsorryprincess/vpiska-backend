@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
 using Vpiska.Domain.Constants;
-using Vpiska.Domain.Responses;
+using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Api.Filters
 {

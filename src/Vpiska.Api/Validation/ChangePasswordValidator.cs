@@ -1,6 +1,7 @@
 using FluentValidation;
 using Vpiska.Domain.Constants;
-using Vpiska.Domain.Requests;
+using Vpiska.Domain.UserAggregate.Constants;
+using Vpiska.Domain.UserAggregate.Requests;
 
 namespace Vpiska.Api.Validation
 {

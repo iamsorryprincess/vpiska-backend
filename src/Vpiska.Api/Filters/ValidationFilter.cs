@@ -2,7 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Vpiska.Domain.Responses;
+using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Api.Filters
 {

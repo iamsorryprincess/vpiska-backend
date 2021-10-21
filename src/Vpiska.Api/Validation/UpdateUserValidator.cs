@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
-using Vpiska.Domain.Constants;
-using Vpiska.Domain.Requests;
+using Vpiska.Api.Models;
+using Vpiska.Domain.UserAggregate.Constants;
 
 namespace Vpiska.Api.Validation
 {

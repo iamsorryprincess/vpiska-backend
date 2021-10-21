@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,8 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Vpiska.Api.Filters;
 using Vpiska.Api.Validation;
-using Vpiska.Domain.Requests;
+using Vpiska.Domain.UserAggregate.RequestHandlers;
+using Vpiska.Domain.UserAggregate.Requests;
 using Vpiska.Firebase;
 using Vpiska.JwtAuthentication;
 using Vpiska.Mongo;
@@ -52,11 +54,12 @@ namespace Vpiska.Api
             services.AddTransient<IValidator<ChangePasswordRequest>, ChangePasswordValidator>();
             services.AddTransient<IValidator<LoginUserRequest>, LoginUserValidator>();
             services.AddTransient<IValidator<SetCodeRequest>, SetCodeValidator>();
-            services.AddTransient<IValidator<UpdateUserRequest>, UpdateUserValidator>();
+            services.AddTransient<IValidator<Models.UpdateUserRequest>, UpdateUserValidator>();
             
             services.AddJwt();
             services.AddFirebase();
             services.AddMongo(_configuration.GetSection("Mongo"));
+            services.AddMediatR(typeof(CreateUserHandler));
         }
         
         public void Configure(IApplicationBuilder app)
