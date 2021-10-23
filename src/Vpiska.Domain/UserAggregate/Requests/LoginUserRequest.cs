@@ -1,4 +1,5 @@
 using MediatR;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Domain.UserAggregate.Requests

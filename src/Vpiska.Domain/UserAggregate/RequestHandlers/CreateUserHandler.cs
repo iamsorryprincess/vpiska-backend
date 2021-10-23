@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Repository;
@@ -10,7 +11,7 @@ using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Domain.UserAggregate.RequestHandlers
 {
-    public sealed class CreateUserHandler : RequestHandlerBase<CreateUserRequest, DomainResponse<LoginResponse>>
+    public sealed class CreateUserHandler : RequestHandlerBase<CreateUserRequest, LoginResponse>
     {
         private readonly ICreateUserRepository _repository;
         private readonly IPasswordSecurityService _passwordSecurity;
@@ -49,11 +50,11 @@ namespace Vpiska.Domain.UserAggregate.RequestHandlers
                 switch (isPhoneExist)
                 {
                     case true when !isNameExist:
-                        return Error<LoginResponse>(DomainErrorConstants.PhoneAlreadyUse);
+                        return Error(DomainErrorConstants.PhoneAlreadyUse);
                     case false when isNameExist:
-                        return Error<LoginResponse>(DomainErrorConstants.NameAlreadyUse);
+                        return Error(DomainErrorConstants.NameAlreadyUse);
                     case true:
-                        return Error<LoginResponse>(DomainErrorConstants.PhoneAlreadyUse, DomainErrorConstants.NameAlreadyUse);
+                        return Error(DomainErrorConstants.PhoneAlreadyUse, DomainErrorConstants.NameAlreadyUse);
                 }
             }
 

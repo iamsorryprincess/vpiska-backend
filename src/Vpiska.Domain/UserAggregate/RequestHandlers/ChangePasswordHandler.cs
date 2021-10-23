@@ -1,14 +1,14 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Repository;
 using Vpiska.Domain.UserAggregate.Requests;
-using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Domain.UserAggregate.RequestHandlers
 {
-    public sealed class ChangePasswordHandler : RequestHandlerBase<ChangePasswordRequest, DomainResponse>
+    public sealed class ChangePasswordHandler : RequestHandlerBase<ChangePasswordRequest>
     {
         private readonly IChangePasswordRepository _repository;
         private readonly IPasswordSecurityService _passwordSecurity;

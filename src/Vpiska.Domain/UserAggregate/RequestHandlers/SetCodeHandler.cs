@@ -1,15 +1,15 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Repository;
 using Vpiska.Domain.UserAggregate.Requests;
-using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Domain.UserAggregate.RequestHandlers
 {
-    public sealed class SetCodeHandler : RequestHandlerBase<SetCodeRequest, DomainResponse>
+    public sealed class SetCodeHandler : RequestHandlerBase<SetCodeRequest>
     {
         private static readonly Random Random = new Random();
         

@@ -1,6 +1,6 @@
 using System;
 using MediatR;
-using Vpiska.Domain.UserAggregate.Responses;
+using Vpiska.Domain.Base;
 
 namespace Vpiska.Domain.UserAggregate.Requests
 {

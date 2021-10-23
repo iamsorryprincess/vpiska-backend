@@ -1,4 +1,4 @@
-namespace Vpiska.Domain.UserAggregate.Responses
+namespace Vpiska.Domain.Base
 {
     public sealed class ErrorResponse
     {

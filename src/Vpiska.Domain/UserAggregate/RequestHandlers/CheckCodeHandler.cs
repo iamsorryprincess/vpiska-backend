@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Repository;
@@ -8,7 +9,7 @@ using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Domain.UserAggregate.RequestHandlers
 {
-    public sealed class CheckCodeHandler : RequestHandlerBase<CheckCodeRequest, DomainResponse<LoginResponse>>
+    public sealed class CheckCodeHandler : RequestHandlerBase<CheckCodeRequest, LoginResponse>
     {
         private readonly IGetByPhoneRepository _repository;
         private readonly IJwtService _jwt;
@@ -25,12 +26,12 @@ namespace Vpiska.Domain.UserAggregate.RequestHandlers
 
             if (user == null)
             {
-                return Error<LoginResponse>(DomainErrorConstants.UserByPhoneNotFound);
+                return Error(DomainErrorConstants.UserByPhoneNotFound);
             }
 
             if (user.VerificationCode != request.Code)
             {
-                return Error<LoginResponse>(DomainErrorConstants.InvalidCode);
+                return Error(DomainErrorConstants.InvalidCode);
             }
 
             var response = new LoginResponse()

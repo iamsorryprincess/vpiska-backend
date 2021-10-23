@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Repository;
@@ -8,7 +9,7 @@ using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Domain.UserAggregate.RequestHandlers
 {
-    public sealed class LoginUserHandler : RequestHandlerBase<LoginUserRequest, DomainResponse<LoginResponse>>
+    public sealed class LoginUserHandler : RequestHandlerBase<LoginUserRequest, LoginResponse>
     {
         private readonly IGetByPhoneRepository _repository;
         private readonly IPasswordSecurityService _passwordSecurity;
@@ -29,12 +30,12 @@ namespace Vpiska.Domain.UserAggregate.RequestHandlers
 
             if (user == null)
             {
-                return Error<LoginResponse>(DomainErrorConstants.UserByPhoneNotFound);
+                return Error(DomainErrorConstants.UserByPhoneNotFound);
             }
 
             if (_passwordSecurity.IsPasswordInvalid(user.Password, request.Password))
             {
-                return Error<LoginResponse>(DomainErrorConstants.InvalidPassword);
+                return Error(DomainErrorConstants.InvalidPassword);
             }
 
             var response = new LoginResponse()

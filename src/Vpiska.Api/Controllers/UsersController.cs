@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.UserAggregate.Requests;
 using Vpiska.Domain.UserAggregate.Responses;
 

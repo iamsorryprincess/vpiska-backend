@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Vpiska.Domain.Base;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Repository;
 using Vpiska.Domain.UserAggregate.Requests;
-using Vpiska.Domain.UserAggregate.Responses;
 
 namespace Vpiska.Domain.UserAggregate.RequestHandlers
 {
-    public sealed class UpdateUserHandler : RequestHandlerBase<UpdateUserRequest, DomainResponse>
+    public sealed class UpdateUserHandler : RequestHandlerBase<UpdateUserRequest>
     {
         private readonly IGetByIdRepository _idRepository;
         private readonly IUpdateUserRepository _updateRepository;
