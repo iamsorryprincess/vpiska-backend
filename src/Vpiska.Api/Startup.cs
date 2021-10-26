@@ -13,6 +13,7 @@ using Vpiska.Domain.UserAggregate.Requests;
 using Vpiska.Firebase;
 using Vpiska.JwtAuthentication;
 using Vpiska.Mongo;
+using Vpiska.Orleans;
 
 namespace Vpiska.Api
 {
@@ -60,6 +61,7 @@ namespace Vpiska.Api
             services.AddFirebase();
             services.AddMongo(_configuration.GetSection("Mongo"));
             services.AddMediatR(typeof(CreateUserHandler));
+            services.AddOrleans(_configuration.GetSection("Orleans"));
         }
         
         public void Configure(IApplicationBuilder app)

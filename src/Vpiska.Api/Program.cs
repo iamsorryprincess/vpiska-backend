@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Orleans.Hosting;
 
 namespace Vpiska.Api
 {
@@ -12,6 +13,7 @@ namespace Vpiska.Api
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
+                .UseOrleans((context, siloBuilder) => siloBuilder.UseLocalhostClustering());
     }
 }

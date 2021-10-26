@@ -6,5 +6,6 @@ namespace Vpiska.Domain.EventAggregate.Constants
         public const string EventNotFound = "EventNotFound";
         public const string OwnerAlreadyHasEvent = "OwnerAlreadyHasEvent";
         public const string UserNotOwner = "UserNotOwner";
+        public const string AreaAlreadyHasEvent = "AreaAlreadyHasEvent";
     }
 }

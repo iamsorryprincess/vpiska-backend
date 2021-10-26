@@ -30,7 +30,7 @@ namespace Vpiska.Domain.EventAggregate.RequestHandlers
                 return Error(DomainErrorConstants.AreaNotFound);
             }
             
-            var isOwnerEventExist = await _eventRepository.IsOwnerHasEvent(request.OwnerId);
+            var isOwnerEventExist = await _eventRepository.IsOwnerHasEvent(request.Area, request.OwnerId);
 
             if (isOwnerEventExist)
             {
@@ -38,7 +38,12 @@ namespace Vpiska.Domain.EventAggregate.RequestHandlers
             }
 
             var @event = new Event(Guid.NewGuid(), request.OwnerId, request.Name, request.Coordinates, request.Address);
-            await _eventRepository.Create(request.Area, @event);
+            var isFail = !await _eventRepository.Create(request.Area, @event);
+
+            if (isFail)
+            {
+                return Error(DomainErrorConstants.AreaAlreadyHasEvent);
+            }
 
             var response = new EventResponse()
             {

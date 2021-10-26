@@ -5,8 +5,8 @@ namespace Vpiska.Domain.EventAggregate.Repository
 {
     public interface ICreateEventRepository
     {
-        Task<bool> IsOwnerHasEvent(Guid ownerId);
+        Task<bool> IsOwnerHasEvent(string areaName, Guid ownerId);
 
-        Task<Guid> Create(string area, Event @event);
+        Task<bool> Create(string area, Event @event);
     }
 }

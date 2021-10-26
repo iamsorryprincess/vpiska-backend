@@ -2,12 +2,15 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <ServerGarbageCollection>true</ServerGarbageCollection>
+        <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Firebase\Vpiska.Firebase.csproj" />
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.JwtAuthentication\Vpiska.JwtAuthentication.csproj" />
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Mongo\Vpiska.Mongo.csproj" />
+      <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Orleans\Vpiska.Orleans.csproj" />
     </ItemGroup>
 
     <ItemGroup>
