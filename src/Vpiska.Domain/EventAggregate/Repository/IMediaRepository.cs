@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace Vpiska.Domain.EventAggregate.Repository
 {
-    public interface ICloseEventRepository
+    public interface IMediaRepository
     {
-        Task<bool> RemoveEvent(Guid eventId);
+        Task<bool> AddMedia(Guid eventId, string mediaLink);
     }
 }

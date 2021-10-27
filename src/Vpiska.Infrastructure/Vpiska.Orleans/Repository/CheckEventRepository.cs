@@ -21,5 +21,18 @@ namespace Vpiska.Orleans.Repository
             var @event = await eventGrain.GetEvent();
             return @event != null;
         }
+        
+        public async Task<bool> CheckOwnership(Guid eventId, Guid ownerId)
+        {
+            var eventGrain = _clusterClient.GetGrain<IEventGrain>(eventId);
+            var eventOwnerId = await eventGrain.GetOwnerId();
+
+            if (eventOwnerId.HasValue)
+            {
+                return eventOwnerId.Value == ownerId;
+            }
+
+            return false;
+        }
     }
 }

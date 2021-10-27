@@ -28,7 +28,7 @@ namespace Vpiska.Domain.EventAggregate.RequestHandlers
                 return Error(DomainErrorConstants.EventNotFound);
             }
             
-            var isNotOwner = !await _closeRepository.CheckOwnership(request.EventId, request.OwnerId);
+            var isNotOwner = !await _checkEventRepository.CheckOwnership(request.EventId, request.OwnerId);
 
             if (isNotOwner)
             {

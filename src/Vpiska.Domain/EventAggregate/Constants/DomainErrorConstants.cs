@@ -7,5 +7,6 @@ namespace Vpiska.Domain.EventAggregate.Constants
         public const string OwnerAlreadyHasEvent = "OwnerAlreadyHasEvent";
         public const string UserNotOwner = "UserNotOwner";
         public const string AreaAlreadyHasEvent = "AreaAlreadyHasEvent";
+        public const string MediaAlreadyAdded = "MediaAlreadyAdded";
     }
 }
