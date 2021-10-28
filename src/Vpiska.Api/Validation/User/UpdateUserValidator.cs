@@ -3,7 +3,7 @@ using FluentValidation;
 using Vpiska.Api.Models;
 using Vpiska.Domain.UserAggregate.Constants;
 
-namespace Vpiska.Api.Validation
+namespace Vpiska.Api.Validation.User
 {
     internal sealed class UpdateUserValidator : AbstractValidator<UpdateUserRequest>
     {

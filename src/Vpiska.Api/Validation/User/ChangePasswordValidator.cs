@@ -1,9 +1,8 @@
 using FluentValidation;
-using Vpiska.Domain.Constants;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Requests;
 
-namespace Vpiska.Api.Validation
+namespace Vpiska.Api.Validation.User
 {
     internal sealed class ChangePasswordValidator : AbstractValidator<ChangePasswordRequest>
     {

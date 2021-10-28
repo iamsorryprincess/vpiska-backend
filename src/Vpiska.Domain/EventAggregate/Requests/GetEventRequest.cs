@@ -7,6 +7,6 @@ namespace Vpiska.Domain.EventAggregate.Requests
 {
     public sealed class GetEventRequest : IRequest<DomainResponse<EventResponse>>
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
     }
 }

@@ -1,14 +1,13 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
-using Vpiska.Domain.Constants;
 using Vpiska.Domain.UserAggregate.Constants;
 using Vpiska.Domain.UserAggregate.Requests;
 
-namespace Vpiska.Api.Validation
+namespace Vpiska.Api.Validation.User
 {
-    internal sealed class CheckCodeValidator : AbstractValidator<CheckCodeRequest>
+    internal sealed class SetCodeValidator : AbstractValidator<SetCodeRequest>
     {
-        public CheckCodeValidator()
+        public SetCodeValidator()
         {
             RuleFor(x => x.Phone)
                 .NotEmpty()
@@ -19,11 +18,9 @@ namespace Vpiska.Api.Validation
                 .When(x => x.Phone != null)
                 .WithMessage(ValidationErrorConstants.PhoneRegexInvalid);
 
-            RuleFor(x => x.Code)
+            RuleFor(x => x.FirebaseToken)
                 .NotEmpty()
-                .WithMessage(ValidationErrorConstants.CodeIsEmpty)
-                .Must(x => x >= UserConstants.VerificationCodeMin && x < UserConstants.VerificationCodeMax)
-                .WithMessage(ValidationErrorConstants.CodeLengthInvalid);
+                .WithMessage(ValidationErrorConstants.FirebaseTokenIsEmpty);
         }
     }
 }

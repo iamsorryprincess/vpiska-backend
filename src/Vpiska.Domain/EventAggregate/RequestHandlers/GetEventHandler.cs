@@ -19,7 +19,7 @@ namespace Vpiska.Domain.EventAggregate.RequestHandlers
         
         public override async Task<DomainResponse<EventResponse>> Handle(GetEventRequest request, CancellationToken cancellationToken)
         {
-            var @event = await _idRepository.GetById(request.Id);
+            var @event = await _idRepository.GetById(request.Id.Value);
 
             if (@event == null)
             {

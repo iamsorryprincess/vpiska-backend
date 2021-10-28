@@ -8,7 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Vpiska.Api.Filters;
-using Vpiska.Api.Validation;
+using Vpiska.Api.Validation.Event;
+using Vpiska.Api.Validation.User;
+using Vpiska.Domain.EventAggregate.Requests;
 using Vpiska.Domain.UserAggregate.RequestHandlers;
 using Vpiska.Domain.UserAggregate.Requests;
 using Vpiska.Firebase;
@@ -72,12 +74,18 @@ namespace Vpiska.Api
                 options.Filters.Add<ValidationFilter>();
             }).AddFluentValidation();
             
-            services.AddTransient<IValidator<CreateUserRequest>, CreateUserValidator>();
-            services.AddTransient<IValidator<CheckCodeRequest>, CheckCodeValidator>();
-            services.AddTransient<IValidator<ChangePasswordRequest>, ChangePasswordValidator>();
-            services.AddTransient<IValidator<LoginUserRequest>, LoginUserValidator>();
-            services.AddTransient<IValidator<SetCodeRequest>, SetCodeValidator>();
-            services.AddTransient<IValidator<Models.UpdateUserRequest>, UpdateUserValidator>();
+            services.AddScoped<IValidator<CreateUserRequest>, CreateUserValidator>();
+            services.AddScoped<IValidator<CheckCodeRequest>, CheckCodeValidator>();
+            services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordValidator>();
+            services.AddScoped<IValidator<LoginUserRequest>, LoginUserValidator>();
+            services.AddScoped<IValidator<SetCodeRequest>, SetCodeValidator>();
+            services.AddScoped<IValidator<Models.UpdateUserRequest>, UpdateUserValidator>();
+
+            services.AddScoped<IValidator<Models.AddMediaRequest>, AddMediaValidator>();
+            services.AddScoped<IValidator<Models.CloseEventRequest>, CloseEventValidator>();
+            services.AddScoped<IValidator<Models.CreateEventRequest>, CreateEventValidator>();
+            services.AddScoped<IValidator<GetEventsRequest>, GetEventsValidator>();
+            services.AddScoped<IValidator<GetEventRequest>, GetEventValidator>();
             
             services.AddJwt();
             services.AddFirebase();

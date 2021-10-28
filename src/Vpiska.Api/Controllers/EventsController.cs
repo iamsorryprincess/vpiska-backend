@@ -66,7 +66,7 @@ namespace Vpiska.Api.Controllers
         {
             var request = new CloseEventRequest()
             {
-                EventId = body.EventId,
+                EventId = body.EventId.Value,
                 OwnerId = GetUserId()
             };
             
@@ -87,7 +87,7 @@ namespace Vpiska.Api.Controllers
 
             var request = new AddMediaRequest()
             {
-                EventId = body.EventId,
+                EventId = body.EventId.Value,
                 OwnerId = userId,
                 MediaData = stream.ToArray(),
                 ContentType = body.Media.ContentType
