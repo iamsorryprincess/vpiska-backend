@@ -6,5 +6,7 @@ namespace Vpiska.Domain.Interfaces
     public interface IFirebaseStorage
     {
         Task<string> UploadFile(string fileName, string contentType, Stream stream);
+
+        Task<bool> DeleteFile(string url);
     }
 }

@@ -97,6 +97,24 @@ namespace Vpiska.Api.Controllers
             return response;
         }
 
+        [Authorize]
+        [HttpPost("media/remove")]
+        [Produces("application/json")]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(DomainResponse), 200)]
+        public Task<DomainResponse> RemoveMedia([FromBody] Models.RemoveMediaRequest body,
+            CancellationToken cancellationToken)
+        {
+            var request = new RemoveMediaRequest()
+            {
+                EventId = body.EventId.Value,
+                OwnerId = GetUserId(),
+                MediaLink = body.MediaLink
+            };
+
+            return _mediator.Send(request, cancellationToken);
+        }
+
         private Guid GetUserId()
         {
             var userId = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id");

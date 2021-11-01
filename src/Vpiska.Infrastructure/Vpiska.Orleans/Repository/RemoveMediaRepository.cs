@@ -6,19 +6,19 @@ using Vpiska.Orleans.Interfaces;
 
 namespace Vpiska.Orleans.Repository
 {
-    internal sealed class MediaRepository : IMediaRepository
+    internal sealed class RemoveMediaRepository : IRemoveMediaRepository
     {
         private readonly IClusterClient _clusterClient;
 
-        public MediaRepository(IClusterClient clusterClient)
+        public RemoveMediaRepository(IClusterClient clusterClient)
         {
             _clusterClient = clusterClient;
         }
         
-        public Task<bool> AddMedia(Guid eventId, string mediaLink)
+        public Task<bool> RemoveMedia(Guid eventId, string mediaLink)
         {
             var eventGrain = _clusterClient.GetGrain<IEventGrain>(eventId);
-            return eventGrain.AddMediaLink(mediaLink);
+            return eventGrain.RemoveMediaLink(mediaLink);
         }
     }
 }

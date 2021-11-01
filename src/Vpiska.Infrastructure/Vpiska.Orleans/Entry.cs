@@ -18,7 +18,8 @@ namespace Vpiska.Orleans
             services.AddTransient<ICreateEventRepository, CreateEventRepository>();
             services.AddTransient<IGetByIdRepository, GetByIdRepository>();
             services.AddTransient<IGetEventsRepository, GetEventsRepository>();
-            services.AddTransient<IMediaRepository, MediaRepository>();
+            services.AddTransient<IAddMediaRepository, AddMediaRepository>();
+            services.AddTransient<IRemoveMediaRepository, RemoveMediaRepository>();
         }
     }
 }

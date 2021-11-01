@@ -8,5 +8,6 @@ namespace Vpiska.Domain.EventAggregate.Constants
         public const string NameIsEmpty = "NameIsEmpty";
         public const string AddressIsEmpty = "AddressIsEmpty";
         public const string MediaContentIsEmpty = "MediaContentIsEmpty";
+        public const string MediaLinkIsEmpty = "MediaLinkIsEmpty";
     }
 }

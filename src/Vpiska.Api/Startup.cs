@@ -86,6 +86,7 @@ namespace Vpiska.Api
             services.AddScoped<IValidator<Models.CreateEventRequest>, CreateEventValidator>();
             services.AddScoped<IValidator<GetEventsRequest>, GetEventsValidator>();
             services.AddScoped<IValidator<GetEventRequest>, GetEventValidator>();
+            services.AddScoped<IValidator<Models.RemoveMediaRequest>, RemoveMediaValidator>();
             
             services.AddJwt();
             services.AddFirebase();

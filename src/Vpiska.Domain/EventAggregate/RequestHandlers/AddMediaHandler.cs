@@ -14,11 +14,11 @@ namespace Vpiska.Domain.EventAggregate.RequestHandlers
     public sealed class AddMediaHandler : RequestHandlerBase<AddMediaRequest, MediaResponse>
     {
         private readonly ICheckEventRepository _checkRepository;
-        private readonly IMediaRepository _mediaRepository;
+        private readonly IAddMediaRepository _mediaRepository;
         private readonly IFirebaseStorage _firebaseStorage;
 
         public AddMediaHandler(ICheckEventRepository checkRepository,
-            IMediaRepository mediaRepository,
+            IAddMediaRepository mediaRepository,
             IFirebaseStorage firebaseStorage)
         {
             _checkRepository = checkRepository;

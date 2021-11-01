@@ -1,5 +1,7 @@
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
+using Google;
 using Google.Cloud.Storage.V1;
 using Vpiska.Domain.Interfaces;
 
@@ -21,6 +23,24 @@ namespace Vpiska.Firebase
             var image = await _client.UploadObjectAsync(BucketName, fileName,
                 contentType, stream);
             return image.Name;
+        }
+
+        public async Task<bool> DeleteFile(string url)
+        {
+            try
+            {
+                await _client.DeleteObjectAsync(BucketName, url);
+                return true;
+            }
+            catch (GoogleApiException ex)
+            {
+                if (ex.HttpStatusCode != HttpStatusCode.NotFound)
+                {
+                    throw;
+                }
+
+                return false;
+            }
         }
     }
 }

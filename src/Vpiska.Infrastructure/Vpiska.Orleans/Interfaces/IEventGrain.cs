@@ -24,5 +24,7 @@ namespace Vpiska.Orleans.Interfaces
         Task<bool> RemoveUserInfo(Guid userId);
 
         Task<bool> AddMediaLink(string link);
+        
+        Task<bool> RemoveMediaLink(string link);
     }
 }

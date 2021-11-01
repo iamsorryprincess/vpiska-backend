@@ -75,5 +75,18 @@ namespace Vpiska.Domain.EventAggregate
             _mediaLinks.Add(mediaId);
             return true;
         }
+
+        public bool TryRemoveMedia(string mediaId)
+        {
+            var mediaLink = _mediaLinks.FirstOrDefault(id => id == mediaId);
+
+            if (mediaLink == null)
+            {
+                return false;
+            }
+
+            _mediaLinks.Remove(mediaLink);
+            return true;
+        }
     }
 }
