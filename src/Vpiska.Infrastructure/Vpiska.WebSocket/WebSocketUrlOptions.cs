@@ -1,18 +1,27 @@
+using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 
 namespace Vpiska.WebSocket
 {
     internal sealed class WebSocketUrlOptions
     {
-        public PathString Url { get; }
-        
         public HashSet<string> QueryParams { get; }
+        
+        public Type Connector { get; }
+        
+        public Type Receiver { get; }
+        
+        public Type Hub { get; }
 
-        public WebSocketUrlOptions(PathString url, HashSet<string> queryParams)
+        public WebSocketUrlOptions(HashSet<string> queryParams,
+            Type connector,
+            Type receiver,
+            Type hub)
         {
-            Url = url;
             QueryParams = queryParams;
+            Connector = connector;
+            Receiver = receiver;
+            Hub = hub;
         }
     }
 }

@@ -1,28 +1,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace Vpiska.WebSocket
 {
     public sealed class WebSocketsOptions
     {
-        internal Dictionary<Type, WebSocketUrlOptions> UrlOptions { get; } = new();
+        internal Dictionary<PathString, WebSocketUrlOptions> UrlOptions { get; } = new();
 
-        internal void AddUrl<TMessage>(string url, params string[] queryParams)
+        internal void AddUrl<TReceiver, TConnector>(string url, params string[] queryParams) 
+            where TReceiver : IWebSocketReceiver 
+            where TConnector : IWebSocketConnector
         {
-            if (UrlOptions.Any(x => x.Value.Url == url))
+            if (UrlOptions.ContainsKey(url))
             {
                 throw new InvalidOperationException($"Url {url} already added");
             }
 
-            var messageType = typeof(TMessage);
-
-            if (UrlOptions.ContainsKey(messageType))
+            var connectorType = typeof(TConnector);
+            if (UrlOptions.Any(x => x.Value.Connector == connectorType))
             {
-                throw new InvalidOperationException($"Message type {messageType.FullName} already added");
+                throw new InvalidOperationException($"Connector {connectorType.FullName} already added");
             }
 
-            UrlOptions.Add(messageType, new WebSocketUrlOptions(url, queryParams.ToHashSet()));
+            var receiverType = typeof(TReceiver);
+            if (UrlOptions.Any(x => x.Value.Receiver == receiverType))
+            {
+                throw new InvalidOperationException($"Receiver {receiverType.FullName} already added");
+            }
+
+            UrlOptions.Add(url,
+                new WebSocketUrlOptions(queryParams.ToHashSet(), connectorType, receiverType,
+                    typeof(WebSocketHub<TConnector, TReceiver>)));
         }
     }
 }

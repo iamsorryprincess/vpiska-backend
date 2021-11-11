@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.JwtAuthentication\Vpiska.JwtAuthentication.csproj" />
+      <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Orleans\Vpiska.Orleans.csproj" />
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.WebSocket\Vpiska.WebSocket.csproj" />
     </ItemGroup>
 

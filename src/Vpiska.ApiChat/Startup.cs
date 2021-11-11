@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Vpiska.ApiChat.Connectors;
+using Vpiska.ApiChat.Receivers;
 using Vpiska.JwtAuthentication;
+using Vpiska.WebSocket;
 
 namespace Vpiska.ApiChat
 {
@@ -9,7 +12,9 @@ namespace Vpiska.ApiChat
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddJwtForWebSocket("access_token", "/chat");
-            services.AddSingleton<EventStorage>();
+            var options = new WebSocketsOptions();
+            services.AddVSocket<ChatReceiver, ChatConnector>(options, "/chat", "eventId");
+            services.AddSingleton(options);
         }
 
         public void Configure(IApplicationBuilder app)
@@ -18,6 +23,7 @@ namespace Vpiska.ApiChat
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseWebSockets();
+            app.UseVSocket();
         }
     }
 }

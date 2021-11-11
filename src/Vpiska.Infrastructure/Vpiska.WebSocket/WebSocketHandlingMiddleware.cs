@@ -5,22 +5,23 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Vpiska.WebSocket
 {
-    internal sealed class WebSocketHandlingMiddleware<TMessage>
+    internal sealed class WebSocketHandlingMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly WebSocketsOptions _options;
-        private readonly WebSocketHub<TMessage> _hub;
+        private readonly IServiceProvider _serviceProvider;
 
         public WebSocketHandlingMiddleware(RequestDelegate next,
             WebSocketsOptions options,
-            IWebSocketSender<TMessage> hub)
+            IServiceProvider serviceProvider)
         {
             _next = next;
             _options = options;
-            _hub = hub as WebSocketHub<TMessage>;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -32,10 +33,11 @@ namespace Vpiska.WebSocket
                     context.Response.StatusCode = 401;
                     return;
                 }
-                
-                var socketOptions = _options.UrlOptions[typeof(TMessage)];
 
-                if (!context.Request.Path.StartsWithSegments(socketOptions.Url))
+                var (url, socketOptions) = _options.UrlOptions
+                    .FirstOrDefault(x => context.Request.Path.StartsWithSegments(x.Key));
+
+                if (socketOptions == null)
                 {
                     context.Response.StatusCode = 404;
                     await context.Response.WriteAsync("Can't find path for WebSocket");
@@ -61,10 +63,13 @@ namespace Vpiska.WebSocket
                     context.Response.StatusCode = 400;
                     return;
                 }
+
+                var hub = _serviceProvider.GetRequiredService(socketOptions.Hub) as IWebSocketHub
+                          ?? throw new InvalidOperationException($"can't resolve websocket hub for url {url}");
                 
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 var userContext = new WebSocketUserContext(Guid.Parse(userId), username, imageId);
-                var connectionId = _hub.AddConnection(userContext, webSocket, queryParams);
+                var connectionId = hub.AddConnection(userContext, webSocket, queryParams);
                 var buffer = new ArraySegment<byte>(new byte[1024 * 4]);
 
                 while (webSocket.State == WebSocketState.Open)
@@ -74,10 +79,10 @@ namespace Vpiska.WebSocket
                     switch (result.MessageType)
                     {
                         case WebSocketMessageType.Text:
-                            await _hub.ReceiveMessage(connectionId, buffer[..result.Count]);
+                            await hub.ReceiveMessage(connectionId, buffer[..result.Count].ToArray());
                             break;
                         case WebSocketMessageType.Close:
-                            var isClosed = await _hub.TryCloseConnection(connectionId);
+                            var isClosed = await hub.TryCloseConnection(connectionId);
                             if (!isClosed)
                             {
                                 throw new InvalidOperationException("Can't close socket");

@@ -63,7 +63,16 @@ namespace Vpiska.Domain.EventAggregate
             return true;
         }
 
-        public void AddChatMessage(Guid userId, string message) => _chatData.Add(new ChatMessage(userId, message));
+        public bool TryAddChatMessage(Guid userId, string message)
+        {
+            if (_users.Any(x => x.Id == userId))
+            {
+                _chatData.Add(new ChatMessage(userId, message));
+                return true;
+            }
+
+            return false;
+        }
 
         public bool TryAddMedia(string mediaId)
         {

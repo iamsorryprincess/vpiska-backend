@@ -2,24 +2,28 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.WebSockets;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Vpiska.WebSocket
 {
-    internal sealed class WebSocketHub<TMessage> : IWebSocketSender<TMessage>
+    internal sealed class WebSocketHub<TConnector, TReceiver> : IWebSocketHub
+        where TConnector : IWebSocketConnector
+        where TReceiver : IWebSocketReceiver
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IWebSocketConnector<TMessage> _connector;
+        private readonly IWebSocketConnector _connector;
         private readonly ConcurrentDictionary<Guid, WebSocketContext> _connections;
+        private readonly Type _receiverType;
 
-        public WebSocketHub(IServiceScopeFactory serviceScopeFactory, IWebSocketConnector<TMessage> connector)
+        public WebSocketHub(IServiceScopeFactory serviceScopeFactory, IServiceProvider serviceProvider)
         {
             _serviceScopeFactory = serviceScopeFactory;
-            _connector = connector;
+            var connectorType = typeof(TConnector);
+            _connector = serviceProvider.GetRequiredService(connectorType) as IWebSocketConnector
+                ?? throw new InvalidOperationException($"Can't resolve connector {connectorType.FullName}");
             _connections = new ConcurrentDictionary<Guid, WebSocketContext>();
+            _receiverType = typeof(TReceiver);
         }
 
         public Guid AddConnection(WebSocketUserContext userContext, System.Net.WebSockets.WebSocket webSocket,
@@ -48,16 +52,16 @@ namespace Vpiska.WebSocket
             return false;
         }
 
-        public async Task ReceiveMessage(Guid connectionId, ArraySegment<byte> data)
+        public async Task ReceiveMessage(Guid connectionId, byte[] data)
         {
             try
             {
                 if (_connections.TryGetValue(connectionId, out var context))
                 {
                     await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                    var message = JsonSerializer.Deserialize<TMessage>(data, _jsonOptions);
-                    var receiver = scope.ServiceProvider.GetRequiredService<IWebSocketReceiver<TMessage>>();
-                    await receiver.Receive(connectionId, message, context.QueryParams);
+                    var receiver = scope.ServiceProvider.GetRequiredService(_receiverType) as IWebSocketReceiver
+                                   ?? throw new InvalidOperationException($"Can't resolve receiver {_receiverType.FullName}");
+                    await receiver.Receive(connectionId, data, context.QueryParams);
                 }
             }
             catch (Exception)
@@ -70,11 +74,8 @@ namespace Vpiska.WebSocket
             }
         }
 
-        public Task SendMessage(Guid connectionId, TMessage message)
+        public Task SendMessage(Guid connectionId, byte[] data)
         {
-            var json = JsonSerializer.Serialize(message, _jsonOptions);
-            var data = Encoding.UTF8.GetBytes(json);
-            
             if (_connections.TryGetValue(connectionId, out var context))
             {
                 return context.Send(data);
@@ -82,10 +83,5 @@ namespace Vpiska.WebSocket
 
             throw new InvalidOperationException($"Can't find connection {connectionId}");
         }
-
-        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
     }
 }

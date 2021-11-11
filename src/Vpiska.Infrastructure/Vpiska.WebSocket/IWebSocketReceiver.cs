@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace Vpiska.WebSocket
 {
-    public interface IWebSocketReceiver<in TMessage>
+    public interface IWebSocketReceiver
     {
-        Task Receive(Guid connectionId, TMessage message, Dictionary<string, string> queryParams);
+        Task Receive(Guid connectionId, byte[] data, Dictionary<string, string> queryParams);
     }
 }

@@ -40,6 +40,9 @@ namespace Vpiska.Orleans.Grains
 
         public Task<bool> RemoveUserInfo(Guid userId) => Task.FromResult(_event.TryRemoveUser(userId, out _));
 
+        public Task<bool> AddChatData(Guid userId, string message) =>
+            Task.FromResult(_event.TryAddChatMessage(userId, message));
+
         public Task<bool> AddMediaLink(string link) => Task.FromResult(_event.TryAddMedia(link));
         
         public Task<bool> RemoveMediaLink(string link) => Task.FromResult(_event.TryRemoveMedia(link));

@@ -23,6 +23,8 @@ namespace Vpiska.Orleans.Interfaces
         
         Task<bool> RemoveUserInfo(Guid userId);
 
+        Task<bool> AddChatData(Guid userId, string message);
+
         Task<bool> AddMediaLink(string link);
         
         Task<bool> RemoveMediaLink(string link);

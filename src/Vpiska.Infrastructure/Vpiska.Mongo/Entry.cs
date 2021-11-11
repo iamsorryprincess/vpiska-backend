@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 using Vpiska.Domain.UserAggregate;
 using Vpiska.Domain.UserAggregate.Repository;
@@ -25,7 +24,7 @@ namespace Vpiska.Mongo
             BsonClassMap.RegisterClassMap<User>(cm => 
             {
                 cm.AutoMap();
-                cm.MapIdMember(c => c.Id).SetIdGenerator(GuidGenerator.Instance);
+                cm.MapIdMember(c => c.Id);
             });
 
             services.AddSingleton(new MongoClient(mongoSection["ConnectionString"]));

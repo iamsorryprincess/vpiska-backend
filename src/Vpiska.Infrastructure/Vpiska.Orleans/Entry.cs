@@ -20,6 +20,7 @@ namespace Vpiska.Orleans
             services.AddTransient<IGetEventsRepository, GetEventsRepository>();
             services.AddTransient<IAddMediaRepository, AddMediaRepository>();
             services.AddTransient<IRemoveMediaRepository, RemoveMediaRepository>();
+            services.AddTransient<IChatMessageRepository, ChatMessageRepository>();
         }
     }
 }
