@@ -1,22 +1,14 @@
 using System;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Vpiska.Api.Filters;
-using Vpiska.Api.Validation.Event;
-using Vpiska.Api.Validation.User;
-using Vpiska.Domain.EventAggregate.Requests;
-using Vpiska.Domain.UserAggregate.RequestHandlers;
-using Vpiska.Domain.UserAggregate.Requests;
-using Vpiska.Firebase;
-using Vpiska.JwtAuthentication;
-using Vpiska.Mongo;
-using Vpiska.Orleans;
+using Vpiska.Application.User;
+using Vpiska.Infrastructure.Firebase;
+using Vpiska.Infrastructure.Jwt;
+using Vpiska.Infrastructure.Mongo;
 
 namespace Vpiska.Api
 {
@@ -67,32 +59,12 @@ namespace Vpiska.Api
                     } 
                 });
             });
-
-            services.AddControllers(options =>
-            {
-                options.Filters.Add<ExceptionFilter>();
-                options.Filters.Add<ValidationFilter>();
-            }).AddFluentValidation();
             
-            services.AddScoped<IValidator<CreateUserRequest>, CreateUserValidator>();
-            services.AddScoped<IValidator<CheckCodeRequest>, CheckCodeValidator>();
-            services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordValidator>();
-            services.AddScoped<IValidator<LoginUserRequest>, LoginUserValidator>();
-            services.AddScoped<IValidator<SetCodeRequest>, SetCodeValidator>();
-            services.AddScoped<IValidator<Models.UpdateUserRequest>, UpdateUserValidator>();
-
-            services.AddScoped<IValidator<Models.AddMediaRequest>, AddMediaValidator>();
-            services.AddScoped<IValidator<Models.CloseEventRequest>, CloseEventValidator>();
-            services.AddScoped<IValidator<Models.CreateEventRequest>, CreateEventValidator>();
-            services.AddScoped<IValidator<GetEventsRequest>, GetEventsValidator>();
-            services.AddScoped<IValidator<GetEventRequest>, GetEventValidator>();
-            services.AddScoped<IValidator<Models.RemoveMediaRequest>, RemoveMediaValidator>();
-            
-            services.AddJwt();
-            services.AddFirebase();
+            services.AddControllers(options => options.Filters.Add<ExceptionFilter>());
             services.AddMongo(_configuration.GetSection("Mongo"));
-            services.AddMediatR(typeof(CreateUserHandler));
-            services.AddOrleans(_configuration.GetSection("Orleans"));
+            services.AddFirebase(_configuration.GetSection("Firebase"));
+            services.AddJwt();
+            services.AddSingleton<UserMobileHttpHandler>();
         }
         
         public void Configure(IApplicationBuilder app)

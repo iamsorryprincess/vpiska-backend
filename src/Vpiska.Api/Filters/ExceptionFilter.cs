@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
-using Vpiska.Domain.Base;
-using Vpiska.Domain.Constants;
+using Vpiska.Application;
+using Vpiska.Domain.User;
 
 namespace Vpiska.Api.Filters
 {
@@ -21,8 +21,8 @@ namespace Vpiska.Api.Filters
             _logger.Error(context.Exception, "Unknown error");
 
             context.Result =
-                new ObjectResult(DomainResponse.CreateError(new[]
-                    { ErrorResponse.Create(AppErrorConstants.InternalError) })) { StatusCode = 200 };
+                new ObjectResult(new ApiResponse(false, null,
+                    new[] { new ErrorResponse(Errors.mapAppError(AppError.InternalError)) })) { StatusCode = 200 };
             
             context.ExceptionHandled = true;
             return Task.CompletedTask;
