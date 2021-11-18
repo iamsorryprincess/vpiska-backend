@@ -6,6 +6,7 @@ open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Mvc
 open Vpiska.Application
+open Vpiska.Application.User.CommandHandler
 open Vpiska.Domain.User
 
 [<CLIMutable>]
@@ -28,10 +29,10 @@ type UpdateUserArgs =
         
 module internal Http =
     
-    let private mapToMobileErrorResponse (error: AppError) = { ErrorCode = Errors.mapAppError error }
+    let private createMobileErrorResult (error: AppError) = { ErrorCode = Errors.mapAppError error }
     
-    let private createMobileErrorResult (errors: AppError[]) =
-        ObjectResult({ IsSuccess = false; Result = null; Errors = errors |> Array.map mapToMobileErrorResponse }, StatusCode = 200)
+    let private mapToMobileErrorResponse (errors: AppError[]) =
+        ObjectResult({ IsSuccess = false; Result = null; Errors = errors |> Array.map createMobileErrorResult }, StatusCode = 200)
     
     let private mapToMobileResponse<'a> (response: Response) =
         match response with
@@ -42,5 +43,21 @@ module internal Http =
     
     let mapToMobileResult (result: Result<Response, AppError[]>) =
         match result with
-        | Error errors -> createMobileErrorResult errors
+        | Error errors -> mapToMobileErrorResponse errors
         | Ok response -> mapToMobileResponse response
+        
+type UserMobileHttpHandler(persistence: UserPersistence) =
+    
+    member _.Handle command =
+        task {
+            let! result = handle persistence command
+            return Http.mapToMobileResult result
+        }
+    
+    member _.HandleUpdateUser (args: UpdateUserArgs) =
+        task {
+            let! data = args.toCommandArgs()
+            let command = Command.Update data
+            let! result = handle persistence command
+            return Http.mapToMobileResult result
+        }

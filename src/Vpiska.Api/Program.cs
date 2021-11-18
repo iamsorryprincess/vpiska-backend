@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Vpiska.Infrastructure.Orleans.Grains;
 
 namespace Vpiska.Api
 {
@@ -7,7 +8,10 @@ namespace Vpiska.Api
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args)
+                .Build()
+                .AddClusterClientShutdown()
+                .Run();
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>

@@ -1,11 +1,22 @@
 module internal Vpiska.Domain.Validation
 
+open System
+open System.Text.RegularExpressions
+
 type ValidationCondition<'model> = 'model -> bool
 
 type ValidationRule<'model, 'error> =
     { Condition: ValidationCondition<'model>
       Error: 'error
       ThenRules: ValidationRule<'model, 'error>[] }
+    
+let isNotEmpty input = String.IsNullOrWhiteSpace(input) |> not
+
+let isRegex pattern input = Regex.IsMatch(input, pattern)
+
+let isGreaterThan (input: string) length = input.Length >= length
+
+let isEqual input eqValue = input = eqValue
     
 let createRule<'model, 'error> (condition: ValidationCondition<'model>) (error: 'error) =
     { Condition = condition

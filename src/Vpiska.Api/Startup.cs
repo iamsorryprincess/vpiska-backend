@@ -1,14 +1,18 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Vpiska.Api.Filters;
+using Vpiska.Application;
+using Vpiska.Application.Event;
 using Vpiska.Application.User;
 using Vpiska.Infrastructure.Firebase;
 using Vpiska.Infrastructure.Jwt;
 using Vpiska.Infrastructure.Mongo;
+using Vpiska.Infrastructure.Orleans.Grains;
 
 namespace Vpiska.Api
 {
@@ -64,7 +68,20 @@ namespace Vpiska.Api
             services.AddMongo(_configuration.GetSection("Mongo"));
             services.AddFirebase(_configuration.GetSection("Firebase"));
             services.AddJwt();
+            services.AddClusterClient(_configuration.GetSection("OrleansCluster"));
+            services.AddPubSubProvider();
+            services.AddUserPersistence();
+            
+            var areas = _configuration.
+                GetSection("AreaSettings").GetSection("Areas")
+                .AsEnumerable()
+                .Skip(1)
+                .Select(x => x.Value)
+                .ToArray();
+
+            services.AddEventPersistence(areas);
             services.AddSingleton<UserMobileHttpHandler>();
+            services.AddSingleton<EventMobileHttpHandler>();
         }
         
         public void Configure(IApplicationBuilder app)

@@ -1,13 +1,6 @@
 module internal Vpiska.Domain.User.UserValidation
 
-open System
-open System.Text.RegularExpressions
 open Vpiska.Domain.Validation
-
-let private isNotEmpty input = String.IsNullOrWhiteSpace(input) |> not
-let private isRegex pattern input = Regex.IsMatch(input, pattern)
-let private isGreaterThan (input: string) length = input.Length >= length
-let private isEqual input eqValue = input = eqValue
    
 let private phoneRegex = @"^\d{10}\b$"
 let private passwordLength = 6
