@@ -1,51 +1,55 @@
-module Vpiska.Application.Event.CommandHandler
+namespace Vpiska.Application.Event
 
+open Google.Cloud.Storage.V1
 open Orleans
+open Vpiska.Application.Firebase
 open Vpiska.Domain.Event
 open Vpiska.Infrastructure.Orleans.Interfaces
 
-type AreaSettings =
-    { Areas: string[] }
+type AreaSettings = { Areas: string[] }
 
-type EventPersistence =
-    { ClusterClient: IClusterClient
-      StreamProducer: IStreamProducer
-      AreaSettings: AreaSettings }
+type CommandHandler(clusterClient: IClusterClient,
+                    streamProducer: IStreamProducer,
+                    areaSettings: AreaSettings,
+                    firebaseClient: StorageClient,
+                    firebaseSettings: Storage.FirebaseSettings) =
     
-let private checkArea (areas: string[]) (area: string) = areas |> Array.contains area
+    let checkArea (area: string) = areaSettings.Areas |> Array.contains area
+    
+    let checkEvent = EventClusterClient.checkEvent clusterClient
+    
+    let checkOwnership = EventClusterClient.checkOwnership clusterClient
 
-let private publish (producer: IStreamProducer) (eventId: string) (event: DomainEvent) = producer.Produce(eventId, event)
-
-let private createEvent (persistence: EventPersistence) =
-    let checkArea = checkArea persistence.AreaSettings.Areas
-    let checkOwner = EventClusterClient.checkOwner persistence.ClusterClient
-    let createEvent = EventClusterClient.createEvent persistence.ClusterClient
-    Domain.createEvent checkArea checkOwner createEvent
+    let publish (eventId: string) (event: DomainEvent) = streamProducer.Produce(eventId, event)
     
-let private connectUserToChat (persistence: EventPersistence) =
-    let checkEvent = EventClusterClient.checkEvent persistence.ClusterClient
-    let getUsers = EventClusterClient.getUsers persistence.ClusterClient
-    let addUser = EventClusterClient.addUser persistence.ClusterClient
-    let publish = publish persistence.StreamProducer
-    Domain.connectUserToChat checkEvent getUsers addUser publish
+    let handle command =
+        match command with
+        | CreateEvent args ->
+            let checkOwner = EventClusterClient.checkOwner clusterClient
+            let createEvent = EventClusterClient.createEvent clusterClient
+            Domain.createEvent checkArea checkOwner createEvent args
+        | CloseEvent args ->
+            let closeEvent = EventClusterClient.closeEvent clusterClient
+            Domain.closeEvent checkEvent checkOwnership publish closeEvent args
+        | Subscribe args -> Domain.subscribe streamProducer.TrySubscribe args
+        | Unsubscribe args -> Domain.unsubscribe streamProducer.TryUnsubscribe args
+        | LogUserInChat args ->
+            let getUsers = EventClusterClient.getUsers clusterClient
+            let addUser = EventClusterClient.addUser clusterClient
+            Domain.connectUserToChat checkEvent getUsers addUser publish args
+        | LogoutUserFromChat args ->
+            let removeUser = EventClusterClient.removeUser clusterClient
+            Domain.disconnectUserFromChat checkEvent removeUser publish args
+        | SendChatMessage args ->
+            let addMessage = EventClusterClient.addMessage clusterClient
+            Domain.sendChatMessage checkEvent addMessage publish args
+        | AddMedia args ->
+            let addMedia = EventClusterClient.addMedia clusterClient
+            let uploadFile = Storage.uploadFile firebaseClient firebaseSettings.BucketName
+            Domain.addMedia checkEvent checkOwnership addMedia uploadFile args
+        | RemoveMedia args ->
+            let removeMedia = EventClusterClient.removeMedia clusterClient
+            let deleteFile = Storage.deleteFile firebaseClient firebaseSettings.BucketName
+            Domain.removeMedia checkEvent checkOwnership removeMedia deleteFile args
     
-let private disconnectUserFromChat (persistence: EventPersistence) =
-    let checkEvent = EventClusterClient.checkEvent persistence.ClusterClient
-    let removeUser = EventClusterClient.removeUser persistence.ClusterClient
-    let publish = publish persistence.StreamProducer
-    Domain.disconnectUserFromChat checkEvent removeUser publish
-    
-let private sendChatMessage (persistence: EventPersistence) =
-    let checkEvent = EventClusterClient.checkEvent persistence.ClusterClient
-    let addMessage = EventClusterClient.addMessage persistence.ClusterClient
-    let publish = publish persistence.StreamProducer
-    Domain.sendChatMessage checkEvent addMessage publish
-    
-let handle persistence command =
-    match command with
-    | CreateEvent args -> createEvent persistence args
-    | Subscribe args -> Domain.subscribe persistence.StreamProducer.TrySubscribe args
-    | Unsubscribe args -> Domain.unsubscribe persistence.StreamProducer.TryUnsubscribe args
-    | LogUserInChat args -> connectUserToChat persistence args
-    | LogoutUserFromChat args -> disconnectUserFromChat persistence args
-    | SendChatMessage args -> sendChatMessage persistence args
+    member _.Handle command = handle command

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Vpiska.Application;
+using Vpiska.Application.Event;
 using Vpiska.Infrastructure.Orleans;
 
 namespace Vpiska.ApiChat
@@ -27,6 +28,7 @@ namespace Vpiska.ApiChat
                 .CreateLogger());
             
             services.AddClusterClient(_configuration.GetSection("OrleansCluster"));
+            services.AddStreamProducer();
 
             var areas = _configuration.
                 GetSection("AreaSettings").GetSection("Areas")
@@ -35,7 +37,8 @@ namespace Vpiska.ApiChat
                 .Select(x => x.Value)
                 .ToArray();
 
-            services.AddEventPersistence(areas);
+            services.AddSingleton(new AreaSettings(areas));
+            services.AddSingleton<Application.Event.CommandHandler>();
             services.AddEventChat();
         }
         

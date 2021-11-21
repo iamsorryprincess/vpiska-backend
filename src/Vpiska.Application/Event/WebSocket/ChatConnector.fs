@@ -5,15 +5,12 @@ open System.Threading.Tasks
 open Serilog
 open FSharp.Control.Tasks
 open Vpiska.Application.Event
-open Vpiska.Application.Event.CommandHandler
 open Vpiska.Domain.Event
 open Vpiska.Infrastructure.Websocket
 
-type ChatConnector(logger: ILogger, storage: UserConnectionsStorage, persistence: EventPersistence) =
+type ChatConnector(logger: ILogger, storage: UserConnectionsStorage, commandHandler: CommandHandler) =
     
     let queryParamName = "eventId"
-    
-    let handle = CommandHandler.handle persistence
     
     let mapErrors errors = errors |> Array.map Errors.mapAppError |> Array.fold (fun acc error -> $"{error}. {acc}") ""
     
@@ -23,7 +20,7 @@ type ChatConnector(logger: ILogger, storage: UserConnectionsStorage, persistence
             | false -> logger.Warning("can't add user context. EventId: {eventId}. ConnectionId: {connectionId}", eventId, connectionId)
             | true ->
                 let args = { EventId = eventId; UserId = userContext.UserId; Name = userContext.Username; ImageId = userContext.UserImageId }
-                match! args |> Command.LogUserInChat |> handle with
+                match! args |> Command.LogUserInChat |> commandHandler.Handle with
                 | Error errors ->
                     let message = mapErrors errors
                     logger.Warning("can't connect user to event. Message: {message}", message)
@@ -33,7 +30,7 @@ type ChatConnector(logger: ILogger, storage: UserConnectionsStorage, persistence
     let disconnectUser (eventId: string) (userId: string) =
         task {
             let command = { EventId = eventId; UserId = userId } |> Command.LogoutUserFromChat
-            match! handle command with
+            match! commandHandler.Handle command with
             | Error errors ->
                 let message = mapErrors errors
                 logger.Warning("can't disconnect user from event. Message: {message}", message)
@@ -51,7 +48,7 @@ type ChatConnector(logger: ILogger, storage: UserConnectionsStorage, persistence
                     | false -> logger.Warning("can't create user group. EventId: {eventId}. ConnectionId: {connectionId}", eventId, connectionId)
                     | true ->
                         let command = { EventId = eventId } |> Command.Subscribe
-                        match! handle command with
+                        match! commandHandler.Handle command with
                         | Error errors ->
                             let message = mapErrors errors
                             logger.Warning("can't subscribe for event. Message: {message}", message)
@@ -73,7 +70,7 @@ type ChatConnector(logger: ILogger, storage: UserConnectionsStorage, persistence
                         | false -> logger.Warning("can't remove user group. EventId: {eventId}. ConnectionId: {connectionId}", eventId, connectionId)
                         | true ->
                             let command = { EventId = eventId } |> Command.Unsubscribe
-                            match! handle command with
+                            match! commandHandler.Handle command with
                             | Error errors ->
                                 let message = mapErrors errors
                                 logger.Warning("can't unsubscribe from event. Message: {message}", message)

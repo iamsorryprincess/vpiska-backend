@@ -8,10 +8,6 @@ using Serilog;
 using Vpiska.Api.Filters;
 using Vpiska.Application;
 using Vpiska.Application.Event;
-using Vpiska.Application.User;
-using Vpiska.Infrastructure.Firebase;
-using Vpiska.Infrastructure.Jwt;
-using Vpiska.Infrastructure.Mongo;
 using Vpiska.Infrastructure.Orleans;
 
 namespace Vpiska.Api
@@ -69,7 +65,7 @@ namespace Vpiska.Api
             services.AddFirebase(_configuration.GetSection("Firebase"));
             services.AddJwt();
             services.AddClusterClient(_configuration.GetSection("OrleansCluster"));
-            services.AddUserPersistence();
+            services.AddStreamProducer();
             
             var areas = _configuration.
                 GetSection("AreaSettings").GetSection("Areas")
@@ -78,9 +74,9 @@ namespace Vpiska.Api
                 .Select(x => x.Value)
                 .ToArray();
 
-            services.AddEventPersistence(areas);
-            services.AddSingleton<UserMobileHttpHandler>();
-            services.AddSingleton<EventMobileHttpHandler>();
+            services.AddSingleton(new AreaSettings(areas));
+            services.AddSingleton<Application.Event.CommandHandler>();
+            services.AddSingleton<Application.User.CommandHandler>();
         }
         
         public void Configure(IApplicationBuilder app)

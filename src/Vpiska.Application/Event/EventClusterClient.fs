@@ -22,6 +22,14 @@ let createEvent (client: IClusterClient) (area: string) (event: Event) =
         return result
     }
     
+let closeEvent (client: IClusterClient) (eventId: string) =
+    let eventGrain = getEventGrain client eventId
+    eventGrain.Close()
+    
+let checkOwnership (client: IClusterClient) (eventId: string) (ownerId: string) =
+    let eventGrain = getEventGrain client eventId
+    eventGrain.CheckOwnership ownerId
+    
 let checkEvent (client: IClusterClient) (eventId: string) =
     let grain = getEventGrain client eventId
     grain.CheckData()
@@ -41,3 +49,11 @@ let removeUser (client: IClusterClient) (eventId: string) (userId: string) =
 let addMessage (client: IClusterClient) (eventId: string) (chatData: ChatData) =
     let grain = getEventGrain client eventId
     grain.AddChatData chatData
+    
+let addMedia (client: IClusterClient) (eventId: string) (mediaLink: string) =
+    let grain = getEventGrain client eventId
+    grain.TryAddMedia mediaLink
+    
+let removeMedia (client: IClusterClient) (eventId: string) (mediaLink: string) =
+    let grain = getEventGrain client eventId
+    grain.TryRemoveMedia mediaLink

@@ -6,7 +6,6 @@ open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Mvc
 open Vpiska.Application
-open Vpiska.Application.User.CommandHandler
 open Vpiska.Domain.User
 
 [<CLIMutable>]
@@ -27,7 +26,7 @@ type UpdateUserArgs =
                          ImageData = stream.ToArray(); ContentType = args.Image.ContentType }
         }
         
-module internal Http =
+module Http =
     
     let private createMobileErrorResult (error: AppError) = { ErrorCode = Errors.mapAppError error }
     
@@ -45,19 +44,3 @@ module internal Http =
         match result with
         | Error errors -> mapToMobileErrorResponse errors
         | Ok response -> mapToMobileResponse response
-        
-type UserMobileHttpHandler(persistence: UserPersistence) =
-    
-    member _.Handle command =
-        task {
-            let! result = handle persistence command
-            return Http.mapToMobileResult result
-        }
-    
-    member _.HandleUpdateUser (args: UpdateUserArgs) =
-        task {
-            let! data = args.toCommandArgs()
-            let command = Command.Update data
-            let! result = handle persistence command
-            return Http.mapToMobileResult result
-        }

@@ -10,3 +10,4 @@ type DomainEvent =
     | UserLoggedIn of UserLoggedInArgs
     | UserLoggedOut of UserLoggedOutArgs
     | ChatMessage of ChatData
+    | EventClosed

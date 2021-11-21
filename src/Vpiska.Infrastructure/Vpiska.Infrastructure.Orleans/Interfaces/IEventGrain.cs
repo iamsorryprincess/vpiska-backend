@@ -12,7 +12,11 @@ namespace Vpiska.Infrastructure.Orleans.Interfaces
 
         Task<Event> GetData();
 
+        Task<bool> Close();
+
         Task<string> GetOwnerId();
+
+        Task<bool> CheckOwnership(string ownerId);
 
         Task<UserInfo[]> GetUsers();
 

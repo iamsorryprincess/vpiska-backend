@@ -34,13 +34,35 @@ namespace Vpiska.Infrastructure.Orleans.Grains
 
         public Task<bool> CheckData() => Task.FromResult(_name != null);
 
-        public Task<Event> GetData() =>
-            _name == null
-                ? Task.FromResult<Event>(null)
-                : Task.FromResult(new Event(this.GetPrimaryKeyString(), _ownerId, _name, _coordinates, _address, _mediaLinks.ToArray(),
-                    _chatData.ToArray(), _users.ToArray()));
+        public Task<Event> GetData()
+        {
+            if (_name == null)
+            {
+                DeactivateOnIdle();
+                return Task.FromResult<Event>(null);
+            }
+
+            return Task.FromResult(new Event(this.GetPrimaryKeyString(), _ownerId, _name, _coordinates, _address,
+                _mediaLinks.ToArray(),
+                _chatData.ToArray(), _users.ToArray()));
+        }
+
+        public async Task<bool> Close()
+        {
+            var isNotSuccess = !await _areaGrain.RemoveEvent(this.GetPrimaryKeyString());
+
+            if (isNotSuccess)
+            {
+                return false;
+            }
+            
+            DeactivateOnIdle();
+            return true;
+        }
 
         public Task<string> GetOwnerId() => Task.FromResult(_ownerId);
+
+        public Task<bool> CheckOwnership(string ownerId) => Task.FromResult(ownerId == _ownerId);
 
         public Task<UserInfo[]> GetUsers() => Task.FromResult(_users.ToArray());
 

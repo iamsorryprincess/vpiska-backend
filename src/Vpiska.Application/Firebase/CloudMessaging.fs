@@ -1,4 +1,4 @@
-module Vpiska.Infrastructure.Firebase.CloudMessaging
+module Vpiska.Application.Firebase.CloudMessaging
 
 open System.Collections.Generic
 open FSharp.Control.Tasks

@@ -1,10 +1,12 @@
-module Vpiska.Infrastructure.Firebase.Storage
+module Vpiska.Application.Firebase.Storage
 
 open System.IO
 open System.Net
 open FSharp.Control.Tasks
 open Google
 open Google.Cloud.Storage.V1
+
+type FirebaseSettings = { BucketName: string }
 
 let uploadFile (storageClient: StorageClient) (bucketName: string) (imageId: string) (data: byte[]) (contentType: string) =
     task {

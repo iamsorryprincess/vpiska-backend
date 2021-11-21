@@ -1,4 +1,4 @@
-module Vpiska.Infrastructure.Jwt.Jwt
+module Vpiska.Application.User.Jwt
 
 open System
 open System.IdentityModel.Tokens.Jwt

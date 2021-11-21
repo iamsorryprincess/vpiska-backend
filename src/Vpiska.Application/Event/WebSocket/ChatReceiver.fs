@@ -3,11 +3,11 @@ namespace Vpiska.Application.Event.WebSocket
 open System.Threading.Tasks
 open FSharp.Control.Tasks
 open Serilog
-open Vpiska.Application.Event.CommandHandler
+open Vpiska.Application.Event
 open Vpiska.Domain.Event
 open Vpiska.Infrastructure.Websocket
 
-type ChatReceiver(logger: ILogger, storage: UserConnectionsStorage, persistence: EventPersistence) =
+type ChatReceiver(logger: ILogger, storage: UserConnectionsStorage, commandHandler: CommandHandler) =
     
     let queryParamName = "eventId"
     
@@ -23,7 +23,7 @@ type ChatReceiver(logger: ILogger, storage: UserConnectionsStorage, persistence:
                 | true ->
                     let command = { EventId = eventId; UserId = context.UserId; Message = data |> WebSocketSerializer.deserializeToString }
                                   |> Command.SendChatMessage
-                    match! handle persistence command with
+                    match! commandHandler.Handle command with
                     | Error errors ->
                         let message = mapErrors errors
                         logger.Warning("can't send message. Message: {message}", message)

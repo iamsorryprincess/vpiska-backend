@@ -11,11 +11,11 @@ namespace Vpiska.Api.Controllers
     [Route("api/users")]
     public sealed class UsersController : ControllerBase
     {
-        private readonly UserMobileHttpHandler _handler;
+        private readonly CommandHandler _commandHandler;
 
-        public UsersController(UserMobileHttpHandler handler)
+        public UsersController(CommandHandler commandHandler)
         {
-            _handler = handler;
+            _commandHandler = commandHandler;
         }
 
         [HttpPost("create")]
@@ -25,7 +25,7 @@ namespace Vpiska.Api.Controllers
         public Task<ObjectResult> Create([FromBody] CreateUserArgs args)
         {
             var command = Command.NewCreate(args);
-            return _handler.Handle(command);
+            return Handle(command);
         }
 
         [HttpPost("login")]
@@ -35,7 +35,7 @@ namespace Vpiska.Api.Controllers
         public Task<ObjectResult> Login([FromBody] LoginUserArgs args)
         {
             var command = Command.NewLogin(args);
-            return _handler.Handle(command);
+            return Handle(command);
         }
 
         [HttpPost("code/set")]
@@ -45,7 +45,7 @@ namespace Vpiska.Api.Controllers
         public Task<ObjectResult> SetCode([FromBody] CodeArgs args)
         {
             var command = Command.NewSetCode(args);
-            return _handler.Handle(command);
+            return Handle(command);
         }
 
         [HttpPost("code/check")]
@@ -55,7 +55,7 @@ namespace Vpiska.Api.Controllers
         public Task<ObjectResult> CheckCode([FromBody] CheckCodeArgs args)
         {
             var command = Command.NewCheckCode(args);
-            return _handler.Handle(command);
+            return Handle(command);
         }
 
         [Authorize]
@@ -66,7 +66,7 @@ namespace Vpiska.Api.Controllers
         public Task<ObjectResult> ChangePassword([FromBody] ChangePasswordArgs args)
         {
             var command = Command.NewChangePassword(args);
-            return _handler.Handle(command);
+            return Handle(command);
         }
 
         [Authorize]
@@ -74,6 +74,20 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
-        public Task<ObjectResult> UpdateUser([FromForm] UpdateUserArgs args) => _handler.HandleUpdateUser(args);
+        public Task<ObjectResult> UpdateUser([FromForm] UpdateUserArgs args) => HandleUpdateUser(args);
+
+        private async Task<ObjectResult> Handle(Command command)
+        {
+            var result = await _commandHandler.Handle(command);
+            return Http.mapToMobileResult(result);
+        }
+
+        private async Task<ObjectResult> HandleUpdateUser(UpdateUserArgs args)
+        {
+            var data = await args.toCommandArgs();
+            var command = Command.NewUpdate(data);
+            var result = await _commandHandler.Handle(command);
+            return Http.mapToMobileResult(result);
+        }
     }
 }

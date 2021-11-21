@@ -1,9 +1,13 @@
-module Vpiska.Infrastructure.Mongo.Database
+module Vpiska.Application.User.Database
 
 open System
 open MongoDB.Driver
 open FSharp.Control.Tasks
 open Vpiska.Domain.User
+
+type MongoSettings =
+    { ConnectionString: string
+      DatabaseName: string }
 
 let private isNotEmpty input = input |> String.IsNullOrWhiteSpace |> not
 
