@@ -13,6 +13,7 @@ type DomainError =
     | AreaNotFound
     | EventNotFound
     | UserNotFound
+    | UserAlreadyExists
     | OwnerAlreadyHasEvent
     | UserNotOwner
     | AreaAlreadyHasEvent
@@ -45,6 +46,7 @@ module Errors =
         | AreaNotFound -> "AreaNotFound"
         | EventNotFound -> "EventNotFound"
         | UserNotFound -> "UserNotFound"
+        | UserAlreadyExists -> "UserAlreadyExists"
         | OwnerAlreadyHasEvent -> "OwnerAlreadyHasEvent"
         | UserNotOwner -> "UserNotOwner"
         | AreaAlreadyHasEvent -> "AreaAlreadyHasEvent"

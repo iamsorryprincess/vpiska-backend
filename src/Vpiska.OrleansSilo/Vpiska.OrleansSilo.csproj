@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Orleans.Grains\Vpiska.Infrastructure.Orleans.Grains.csproj" />
+      <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Orleans\Vpiska.Infrastructure.Orleans.csproj" />
     </ItemGroup>
 
 </Project>

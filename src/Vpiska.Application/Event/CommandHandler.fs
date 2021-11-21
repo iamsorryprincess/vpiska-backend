@@ -2,24 +2,19 @@ module Vpiska.Application.Event.CommandHandler
 
 open Orleans
 open Vpiska.Domain.Event
-open Vpiska.Domain.User
-open Vpiska.Infrastructure.Orleans.Client
-open Vpiska.Infrastructure.Orleans.Grains.Interfaces
+open Vpiska.Infrastructure.Orleans.Interfaces
 
 type AreaSettings =
     { Areas: string[] }
 
-type OrleansPubSub =
-    { UserLoggedInPubSub: IOrleansPubSubProvider<UserLoggedInArgs>
-      UserLoggedOutPubSub: IOrleansPubSubProvider<string>
-      ChatPubSub: IOrleansPubSubProvider<ChatData> }
-
 type EventPersistence =
     { ClusterClient: IClusterClient
-      PubSubProviders: OrleansPubSub
+      StreamProducer: IStreamProducer
       AreaSettings: AreaSettings }
     
 let private checkArea (areas: string[]) (area: string) = areas |> Array.contains area
+
+let private publish (producer: IStreamProducer) (eventId: string) (event: DomainEvent) = producer.Produce(eventId, event)
 
 let private createEvent (persistence: EventPersistence) =
     let checkArea = checkArea persistence.AreaSettings.Areas
@@ -27,22 +22,30 @@ let private createEvent (persistence: EventPersistence) =
     let createEvent = EventClusterClient.createEvent persistence.ClusterClient
     Domain.createEvent checkArea checkOwner createEvent
     
-let private subscribe (persistence: EventPersistence) =
-    let createSubscription = EventClusterClient.createSubscription
-                              persistence.PubSubProviders.UserLoggedInPubSub
-                              persistence.PubSubProviders.UserLoggedOutPubSub
-                              persistence.PubSubProviders.ChatPubSub
-    Domain.subscribe createSubscription
+let private connectUserToChat (persistence: EventPersistence) =
+    let checkEvent = EventClusterClient.checkEvent persistence.ClusterClient
+    let getUsers = EventClusterClient.getUsers persistence.ClusterClient
+    let addUser = EventClusterClient.addUser persistence.ClusterClient
+    let publish = publish persistence.StreamProducer
+    Domain.connectUserToChat checkEvent getUsers addUser publish
     
-let private unsubscribe (persistence: EventPersistence) =
-    let removeSubscription = EventClusterClient.removeSubscription
-                               persistence.PubSubProviders.UserLoggedInPubSub
-                               persistence.PubSubProviders.UserLoggedOutPubSub
-                               persistence.PubSubProviders.ChatPubSub
-    Domain.unsubscribe removeSubscription
+let private disconnectUserFromChat (persistence: EventPersistence) =
+    let checkEvent = EventClusterClient.checkEvent persistence.ClusterClient
+    let removeUser = EventClusterClient.removeUser persistence.ClusterClient
+    let publish = publish persistence.StreamProducer
+    Domain.disconnectUserFromChat checkEvent removeUser publish
+    
+let private sendChatMessage (persistence: EventPersistence) =
+    let checkEvent = EventClusterClient.checkEvent persistence.ClusterClient
+    let addMessage = EventClusterClient.addMessage persistence.ClusterClient
+    let publish = publish persistence.StreamProducer
+    Domain.sendChatMessage checkEvent addMessage publish
     
 let handle persistence command =
     match command with
     | CreateEvent args -> createEvent persistence args
-    | Subscribe args -> subscribe persistence args
-    | Unsubscribe args -> unsubscribe persistence args
+    | Subscribe args -> Domain.subscribe persistence.StreamProducer.TrySubscribe args
+    | Unsubscribe args -> Domain.unsubscribe persistence.StreamProducer.TryUnsubscribe args
+    | LogUserInChat args -> connectUserToChat persistence args
+    | LogoutUserFromChat args -> disconnectUserFromChat persistence args
+    | SendChatMessage args -> sendChatMessage persistence args

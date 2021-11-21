@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Orleans;
 
-namespace Vpiska.Infrastructure.Orleans.Grains.Interfaces
+namespace Vpiska.Infrastructure.Orleans.Interfaces
 {
     public interface IAreaGrain : IGrainWithStringKey
     {

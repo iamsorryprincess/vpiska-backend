@@ -2,15 +2,19 @@ using System.Threading.Tasks;
 using Orleans;
 using Vpiska.Domain.Event;
 
-namespace Vpiska.Infrastructure.Orleans.Grains.Interfaces
+namespace Vpiska.Infrastructure.Orleans.Interfaces
 {
     public interface IEventGrain : IGrainWithStringKey
     {
+        Task<bool> CheckData();
+        
         Task SetData(Event @event, IAreaGrain areaGrain);
 
         Task<Event> GetData();
 
         Task<string> GetOwnerId();
+
+        Task<UserInfo[]> GetUsers();
 
         Task<bool> TryAddMedia(string mediaLink);
 
@@ -20,6 +24,6 @@ namespace Vpiska.Infrastructure.Orleans.Grains.Interfaces
 
         Task<bool> TryRemoveUser(string userId);
 
-        Task AddChatData(ChatData chatData);
+        Task<bool> AddChatData(ChatData chatData);
     }
 }

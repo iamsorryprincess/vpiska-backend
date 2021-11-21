@@ -3,23 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orleans;
 using Orleans.Configuration;
-using Vpiska.Infrastructure.Orleans.Grains.Interfaces;
+using Orleans.Hosting;
+using Vpiska.Infrastructure.Orleans.Interfaces;
+using Vpiska.Infrastructure.Orleans.Streaming;
 
-namespace Vpiska.Infrastructure.Orleans.Grains
+namespace Vpiska.Infrastructure.Orleans
 {
     public static class Entry
     {
-        public static void AddPubSubProvider(this IServiceCollection services)
-        {
-            services.AddSingleton(typeof(IOrleansPubSubProvider<>), typeof(OrleansPubSubProvider<>));
-        }
-
-        public static void AddEventConsumer<TEventData, TConsumer>(this IServiceCollection services)
-            where TConsumer : class, IEventConsumer<TEventData>
-        {
-            services.AddTransient<IEventConsumer<TEventData>, TConsumer>();
-        }
-
         public static void AddClusterClient(this IServiceCollection services, IConfigurationSection clusterSection)
         {
             var client = new ClientBuilder()
@@ -29,9 +20,20 @@ namespace Vpiska.Infrastructure.Orleans.Grains
                     options.ClusterId = clusterSection["ClusterId"];
                     options.ServiceId = clusterSection["ServiceId"];
                 })
+                .AddSimpleMessageStreamProvider("chatProvider")
                 .Build();
             client.Connect().Wait();
             services.AddSingleton(client);
+        }
+
+        public static void AddStreamProducer(this IServiceCollection services)
+        {
+            services.AddSingleton<IStreamProducer, StreamProducer>();
+        }
+
+        public static void AddStreamConsumer<TConsumer>(this IServiceCollection services) where TConsumer : class, IStreamConsumer
+        {
+            services.AddTransient<IStreamConsumer, TConsumer>();
         }
 
         public static IHost AddClusterClientShutdown(this IHost host)

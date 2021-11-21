@@ -12,7 +12,7 @@ using Vpiska.Application.User;
 using Vpiska.Infrastructure.Firebase;
 using Vpiska.Infrastructure.Jwt;
 using Vpiska.Infrastructure.Mongo;
-using Vpiska.Infrastructure.Orleans.Grains;
+using Vpiska.Infrastructure.Orleans;
 
 namespace Vpiska.Api
 {
@@ -69,7 +69,6 @@ namespace Vpiska.Api
             services.AddFirebase(_configuration.GetSection("Firebase"));
             services.AddJwt();
             services.AddClusterClient(_configuration.GetSection("OrleansCluster"));
-            services.AddPubSubProvider();
             services.AddUserPersistence();
             
             var areas = _configuration.

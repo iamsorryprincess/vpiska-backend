@@ -42,7 +42,7 @@ type LogoutUserArgs =
       EventId: EventId }
 
 [<CLIMutable>]    
-type UserMessageArgs =
+type ChatMessageArgs =
     { UserId: UserId
       EventId: EventId
       Message: string }
@@ -54,6 +54,6 @@ type Command =
     | Unsubscribe of SubscribeArgs
     | AddMedia of AddMediaArgs
     | RemoveMedia of RemoveMediaArgs
-    | LoginUser of LoginUserArgs
-    | LogoutUser of LogoutUserArgs
-    | UserMessage of UserMessageArgs
+    | LogUserInChat of LoginUserArgs
+    | LogoutUserFromChat of LogoutUserArgs
+    | SendChatMessage of ChatMessageArgs

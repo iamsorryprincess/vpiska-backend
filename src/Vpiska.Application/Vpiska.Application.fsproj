@@ -10,7 +10,8 @@
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Firebase\Vpiska.Infrastructure.Firebase.fsproj" />
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Jwt\Vpiska.Infrastructure.Jwt.fsproj" />
       <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Mongo\Vpiska.Infrastructure.Mongo.fsproj" />
-      <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Orleans.Client\Vpiska.Infrastructure.Orleans.Client.fsproj" />
+      <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Orleans\Vpiska.Infrastructure.Orleans.csproj" />
+      <ProjectReference Include="..\Vpiska.Infrastructure\Vpiska.Infrastructure.Websocket\Vpiska.Infrastructure.Websocket.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,8 +19,13 @@
       <Compile Include="User\Security.fs" />
       <Compile Include="User\CommandHandler.fs" />
       <Compile Include="User\Http.fs" />
+      <Compile Include="Event\EventClusterClient.fs" />
       <Compile Include="Event\CommandHandler.fs" />
       <Compile Include="Event\Http.fs" />
+      <Compile Include="Event\WebSocket\Common.fs" />
+      <Compile Include="Event\WebSocket\ChatConnector.fs" />
+      <Compile Include="Event\WebSocket\ChatConsumer.fs" />
+      <Compile Include="Event\WebSocket\ChatReceiver.fs" />
       <Compile Include="Entry.fs" />
     </ItemGroup>
 

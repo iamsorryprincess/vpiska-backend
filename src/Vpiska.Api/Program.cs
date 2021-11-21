@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Vpiska.Infrastructure.Orleans.Grains;
+using Vpiska.Infrastructure.Orleans;
 
 namespace Vpiska.Api
 {

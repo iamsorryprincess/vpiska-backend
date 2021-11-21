@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
-using Vpiska.Infrastructure.Orleans.Grains.Interfaces;
+using Vpiska.Infrastructure.Orleans.Interfaces;
 
 namespace Vpiska.OrleansSilo
 {
@@ -20,7 +20,7 @@ namespace Vpiska.OrleansSilo
         private static void Main(string[] args)
         {
             SetupApplicationShutdown();
-            
+
             var builder = new SiloHostBuilder()
                 .UseLocalhostClustering()
                 .Configure<ClusterOptions>(options =>
@@ -28,7 +28,10 @@ namespace Vpiska.OrleansSilo
                     options.ClusterId = "dev";
                     options.ServiceId = "OrleansBasics";
                 })
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IEventGrain).Assembly).WithReferences())
+                .ConfigureApplicationParts(parts =>
+                    parts.AddApplicationPart(typeof(IEventGrain).Assembly).WithReferences())
+                .AddSimpleMessageStreamProvider("chatProvider", (options) => options.OptimizeForImmutableData = false)
+                .AddMemoryGrainStorage("PubSubStore")
                 .ConfigureLogging(logging => logging.AddConsole());
 
             _silo = builder.Build();

@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Orleans;
 using Vpiska.Domain.Event;
-using Vpiska.Infrastructure.Orleans.Grains.Interfaces;
+using Vpiska.Infrastructure.Orleans.Interfaces;
 
-namespace Vpiska.Infrastructure.Orleans.Grains.Grains
+namespace Vpiska.Infrastructure.Orleans.Grains
 {
     internal sealed class EventGrain : Grain, IEventGrain
     {
@@ -32,6 +32,8 @@ namespace Vpiska.Infrastructure.Orleans.Grains.Grains
             return Task.CompletedTask;
         }
 
+        public Task<bool> CheckData() => Task.FromResult(_name != null);
+
         public Task<Event> GetData() =>
             _name == null
                 ? Task.FromResult<Event>(null)
@@ -39,6 +41,8 @@ namespace Vpiska.Infrastructure.Orleans.Grains.Grains
                     _chatData.ToArray(), _users.ToArray()));
 
         public Task<string> GetOwnerId() => Task.FromResult(_ownerId);
+
+        public Task<UserInfo[]> GetUsers() => Task.FromResult(_users.ToArray());
 
         public Task<bool> TryAddMedia(string mediaLink)
         {
@@ -86,10 +90,15 @@ namespace Vpiska.Infrastructure.Orleans.Grains.Grains
             return Task.FromResult(true);
         }
 
-        public Task AddChatData(ChatData chatData)
+        public Task<bool> AddChatData(ChatData chatData)
         {
+            if (_users.All(x => x.Id != chatData.UserId))
+            {
+                return Task.FromResult(false);
+            }
+            
             _chatData.Add(chatData);
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }

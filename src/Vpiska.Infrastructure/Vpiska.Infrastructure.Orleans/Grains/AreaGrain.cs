@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Orleans;
-using Vpiska.Infrastructure.Orleans.Grains.Interfaces;
+using Vpiska.Infrastructure.Orleans.Interfaces;
 
-namespace Vpiska.Infrastructure.Orleans.Grains.Grains
+namespace Vpiska.Infrastructure.Orleans.Grains
 {
     internal sealed class AreaGrain : Grain, IAreaGrain
     {
