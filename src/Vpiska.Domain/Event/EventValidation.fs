@@ -1,4 +1,4 @@
-module Vpiska.Domain.Event.EventValidation
+module internal Vpiska.Domain.Event.EventValidation
 
 open Vpiska.Domain.Validation
 

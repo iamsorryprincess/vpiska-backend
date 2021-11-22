@@ -6,11 +6,9 @@ open Vpiska.Application.Firebase
 open Vpiska.Domain.Event
 open Vpiska.Infrastructure.Orleans.Interfaces
 
-type AreaSettings = { Areas: string[] }
-
 type CommandHandler(clusterClient: IClusterClient,
                     streamProducer: IStreamProducer,
-                    areaSettings: AreaSettings,
+                    areaSettings: EventClusterClient.AreaSettings,
                     firebaseClient: StorageClient,
                     firebaseSettings: Storage.FirebaseSettings) =
     

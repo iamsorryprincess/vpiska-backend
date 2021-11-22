@@ -47,6 +47,9 @@ namespace Vpiska.Infrastructure.Orleans.Grains
                 _chatData.ToArray(), _users.ToArray()));
         }
 
+        public Task<ShortEventResponse> GetShortResponse() => Task.FromResult(
+            new ShortEventResponse(this.GetPrimaryKeyString(), _name, _coordinates, _users.Count));
+
         public async Task<bool> Close()
         {
             var isNotSuccess = !await _areaGrain.RemoveEvent(this.GetPrimaryKeyString());

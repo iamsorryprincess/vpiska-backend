@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Orleans;
+using Vpiska.Domain.Event;
 
 namespace Vpiska.Infrastructure.Orleans.Interfaces
 {
@@ -9,7 +10,7 @@ namespace Vpiska.Infrastructure.Orleans.Interfaces
 
         Task<bool> RemoveEvent(string eventId);
 
-        Task<IEventGrain[]> GetEventGrains();
+        Task<ShortEventResponse[]> GetShortEventsResponse();
         
         Task<bool> CheckOwnerId(string ownerId);
     }

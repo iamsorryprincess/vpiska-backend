@@ -24,6 +24,7 @@
       <Compile Include="User\CommandHandler.fs" />
       <Compile Include="User\Http.fs" />
       <Compile Include="Event\EventClusterClient.fs" />
+      <Compile Include="Event\QueryHandle.fs" />
       <Compile Include="Event\CommandHandler.fs" />
       <Compile Include="Event\Http.fs" />
       <Compile Include="Event\WebSocket\Common.fs" />

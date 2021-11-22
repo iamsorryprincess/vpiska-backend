@@ -12,6 +12,8 @@ namespace Vpiska.Infrastructure.Orleans.Interfaces
 
         Task<Event> GetData();
 
+        Task<ShortEventResponse> GetShortResponse();
+
         Task<bool> Close();
 
         Task<string> GetOwnerId();

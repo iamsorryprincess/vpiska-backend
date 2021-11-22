@@ -28,7 +28,12 @@ type AddMedia = EventId -> ImageId -> Task<bool>
 type RemoveMedia = EventId -> ImageId -> Task<bool>
 type DeleteFile = ImageId -> Task<bool>
 
+type GetEvent = EventId -> Task<Event>
+type GetEvents = Area -> Task<ShortEventResponse[]>
+
 let private generateId () = Guid.NewGuid().ToString("N")
+
+let private isNull o = Object.ReferenceEquals(o, null)
 
 let createEvent
     (checkArea: CheckArea)
@@ -179,4 +184,26 @@ let removeMedia
                 | true ->
                     let! _ = deleteFile args.MediaLink
                     return Response.MediaRemoved |> Ok
+    }
+    
+let getById
+    (getEvent: GetEvent)
+    (args: GetEventArgs) =
+    task {
+        let! event = getEvent args.EventId
+        match isNull event with
+        | true -> return [| DomainError.EventNotFound |> AppError.create |] |> Error
+        | false -> return event |> QueryResponse.Event |> Ok
+    }
+    
+let getEvents
+    (checkArea: CheckArea)
+    (getEvents: GetEvents)
+    (args: GetEventsArgs) =
+    task {
+        match checkArea args.Area with
+        | false -> return [| DomainError.AreaNotFound |> AppError.create |] |> Error
+        | true ->
+            let! events = getEvents args.Area
+            return events |> QueryResponse.Events |> Ok
     }

@@ -16,6 +16,7 @@
       <Compile Include="User\Domain.fs" />
       <Compile Include="Event\Models.fs" />
       <Compile Include="Event\Commands.fs" />
+      <Compile Include="Event\Queries.fs" />
       <Compile Include="Event\Errors.fs" />
       <Compile Include="Event\Events.fs" />
       <Compile Include="Event\Responses.fs" />

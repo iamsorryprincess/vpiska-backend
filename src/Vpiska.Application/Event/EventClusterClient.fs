@@ -5,6 +5,8 @@ open FSharp.Control.Tasks
 open Vpiska.Domain.Event
 open Vpiska.Infrastructure.Orleans.Interfaces
 
+type AreaSettings = { Areas: string[] }
+
 let private getAreaGrain (client: IClusterClient) = client.GetGrain<IAreaGrain>
 
 let private getEventGrain (client: IClusterClient) = client.GetGrain<IEventGrain>
@@ -25,6 +27,14 @@ let createEvent (client: IClusterClient) (area: string) (event: Event) =
 let closeEvent (client: IClusterClient) (eventId: string) =
     let eventGrain = getEventGrain client eventId
     eventGrain.Close()
+    
+let getEvent (client: IClusterClient) (eventId: string) =
+    let grain = getEventGrain client eventId
+    grain.GetData()
+    
+let getEvents (client: IClusterClient) (area: string) =
+    let grain = getAreaGrain client area
+    grain.GetShortEventsResponse()
     
 let checkOwnership (client: IClusterClient) (eventId: string) (ownerId: string) =
     let eventGrain = getEventGrain client eventId

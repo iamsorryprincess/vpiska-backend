@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +12,33 @@ namespace Vpiska.Api.Controllers
     [Route("api/events")]
     public sealed class EventsController : ControllerBase
     {
+        private readonly QueryHandler _queryHandler;
         private readonly CommandHandler _commandHandler;
 
-        public EventsController(CommandHandler commandHandler)
+        public EventsController(QueryHandler queryHandler, CommandHandler commandHandler)
         {
+            _queryHandler = queryHandler;
             _commandHandler = commandHandler;
+        }
+
+        [HttpPost("all")]
+        [Produces("application/json")]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(ApiResponse<ShortEventResponse[]>), 200)]
+        public Task<ObjectResult> GetAll([FromBody] GetEventsArgs args)
+        {
+            var query = Query.NewGetEvents(args);
+            return Handle(query);
+        }
+
+        [HttpPost("single")]
+        [Produces("application/json")]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(ApiResponse<Event>), 200)]
+        public Task<ObjectResult> GetById([FromBody] GetEventArgs args)
+        {
+            var query = Query.NewGetEvent(args);
+            return Handle(query);
         }
 
         [Authorize]
@@ -25,10 +46,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<Event>), 200)]
-        public Task<ObjectResult> Create([FromBody] Models.CreateEventArgs body)
+        public Task<ObjectResult> Create([FromBody] Application.Event.CreateEventArgs args)
         {
-            var args = new CreateEventArgs(GetUserId(), body.Name, body.Coordinates, body.Address, body.Area);
-            var command = Command.NewCreateEvent(args);
+            var command = args.toCommand(GetUserId());
             return Handle(command);
         }
 
@@ -37,10 +57,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
-        public Task<ObjectResult> Close([FromBody] Models.CloseEventArgs body)
+        public Task<ObjectResult> Close([FromBody] Application.Event.CloseEventArgs args)
         {
-            var args = new CloseEventArgs(GetUserId(), body.EventId);
-            var command = Command.NewCloseEvent(args);
+            var command = args.toCommand(GetUserId());
             return Handle(command);
         }
 
@@ -49,12 +68,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ApiResponse<AddMediaResponseArgs>), 200)]
-        public async Task<ObjectResult> AddMedia([FromForm] Models.AddMediaArgs body)
+        public async Task<ObjectResult> AddMedia([FromForm] Application.Event.AddMediaArgs args)
         {
-            await using var stream = new MemoryStream();
-            await body.Media.CopyToAsync(stream);
-            var args = new AddMediaArgs(body.EventId, GetUserId(), stream.ToArray(), body.Media.ContentType);
-            var command = Command.NewAddMedia(args);
+            var command = await args.toCommand(GetUserId());
             var result = await Handle(command);
             return result;
         }
@@ -64,10 +80,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
-        public Task<ObjectResult> RemoveMedia([FromBody] Models.RemoveMediaArgs body)
+        public Task<ObjectResult> RemoveMedia([FromBody] Application.Event.RemoveMediaArgs args)
         {
-            var args = new RemoveMediaArgs(body.EventId, GetUserId(), body.MediaLink);
-            var command = Command.NewRemoveMedia(args);
+            var command = args.toCommand(GetUserId());
             return Handle(command);
         }
 
@@ -92,6 +107,12 @@ namespace Vpiska.Api.Controllers
         {
             var result = await _commandHandler.Handle(command);
             return Http.mapToMobileResult(result);
+        }
+
+        private async Task<ObjectResult> Handle(Query query)
+        {
+            var result = await _queryHandler.Handle(query);
+            return Http.mapQueryResultToMobileResult(result);
         }
     }
 }

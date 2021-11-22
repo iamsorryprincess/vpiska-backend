@@ -74,9 +74,10 @@ namespace Vpiska.Api
                 .Select(x => x.Value)
                 .ToArray();
 
-            services.AddSingleton(new AreaSettings(areas));
+            services.AddSingleton(new EventClusterClient.AreaSettings(areas));
             services.AddSingleton<Application.Event.CommandHandler>();
             services.AddSingleton<Application.User.CommandHandler>();
+            services.AddSingleton<Application.Event.QueryHandler>();
         }
         
         public void Configure(IApplicationBuilder app)

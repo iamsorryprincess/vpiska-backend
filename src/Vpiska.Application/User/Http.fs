@@ -15,15 +15,15 @@ type UpdateUserArgs =
       Phone: string
       Image: IFormFile }
     
-    member args.toCommandArgs () =
+    member args.toCommand () =
         task {
             match Object.ReferenceEquals(args.Image, null) with
-            | true -> return { Id = args.Id; Name = args.Name; Phone = args.Phone; ImageData = null; ContentType = null }
+            | true -> return { Id = args.Id; Name = args.Name; Phone = args.Phone; ImageData = null; ContentType = null } |> Command.Update
             | false ->
                 use stream = new MemoryStream()
                 do! args.Image.CopyToAsync stream
                 return { Id = args.Id; Name = args.Name; Phone = args.Phone
-                         ImageData = stream.ToArray(); ContentType = args.Image.ContentType }
+                         ImageData = stream.ToArray(); ContentType = args.Image.ContentType } |> Command.Update
         }
         
 module Http =

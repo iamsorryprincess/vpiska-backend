@@ -74,18 +74,15 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
-        public Task<ObjectResult> UpdateUser([FromForm] UpdateUserArgs args) => HandleUpdateUser(args);
+        public async Task<ObjectResult> UpdateUser([FromForm] UpdateUserArgs args)
+        {
+            var command = await args.toCommand();
+            var result = await Handle(command);
+            return result;
+        }
 
         private async Task<ObjectResult> Handle(Command command)
         {
-            var result = await _commandHandler.Handle(command);
-            return Http.mapToMobileResult(result);
-        }
-
-        private async Task<ObjectResult> HandleUpdateUser(UpdateUserArgs args)
-        {
-            var data = await args.toCommandArgs();
-            var command = Command.NewUpdate(data);
             var result = await _commandHandler.Handle(command);
             return Http.mapToMobileResult(result);
         }

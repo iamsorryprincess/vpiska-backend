@@ -8,6 +8,7 @@ type MessageType =
     | UserLoggedOut = 1
     | UsersInfo = 2
     | ChatMessage = 3
+    | EventClosed = 4
 
 [<CLIMutable>]
 type WebSocketResponse =

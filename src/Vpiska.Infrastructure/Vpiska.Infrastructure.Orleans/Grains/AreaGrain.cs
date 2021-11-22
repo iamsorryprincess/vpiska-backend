@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Orleans;
+using Vpiska.Domain.Event;
 using Vpiska.Infrastructure.Orleans.Interfaces;
 
 namespace Vpiska.Infrastructure.Orleans.Grains
@@ -39,7 +40,8 @@ namespace Vpiska.Infrastructure.Orleans.Grains
             return Task.FromResult(true);
         }
 
-        public Task<IEventGrain[]> GetEventGrains() => Task.FromResult(_eventGrains.ToArray());
+        public Task<ShortEventResponse[]> GetShortEventsResponse() =>
+            Task.WhenAll(_eventGrains.Select(x => x.GetShortResponse()));
 
         public async Task<bool> CheckOwnerId(string ownerId)
         {

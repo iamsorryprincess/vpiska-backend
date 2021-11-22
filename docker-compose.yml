@@ -22,7 +22,26 @@ services:
       dockerfile: src/Vpiska.Api/Dockerfile
     environment:
       - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
+      - Mongo__DatabaseName=vpiska
+      - Firebase__BucketName=vpiska-a6e65.appspot.com
+      - OrleansCluster__ClusterId=dev
+      - OrleansCluster__ClusterId=OrleansBasics
     ports:
       - "5000:80"
     volumes:
       - /data/logs/api:/logs
+
+  chat:
+    container_name: vpiska_api_chat
+    image: apichat
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: src/Vpiska.ApiChat/Dockerfile
+    environment:
+      - OrleansCluster__ClusterId=dev
+      - OrleansCluster__ClusterId=OrleansBasics
+    ports:
+      - "9000:80"
+    volumes:
+      - /data/logs/api_chat:/logs

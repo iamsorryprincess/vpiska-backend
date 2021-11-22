@@ -46,6 +46,11 @@ type ChatConsumer(storage: UserConnectionsStorage, sender: IWebSocketSender<Chat
                 let message = { Type = MessageType.ChatMessage; Data = chatData } |> WebSocketSerializer.serialize
                 do! sendToConnections connections message
         } :> Task
+        
+    let handleEventClosed (eventId: string) =
+        task {
+            return ()
+        } :> Task
     
     interface IStreamConsumer with
         member _.Consume(eventId, domainEvent) =
@@ -53,3 +58,4 @@ type ChatConsumer(storage: UserConnectionsStorage, sender: IWebSocketSender<Chat
             | UserLoggedIn args -> handleUserLoggedIn eventId args
             | UserLoggedOut args -> handleUserLoggedOut eventId args
             | ChatMessage args -> handleChatMessage eventId args
+            | EventClosed -> handleEventClosed eventId
