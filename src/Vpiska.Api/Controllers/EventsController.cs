@@ -67,7 +67,7 @@ namespace Vpiska.Api.Controllers
         [HttpPost("media/add")]
         [Produces("application/json")]
         [Consumes("multipart/form-data")]
-        [ProducesResponseType(typeof(ApiResponse<AddMediaResponseArgs>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<MediaArgs>), 200)]
         public async Task<ObjectResult> AddMedia([FromForm] Application.Event.AddMediaArgs args)
         {
             var command = await args.toCommand(GetUserId());
@@ -106,13 +106,13 @@ namespace Vpiska.Api.Controllers
         private async Task<ObjectResult> Handle(Command command)
         {
             var result = await _commandHandler.Handle(command);
-            return Http.mapToMobileResult(result);
+            return Http.mapToMobileEventResult(result);
         }
 
         private async Task<ObjectResult> Handle(Query query)
         {
             var result = await _queryHandler.Handle(query);
-            return Http.mapQueryResultToMobileResult(result);
+            return Http.mapToMobileResponseResult(result);
         }
     }
 }

@@ -33,14 +33,14 @@ module Http =
     let private mapToMobileErrorResponse (errors: AppError[]) =
         ObjectResult({ IsSuccess = false; Result = null; Errors = errors |> Array.map createMobileErrorResult }, StatusCode = 200)
     
-    let private mapToMobileResponse<'a> (response: Response) =
-        match response with
+    let private mapToMobileResponse<'a> (domainEvent: DomainEvent) =
+        match domainEvent with
         | UserLogged args -> ObjectResult(HttpMobileResponse.createValueResult args, StatusCode = 200)
-        | Code -> ObjectResult(HttpMobileResponse.createResult (), StatusCode = 200)
+        | CodePushed -> ObjectResult(HttpMobileResponse.createResult (), StatusCode = 200)
         | PasswordChanged -> ObjectResult(HttpMobileResponse.createResult (), StatusCode = 200)
         | UserUpdated -> ObjectResult(HttpMobileResponse.createResult (), StatusCode = 200)
     
-    let mapToMobileResult (result: Result<Response, AppError[]>) =
+    let mapToMobileResult (result: Result<DomainEvent, AppError[]>) =
         match result with
         | Error errors -> mapToMobileErrorResponse errors
         | Ok response -> mapToMobileResponse response

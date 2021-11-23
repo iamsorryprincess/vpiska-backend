@@ -9,6 +9,8 @@ type ValidationRule<'model, 'error> =
     { Condition: ValidationCondition<'model>
       Error: 'error
       ThenRules: ValidationRule<'model, 'error>[] }
+
+let isNotNull input = Object.ReferenceEquals(input, null) |> not
     
 let isNotEmpty input = String.IsNullOrWhiteSpace(input) |> not
 

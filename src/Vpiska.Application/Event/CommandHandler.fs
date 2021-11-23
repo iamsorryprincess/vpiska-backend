@@ -4,6 +4,7 @@ open Google.Cloud.Storage.V1
 open Orleans
 open Vpiska.Application.Firebase
 open Vpiska.Domain.Event
+open Vpiska.Domain.Event.Logic
 open Vpiska.Infrastructure.Orleans.Interfaces
 
 type CommandHandler(clusterClient: IClusterClient,
@@ -25,29 +26,29 @@ type CommandHandler(clusterClient: IClusterClient,
         | CreateEvent args ->
             let checkOwner = EventClusterClient.checkOwner clusterClient
             let createEvent = EventClusterClient.createEvent clusterClient
-            Domain.createEvent checkArea checkOwner createEvent args
+            CommandsLogic.createEvent checkArea checkOwner createEvent args
         | CloseEvent args ->
             let closeEvent = EventClusterClient.closeEvent clusterClient
-            Domain.closeEvent checkEvent checkOwnership publish closeEvent args
-        | Subscribe args -> Domain.subscribe streamProducer.TrySubscribe args
-        | Unsubscribe args -> Domain.unsubscribe streamProducer.TryUnsubscribe args
+            CommandsLogic.closeEvent checkEvent checkOwnership publish closeEvent args
+        | Subscribe args -> CommandsLogic.subscribe streamProducer.TrySubscribe args
+        | Unsubscribe args -> CommandsLogic.unsubscribe streamProducer.TryUnsubscribe args
         | LogUserInChat args ->
             let getUsers = EventClusterClient.getUsers clusterClient
             let addUser = EventClusterClient.addUser clusterClient
-            Domain.connectUserToChat checkEvent getUsers addUser publish args
+            CommandsLogic.connectUserToChat checkEvent getUsers addUser publish args
         | LogoutUserFromChat args ->
             let removeUser = EventClusterClient.removeUser clusterClient
-            Domain.disconnectUserFromChat checkEvent removeUser publish args
+            CommandsLogic.disconnectUserFromChat checkEvent removeUser publish args
         | SendChatMessage args ->
             let addMessage = EventClusterClient.addMessage clusterClient
-            Domain.sendChatMessage checkEvent addMessage publish args
+            CommandsLogic.sendChatMessage checkEvent addMessage publish args
         | AddMedia args ->
             let addMedia = EventClusterClient.addMedia clusterClient
             let uploadFile = Storage.uploadFile firebaseClient firebaseSettings.BucketName
-            Domain.addMedia checkEvent checkOwnership addMedia uploadFile args
+            CommandsLogic.addMedia checkEvent checkOwnership addMedia uploadFile args
         | RemoveMedia args ->
             let removeMedia = EventClusterClient.removeMedia clusterClient
             let deleteFile = Storage.deleteFile firebaseClient firebaseSettings.BucketName
-            Domain.removeMedia checkEvent checkOwnership removeMedia deleteFile args
+            CommandsLogic.removeMedia checkEvent checkOwnership removeMedia deleteFile args
     
     member _.Handle command = handle command

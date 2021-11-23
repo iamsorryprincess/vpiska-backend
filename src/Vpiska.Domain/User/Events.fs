@@ -1,11 +1,11 @@
 namespace Vpiska.Domain.User
 
-type LoginResponse =
+type UserLoggedArgs =
     { UserId: string
       AccessToken: string }
     
-type Response =
-    | UserLogged of LoginResponse
-    | Code
+type DomainEvent =
+    | UserLogged of UserLoggedArgs
+    | CodePushed
     | PasswordChanged
     | UserUpdated

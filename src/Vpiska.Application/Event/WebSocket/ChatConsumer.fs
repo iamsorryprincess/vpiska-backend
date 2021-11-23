@@ -57,5 +57,5 @@ type ChatConsumer(storage: UserConnectionsStorage, sender: IWebSocketSender<Chat
             match domainEvent with
             | UserLoggedIn args -> handleUserLoggedIn eventId args
             | UserLoggedOut args -> handleUserLoggedOut eventId args
-            | ChatMessage args -> handleChatMessage eventId args
+            | ChatMessageSent args -> handleChatMessage eventId args
             | EventClosed -> handleEventClosed eventId

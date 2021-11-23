@@ -21,7 +21,7 @@ namespace Vpiska.Api.Controllers
         [HttpPost("create")]
         [Produces("application/json")]
         [Consumes("application/json")]
-        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UserLoggedArgs>), 200)]
         public Task<ObjectResult> Create([FromBody] CreateUserArgs args)
         {
             var command = Command.NewCreate(args);
@@ -31,7 +31,7 @@ namespace Vpiska.Api.Controllers
         [HttpPost("login")]
         [Produces("application/json")]
         [Consumes("application/json")]
-        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UserLoggedArgs>), 200)]
         public Task<ObjectResult> Login([FromBody] LoginUserArgs args)
         {
             var command = Command.NewLogin(args);
@@ -51,7 +51,7 @@ namespace Vpiska.Api.Controllers
         [HttpPost("code/check")]
         [Produces("application/json")]
         [Consumes("application/json")]
-        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UserLoggedArgs>), 200)]
         public Task<ObjectResult> CheckCode([FromBody] CheckCodeArgs args)
         {
             var command = Command.NewCheckCode(args);

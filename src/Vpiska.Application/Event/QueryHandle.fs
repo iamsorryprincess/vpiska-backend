@@ -2,6 +2,7 @@ namespace Vpiska.Application.Event
 
 open Orleans
 open Vpiska.Domain.Event
+open Vpiska.Domain.Event.Logic
 
 type QueryHandler(clusterClient: IClusterClient, areaSettings: EventClusterClient.AreaSettings) =
     
@@ -9,10 +10,10 @@ type QueryHandler(clusterClient: IClusterClient, areaSettings: EventClusterClien
         match query with
         | GetEvent args ->
             let getEvent = EventClusterClient.getEvent clusterClient
-            Domain.getById getEvent args
+            QueriesLogic.getById getEvent args
         | GetEvents args ->
             let checkArea (area: string) = areaSettings.Areas |> Array.contains area
             let getEvents = EventClusterClient.getEvents clusterClient
-            Domain.getEvents checkArea getEvents args
+            QueriesLogic.getEvents checkArea getEvents args
     
     member _.Handle query = handle query

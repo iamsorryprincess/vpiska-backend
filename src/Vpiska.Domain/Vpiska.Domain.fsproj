@@ -11,17 +11,19 @@
       <Compile Include="User\Models.fs" />
       <Compile Include="User\Commands.fs" />
       <Compile Include="User\Errors.fs" />
-      <Compile Include="User\Responses.fs" />
+      <Compile Include="User\Events.fs" />
       <Compile Include="User\UserValidation.fs" />
-      <Compile Include="User\Domain.fs" />
+      <Compile Include="User\Logic.fs" />
       <Compile Include="Event\Models.fs" />
       <Compile Include="Event\Commands.fs" />
-      <Compile Include="Event\Queries.fs" />
-      <Compile Include="Event\Errors.fs" />
       <Compile Include="Event\Events.fs" />
+      <Compile Include="Event\Queries.fs" />
       <Compile Include="Event\Responses.fs" />
+      <Compile Include="Event\Errors.fs" />
       <Compile Include="Event\EventValidation.fs" />
-      <Compile Include="Event\Domain.fs" />
+      <Compile Include="Event\Logic\Abbreviations.fs" />
+      <Compile Include="Event\Logic\CommandsLogic.fs" />
+      <Compile Include="Event\Logic\QueriesLogic.fs" />
     </ItemGroup>
 
     <ItemGroup>

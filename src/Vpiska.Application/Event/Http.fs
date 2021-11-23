@@ -14,9 +14,12 @@ type AddMediaArgs =
       Media: IFormFile }
     member this.toCommand (ownerId: string) =
         task {
-            use stream = new MemoryStream()
-            do! this.Media.CopyToAsync stream
-            return { EventId = this.EventId; OwnerId = ownerId; MediaData = stream.ToArray(); ContentType = this.Media.ContentType } |> Command.AddMedia
+            match Object.ReferenceEquals(this.Media, null) with
+            | true -> return { EventId = this.EventId; OwnerId = ownerId; MediaData = null; ContentType = null } |> Command.AddMedia
+            | false ->
+                use stream = new MemoryStream()
+                do! this.Media.CopyToAsync stream
+                return { EventId = this.EventId; OwnerId = ownerId; MediaData = stream.ToArray(); ContentType = this.Media.ContentType } |> Command.AddMedia
         }
 
 [<CLIMutable>]
@@ -48,29 +51,29 @@ module Http =
     let private mapToMobileErrorResponse (errors: AppError[]) =
         ObjectResult({ IsSuccess = false; Result = null; Errors = errors |> Array.map createMobileErrorResult }, StatusCode = 200)
         
-    let private mapToMobileResponse (response: Response) =
-        match response with
+    let private fromEventToMobile (domainEvent: DomainEvent) =
+        match domainEvent with
         | EventCreated args -> ObjectResult(HttpMobileResponse.createValueResult args, StatusCode = 200)
-        | Response.EventClosed -> ObjectResult(HttpMobileResponse.createResult(), StatusCode = 200)
+        | EventClosed -> ObjectResult(HttpMobileResponse.createResult(), StatusCode = 200)
         | MediaAdded args -> ObjectResult(HttpMobileResponse.createValueResult args, StatusCode = 200)
-        | MediaRemoved -> ObjectResult(HttpMobileResponse.createResult(), StatusCode = 200)
-        | SubscriptionCreated -> raise(ArgumentException("Unknown response for event http mobile response"))
-        | SubscriptionRemoved -> raise(ArgumentException("Unknown response for event http mobile response"))
-        | UserLoggedInChat -> raise(ArgumentException("Unknown response for event http mobile response"))
-        | UserLoggedOutFromChat -> raise(ArgumentException("Unknown response for event http mobile response"))
-        | ChatMessageSent -> raise(ArgumentException("Unknown response for event http mobile response"))
+        | MediaRemoved _ -> ObjectResult(HttpMobileResponse.createResult(), StatusCode = 200)
+        | SubscriptionCreated -> raise(ArgumentException("Unknown event for http mobile response"))
+        | SubscriptionRemoved -> raise(ArgumentException("Unknown event for http mobile response"))
+        | UserLoggedIn _ -> raise(ArgumentException("Unknown event for http mobile response"))
+        | UserLoggedOut _ -> raise(ArgumentException("Unknown event for http mobile response"))
+        | ChatMessageSent _ -> raise(ArgumentException("Unknown event for http mobile response"))
         
-    let private mapQueryResultToMobileResponse (queryResponse: QueryResponse) =
-        match queryResponse with
+    let private fromResponseToMobile (response: Response) =
+        match response with
         | Event args -> ObjectResult(HttpMobileResponse.createValueResult args, StatusCode = 200)
         | Events args -> ObjectResult(HttpMobileResponse.createValueResult args, StatusCode = 200)
         
-    let mapToMobileResult (result: Result<Response, AppError[]>) =
+    let mapToMobileEventResult (result: Result<DomainEvent, AppError[]>) =
         match result with
         | Error errors -> mapToMobileErrorResponse errors
-        | Ok response -> mapToMobileResponse response
+        | Ok domainEvent -> fromEventToMobile domainEvent
         
-    let mapQueryResultToMobileResult (result: Result<QueryResponse, AppError[]>) =
+    let mapToMobileResponseResult (result: Result<Response, AppError[]>) =
         match result with
         | Error errors -> mapToMobileErrorResponse errors
-        | Ok response -> mapQueryResultToMobileResponse response
+        | Ok response -> fromResponseToMobile response

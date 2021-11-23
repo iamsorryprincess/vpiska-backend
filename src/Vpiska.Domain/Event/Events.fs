@@ -6,8 +6,15 @@ type UserLoggedInArgs =
     
 type UserLoggedOutArgs = { UserId: UserId }
 
+type MediaArgs = { ImageId: string }
+
 type DomainEvent =
+    | EventCreated of Event
+    | EventClosed
+    | SubscriptionCreated
+    | SubscriptionRemoved
     | UserLoggedIn of UserLoggedInArgs
     | UserLoggedOut of UserLoggedOutArgs
-    | ChatMessage of ChatData
-    | EventClosed
+    | ChatMessageSent of ChatData
+    | MediaAdded of MediaArgs
+    | MediaRemoved of MediaArgs

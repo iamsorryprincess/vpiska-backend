@@ -54,3 +54,9 @@ module Errors =
         | Validation err -> mapValidationError err
         | Domain err -> mapDomainError err
         | InternalError -> "InternalError"
+        
+    let fromValidation (errors: ValidationError[]) = errors |> Array.map AppError.create |> Error
+        
+    let fromDomain (error: DomainError) = [| error |> AppError.create |] |> Error
+    
+    let fromDomainArr (errors: DomainError[]) = errors |> Array.map AppError.create |> Error
