@@ -8,16 +8,16 @@ namespace Vpiska.Infrastructure.Websocket
         public static void AddVSocket<TReceiver, TConnector>(this IServiceCollection services,
             WebSocketsOptions options,
             string url,
-            params string[] queryParams)
+            string[] identityParams,
+            string[] queryParams)
             where TReceiver : class, IWebSocketReceiver
             where TConnector : class, IWebSocketConnector
         {
-            options.AddUrl<TReceiver, TConnector>(url, queryParams);
+            options.AddUrl<TReceiver, TConnector>(url, identityParams, queryParams);
             services.AddSingleton<TConnector>();
             services.AddSingleton<WebSocketHub<TConnector, TReceiver>>();
-            services.AddSingleton<IWebSocketSender<TConnector>, WebSocketSender<TConnector, TReceiver>>();
+            services.AddSingleton<IWebSocketInteracting<TConnector>, WebSocketInteracting<TConnector, TReceiver>>();
             services.AddTransient<TReceiver>();
-            services.AddSingleton<UserConnectionsStorage>();
         }
 
         public static void UseVSocket(this IApplicationBuilder app)

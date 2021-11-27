@@ -2,6 +2,8 @@ namespace Vpiska.Application.Event.WebSocket
 
 open System.Text
 open System.Text.Json
+open Serilog
+open Vpiska.Domain.Event
 
 type MessageType =
     | UserLoggedIn = 0
@@ -30,3 +32,14 @@ module internal WebSocketSerializer =
         JsonSerializer.Deserialize<'a>(json, options)
         
     let deserializeToString data = getString data
+
+module internal ChatWebSocket =
+    
+    let paramEventId = "eventId"
+    let paramUserId = "Id"
+    let paramUsername = "Name"
+    let paramUserImage = "ImageId"
+    
+    let logErrors (logger: ILogger) (errors: AppError[]) =
+        for error in errors do
+            error |> Errors.mapAppError |> logger.Error

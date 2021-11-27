@@ -6,13 +6,11 @@ open FSharp.Control.Tasks
 
 let private phoneCode: PhoneCode = "+7"
 
-let private generateId (): UserId = Guid.NewGuid().ToString("N")
-
 let private isNull o = Object.ReferenceEquals(o, null)
 
-let private random = Random()
-
-let private generateCode () = random.Next(111111, 777777)
+type GenerateUserId = unit -> UserId
+type GenerateImageId = unit -> ImageId
+type GenerateCode = unit -> VerificationCode
 
 type CheckUser = Phone -> Username -> Task<CheckPhoneNameResult>
 type CreateUser = User -> Task<UserId>
@@ -37,6 +35,7 @@ let createUser
   (create: CreateUser)
   (hashPassword: HashPassword)
   (encodeToken: EncodeToken)
+  (generateId: GenerateUserId)
   (args: CreateUserArgs) =
   task {
     match UserValidation.validateCreateUserArgs args with
@@ -81,6 +80,7 @@ let loginUser
 let setVerificationCode
   (setCode: SetCode)
   (pushNotification: PushNotification)
+  (generateCode: GenerateCode)
   (args: CodeArgs) =
   task {
     match UserValidation.validateCodeArgs args with
@@ -133,6 +133,7 @@ let updateUser
   (checkName: CheckName)
   (uploadFile: UploadFile)
   (updateUser: UpdateUser)
+  (generateId: GenerateImageId)
   (args: UpdateUserArgs) =
   task {
     match UserValidation.validateUpdateUserArgs args with

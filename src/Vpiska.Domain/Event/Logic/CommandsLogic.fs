@@ -1,10 +1,7 @@
 module Vpiska.Domain.Event.Logic.CommandsLogic
 
-open System
 open FSharp.Control.Tasks
 open Vpiska.Domain.Event
-
-let private generateId () = Guid.NewGuid().ToString("N")
 
 let createEvent
     (checkArea: CheckArea)
@@ -21,7 +18,7 @@ let createEvent
                 match! checkOwner args.Area args.OwnerId with
                 | true -> return DomainError.OwnerAlreadyHasEvent |> Errors.fromDomain
                 | false ->
-                    let event = { Id = generateId(); OwnerId = args.OwnerId; Name = args.Name; Coordinates = args.Coordinates
+                    let event = { Id = args.EventId; OwnerId = args.OwnerId; Name = args.Name; Coordinates = args.Coordinates
                                   Address = args.Address; MediaLinks = [||]; ChatData = [||]; Users = [||] }
                     match! create args.Area event with
                     | false -> return DomainError.AreaAlreadyHasEvent |> Errors.fromDomain
@@ -112,7 +109,7 @@ let sendChatMessage
         match! checkEvent args.EventId with
         | false -> return DomainError.EventNotFound |> Errors.fromDomain
         | true ->
-            let chatData = { UserId = args.UserId; Message = args.Message }
+            let chatData = { UserId = args.UserId; Message = args.Message; UserImage = args.UserImage }
             match! addMessage args.EventId chatData with
             | false -> return DomainError.UserNotFound |> Errors.fromDomain
             | true ->
@@ -137,11 +134,10 @@ let addMedia
                 match! checkOwnership args.EventId args.OwnerId with
                 | false -> return DomainError.UserNotOwner |> Errors.fromDomain
                 | true ->
-                    let imageId = generateId ()
-                    match! addMedia args.EventId imageId with
+                    match! addMedia args.EventId args.ImageId with
                     | false -> return DomainError.MediaAlreadyAdded |> Errors.fromDomain
                     | true ->
-                        let! result = uploadFile imageId args.MediaData args.ContentType
+                        let! result = uploadFile args.ImageId args.MediaData args.ContentType
                         return { ImageId = result } |> DomainEvent.MediaAdded |> Ok
     }
     

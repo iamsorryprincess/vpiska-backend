@@ -10,8 +10,8 @@
       <Compile Include="Validation.fs" />
       <Compile Include="User\Models.fs" />
       <Compile Include="User\Commands.fs" />
-      <Compile Include="User\Errors.fs" />
       <Compile Include="User\Events.fs" />
+      <Compile Include="User\Errors.fs" />
       <Compile Include="User\UserValidation.fs" />
       <Compile Include="User\Logic.fs" />
       <Compile Include="Event\Models.fs" />

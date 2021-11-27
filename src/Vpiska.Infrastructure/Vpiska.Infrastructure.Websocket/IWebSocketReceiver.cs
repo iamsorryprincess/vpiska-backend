@@ -6,6 +6,6 @@ namespace Vpiska.Infrastructure.Websocket
 {
     public interface IWebSocketReceiver
     {
-        Task Receive(Guid connectionId, byte[] data, Dictionary<string, string> queryParams);
+        Task Receive(Guid connectionId, byte[] data, Dictionary<string, string> identityParams, Dictionary<string, string> queryParams);
     }
 }

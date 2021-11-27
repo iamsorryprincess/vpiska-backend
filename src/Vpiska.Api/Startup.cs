@@ -75,7 +75,7 @@ namespace Vpiska.Api
                 .ToArray();
 
             services.AddSingleton(new EventClusterClient.AreaSettings(areas));
-            services.AddSingleton<Application.Event.CommandHandler>();
+            services.AddSingleton<Application.Event.EventCommandHandler>();
             services.AddSingleton<Application.User.CommandHandler>();
             services.AddSingleton<Application.Event.QueryHandler>();
         }

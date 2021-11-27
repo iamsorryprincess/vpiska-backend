@@ -6,6 +6,7 @@ type EventName = string
 
 type ChatData =
     { UserId: UserId
+      UserImage: string
       Message: string }
     
 type UserInfo =

@@ -7,11 +7,16 @@ namespace Vpiska.Infrastructure.Websocket
 {
     internal interface IWebSocketHub
     {
-        Task<Guid> AddConnection(WebSocketUserContext userContext, WebSocket webSocket,
+        Task<Guid> AddConnection(WebSocket webSocket,
+            Dictionary<string, string> identityParams,
             Dictionary<string, string> queryParams);
 
-        Task<bool> TryCloseConnection(Guid connectionId);
+        Task<bool> TryCloseConnection(Guid connectionId,
+            Dictionary<string, string> identityParams,
+            Dictionary<string, string> queryParams);
 
-        Task ReceiveMessage(Guid connectionId, byte[] data);
+        Task ReceiveMessage(Guid connectionId, byte[] data,
+            Dictionary<string, string> identityParams,
+            Dictionary<string, string> queryParams);
     }
 }

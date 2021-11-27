@@ -13,9 +13,9 @@ namespace Vpiska.Api.Controllers
     public sealed class EventsController : ControllerBase
     {
         private readonly QueryHandler _queryHandler;
-        private readonly CommandHandler _commandHandler;
+        private readonly EventCommandHandler _commandHandler;
 
-        public EventsController(QueryHandler queryHandler, CommandHandler commandHandler)
+        public EventsController(QueryHandler queryHandler, EventCommandHandler commandHandler)
         {
             _queryHandler = queryHandler;
             _commandHandler = commandHandler;
@@ -48,7 +48,7 @@ namespace Vpiska.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<Event>), 200)]
         public Task<ObjectResult> Create([FromBody] Application.Event.CreateEventArgs args)
         {
-            var command = args.toCommand(GetUserId());
+            var command = args.toCommand(Guid.NewGuid().ToString("N"), GetUserId());
             return Handle(command);
         }
 
@@ -70,7 +70,7 @@ namespace Vpiska.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<MediaArgs>), 200)]
         public async Task<ObjectResult> AddMedia([FromForm] Application.Event.AddMediaArgs args)
         {
-            var command = await args.toCommand(GetUserId());
+            var command = await args.toCommand(GetUserId(), Guid.NewGuid().ToString("N"));
             var result = await Handle(command);
             return result;
         }
@@ -95,7 +95,7 @@ namespace Vpiska.Api.Controllers
                 throw new InvalidOperationException("Can't resolve userId from token");
             }
 
-            if (!Guid.TryParse(userId.Value, out var _))
+            if (!Guid.TryParseExact(userId.Value, "N", out _))
             {
                 throw new InvalidOperationException("Can't resolve userId from token");
             }

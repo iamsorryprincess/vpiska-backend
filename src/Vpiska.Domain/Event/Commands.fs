@@ -2,7 +2,8 @@ namespace Vpiska.Domain.Event
 
 [<CLIMutable>]
 type CreateEventArgs =
-    { OwnerId: UserId
+    { EventId: EventId
+      OwnerId: UserId
       Name: EventName
       Coordinates: string
       Address: string
@@ -21,7 +22,8 @@ type AddMediaArgs =
     { EventId: EventId
       OwnerId: UserId
       MediaData: byte[]
-      ContentType: string }
+      ContentType: string
+      ImageId: string }
 
 [<CLIMutable>]
 type RemoveMediaArgs =
@@ -44,6 +46,7 @@ type LogoutUserArgs =
 [<CLIMutable>]    
 type ChatMessageArgs =
     { UserId: UserId
+      UserImage: string
       EventId: EventId
       Message: string }
 

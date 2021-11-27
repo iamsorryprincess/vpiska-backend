@@ -12,14 +12,16 @@ open Vpiska.Domain.Event
 type AddMediaArgs =
     { EventId: string
       Media: IFormFile }
-    member this.toCommand (ownerId: string) =
+    member this.toCommand (ownerId: string, imageId: string) =
         task {
             match Object.ReferenceEquals(this.Media, null) with
-            | true -> return { EventId = this.EventId; OwnerId = ownerId; MediaData = null; ContentType = null } |> Command.AddMedia
+            | true -> return { EventId = this.EventId; OwnerId = ownerId
+                               MediaData = null; ContentType = null; ImageId = imageId } |> Command.AddMedia
             | false ->
                 use stream = new MemoryStream()
                 do! this.Media.CopyToAsync stream
-                return { EventId = this.EventId; OwnerId = ownerId; MediaData = stream.ToArray(); ContentType = this.Media.ContentType } |> Command.AddMedia
+                return { EventId = this.EventId; OwnerId = ownerId; MediaData = stream.ToArray()
+                         ContentType = this.Media.ContentType; ImageId = imageId } |> Command.AddMedia
         }
 
 [<CLIMutable>]
@@ -35,9 +37,10 @@ type CreateEventArgs =
       Coordinates: string
       Address: string
       Area: string }
-    member this.toCommand (ownerId: string) =
-        { OwnerId = ownerId; Name = this.Name; Coordinates = this.Coordinates
-          Address = this.Address; Area = this.Area } |> Command.CreateEvent
+    member this.toCommand (eventId: string) (ownerId: string) =
+        { EventId = eventId; OwnerId = ownerId; Name = this.Name
+          Coordinates = this.Coordinates; Address = this.Address
+          Area = this.Area } |> Command.CreateEvent
     
 [<CLIMutable>]    
 type CloseEventArgs =

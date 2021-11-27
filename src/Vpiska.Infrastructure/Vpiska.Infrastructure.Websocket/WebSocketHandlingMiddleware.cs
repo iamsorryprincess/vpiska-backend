@@ -44,14 +44,10 @@ namespace Vpiska.Infrastructure.Websocket
                     return;
                 }
 
-                var userId = context.User.Claims.FirstOrDefault(x => x.Type == "Id")?.Value;
-                var username = context.User.Claims.FirstOrDefault(x => x.Type == "Name")?.Value;
-                var imageId = context.User.Claims.FirstOrDefault(x => x.Type == "ImageId")?.Value;
-
-                if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(username))
-                {
-                    throw new InvalidOperationException("Can't resolve user data from token");
-                }
+                var identityParams = socketOptions.IdentityParams
+                    .Select(paramName => new KeyValuePair<string, string>(paramName,
+                        context.User.Claims.FirstOrDefault(x => x.Type == paramName)?.Value))
+                    .ToDictionary(x => x.Key, x => x.Value);
 
                 var queryParams = socketOptions.QueryParams
                     .Where(paramName => context.Request.Query.ContainsKey(paramName))
@@ -61,6 +57,7 @@ namespace Vpiska.Infrastructure.Websocket
                 if (queryParams.Count != socketOptions.QueryParams.Count)
                 {
                     context.Response.StatusCode = 400;
+                    await context.Response.WriteAsync("Can't find path for WebSocket");
                     return;
                 }
 
@@ -68,8 +65,7 @@ namespace Vpiska.Infrastructure.Websocket
                           ?? throw new InvalidOperationException($"can't resolve websocket hub for url {url}");
                 
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                var userContext = new WebSocketUserContext(userId, username, imageId);
-                var connectionId = await hub.AddConnection(userContext, webSocket, queryParams);
+                var connectionId = await hub.AddConnection(webSocket, identityParams, queryParams);
                 var buffer = new ArraySegment<byte>(new byte[1024 * 4]);
 
                 while (webSocket.State == WebSocketState.Open)
@@ -79,14 +75,10 @@ namespace Vpiska.Infrastructure.Websocket
                     switch (result.MessageType)
                     {
                         case WebSocketMessageType.Text:
-                            await hub.ReceiveMessage(connectionId, buffer[..result.Count].ToArray());
+                            await hub.ReceiveMessage(connectionId, buffer[..result.Count].ToArray(), identityParams, queryParams);
                             break;
                         case WebSocketMessageType.Close:
-                            var isClosed = await hub.TryCloseConnection(connectionId);
-                            if (!isClosed)
-                            {
-                                throw new InvalidOperationException("Can't close socket");
-                            }
+                            await hub.TryCloseConnection(connectionId, identityParams, queryParams);
                             break;
                         default:
                             throw new InvalidOperationException("Unknown WebSocketMessageType");

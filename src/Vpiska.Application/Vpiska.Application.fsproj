@@ -21,16 +21,19 @@
       <Compile Include="User\Database.fs" />
       <Compile Include="User\Jwt.fs" />
       <Compile Include="User\Security.fs" />
+      <Compile Include="User\CodeGenerator.fs" />
       <Compile Include="User\CommandHandler.fs" />
       <Compile Include="User\Http.fs" />
       <Compile Include="Event\EventClusterClient.fs" />
       <Compile Include="Event\QueryHandle.fs" />
-      <Compile Include="Event\CommandHandler.fs" />
+      <Compile Include="Event\EventCommandHandler.fs" />
+      <Compile Include="Event\ChatCommandHandler.fs" />
       <Compile Include="Event\Http.fs" />
       <Compile Include="Event\WebSocket\Common.fs" />
-      <Compile Include="Event\WebSocket\ChatConnector.fs" />
-      <Compile Include="Event\WebSocket\ChatConsumer.fs" />
-      <Compile Include="Event\WebSocket\ChatReceiver.fs" />
+      <Compile Include="Event\WebSocket\ChatStorage.fs" />
+      <Compile Include="Event\WebSocket\ConnectionsLogic.fs" />
+      <Compile Include="Event\WebSocket\EventsLogic.fs" />
+      <Compile Include="Event\WebSocket\Chat.fs" />
       <Compile Include="Entry.fs" />
     </ItemGroup>
 

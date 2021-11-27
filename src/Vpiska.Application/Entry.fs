@@ -92,7 +92,7 @@ type Entry() =
         services.AddStreamConsumer<ChatConsumer>()
         services.AddJwtForWebsocket("access_token", "/chat")
         let options = WebSocketsOptions()
-        services.AddVSocket<ChatReceiver, ChatConnector>(options, "/chat", "eventId")
+        services.AddVSocket<ChatReceiver, ChatConnector>(options, "/chat", [|"Id"; "Name"; "ImageId"|], [|"eventId"|])
         services.AddSingleton(options) |> ignore
     
     [<Extension>]
