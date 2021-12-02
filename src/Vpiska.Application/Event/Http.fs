@@ -7,6 +7,7 @@ open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc
 open Vpiska.Application
 open Vpiska.Domain.Event
+open Vpiska.Domain.Event.Commands
 
 [<CLIMutable>]
 type AddMediaArgs =
@@ -16,12 +17,12 @@ type AddMediaArgs =
         task {
             match Object.ReferenceEquals(this.Media, null) with
             | true -> return { EventId = this.EventId; OwnerId = ownerId
-                               MediaData = null; ContentType = null; ImageId = imageId } |> Command.AddMedia
+                               MediaData = null; ContentType = null; ImageId = imageId } |> EventCommand.AddMedia
             | false ->
                 use stream = new MemoryStream()
                 do! this.Media.CopyToAsync stream
                 return { EventId = this.EventId; OwnerId = ownerId; MediaData = stream.ToArray()
-                         ContentType = this.Media.ContentType; ImageId = imageId } |> Command.AddMedia
+                         ContentType = this.Media.ContentType; ImageId = imageId } |> EventCommand.AddMedia
         }
 
 [<CLIMutable>]
@@ -29,7 +30,7 @@ type RemoveMediaArgs =
     { EventId: string
       MediaLink: string }
     member this.toCommand (ownerId: string) =
-        { EventId = this.EventId; OwnerId = ownerId; MediaLink = this.MediaLink } |> Command.RemoveMedia
+        { EventId = this.EventId; OwnerId = ownerId; MediaLink = this.MediaLink } |> EventCommand.RemoveMedia
 
 [<CLIMutable>]
 type CreateEventArgs =
@@ -40,12 +41,12 @@ type CreateEventArgs =
     member this.toCommand (eventId: string) (ownerId: string) =
         { EventId = eventId; OwnerId = ownerId; Name = this.Name
           Coordinates = this.Coordinates; Address = this.Address
-          Area = this.Area } |> Command.CreateEvent
+          Area = this.Area } |> EventCommand.CreateEvent
     
 [<CLIMutable>]    
 type CloseEventArgs =
     { EventId: string }
-    member this.toCommand (ownerId: string) = { EventId = this.EventId; OwnerId = ownerId } |> Command.CloseEvent
+    member this.toCommand (ownerId: string) = { EventId = this.EventId; OwnerId = ownerId } |> EventCommand.CloseEvent
 
 module Http =
     

@@ -5,7 +5,7 @@ using Serilog;
 using Vpiska.Application;
 using Vpiska.Domain.User;
 
-namespace Vpiska.Api.Filters
+namespace Vpiska.Api.Rest.Filters
 {
     public sealed class ExceptionFilter : IAsyncExceptionFilter
     {

@@ -7,7 +7,7 @@ using Vpiska.Application;
 using Vpiska.Application.Event;
 using Vpiska.Infrastructure.Orleans;
 
-namespace Vpiska.ApiChat
+namespace Vpiska.Api.Chat
 {
     public class Startup
     {

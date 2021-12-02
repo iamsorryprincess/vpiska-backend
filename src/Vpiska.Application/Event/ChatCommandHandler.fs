@@ -1,8 +1,8 @@
 namespace Vpiska.Application.Event
 
-open System
 open Orleans
 open Vpiska.Domain.Event
+open Vpiska.Domain.Event.Commands
 open Vpiska.Domain.Event.Logic
 open Vpiska.Infrastructure.Orleans.Interfaces
 
@@ -26,6 +26,5 @@ type ChatCommandHandler(clusterClient: IClusterClient, streamProducer: IStreamPr
         | SendChatMessage args ->
             let addMessage = EventsCluster.addMessage clusterClient
             CommandsLogic.sendChatMessage checkEvent addMessage publish args
-        | _ -> raise(ArgumentException("unknown command"))
             
     member _.Handle command = handle command 

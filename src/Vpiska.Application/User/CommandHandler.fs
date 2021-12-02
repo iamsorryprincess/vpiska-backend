@@ -1,6 +1,7 @@
 namespace Vpiska.Application.User
 
 open System
+open FirebaseAdmin.Messaging
 open Google.Cloud.Storage.V1
 open MongoDB.Driver
 open Vpiska.Application.Firebase
@@ -24,7 +25,8 @@ type CommandHandler(mongoClient: MongoClient,
         | Login args -> Logic.loginUser getUserByPhone Security.checkPassword Jwt.encodeJwt args
         | SetCode args ->
             let setCode = Database.setCode mongoClient mongoSetting.DatabaseName
-            Logic.setVerificationCode setCode CloudMessaging.pushNotification CodeGenerator.generate args
+            let pushNotification = CloudMessaging.pushNotification FirebaseMessaging.DefaultInstance.SendAsync
+            Logic.setVerificationCode setCode pushNotification CodeGenerator.generate args
         | CheckCode args -> Logic.checkVerificationCode getUserByPhone Jwt.encodeJwt args
         | ChangePassword args ->
             let changePassword = Database.changePassword mongoClient mongoSetting.DatabaseName

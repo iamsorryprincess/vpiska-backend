@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -8,7 +7,7 @@ using Orleans.Configuration;
 using Orleans.Hosting;
 using Vpiska.Infrastructure.Orleans.Interfaces;
 
-namespace Vpiska.OrleansSilo
+namespace Vpiska.Api.Silo
 {
     public static class Program
     {
@@ -23,13 +22,8 @@ namespace Vpiska.OrleansSilo
             SetupApplicationShutdown();
 
             var builder = new SiloHostBuilder()
-                .UseLocalhostClustering()
-                .Configure<EndpointOptions>(a =>
-                {
-                    a.GatewayPort = 9090;
-                    a.SiloPort = 11111;
-                    a.AdvertisedIPAddress = IPAddress.Loopback;
-                })
+                .ConfigureEndpoints(11111, 30000)
+                .AddClustering()
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
@@ -64,6 +58,20 @@ namespace Vpiska.OrleansSilo
         {
             await _silo.StopAsync();
             SiloStopped.Set();
+        }
+
+        private static ISiloHostBuilder AddClustering(this ISiloHostBuilder builder)
+        {
+#if DEBUG
+            var result = builder.UseLocalhostClustering();
+#else
+            var result = builder.UseRedisClustering(options =>
+            {
+                options.ConnectionString = "redis:6379";
+                options.Database = 0;
+            });
+#endif
+            return result;
         }
     }
 }

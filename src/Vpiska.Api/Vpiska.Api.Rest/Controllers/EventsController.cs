@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Vpiska.Application;
 using Vpiska.Application.Event;
 using Vpiska.Domain.Event;
+using Vpiska.Domain.Event.Commands;
 
-namespace Vpiska.Api.Controllers
+namespace Vpiska.Api.Rest.Controllers
 {
     [Route("api/events")]
     public sealed class EventsController : ControllerBase
@@ -103,7 +104,7 @@ namespace Vpiska.Api.Controllers
             return userId.Value;
         }
 
-        private async Task<ObjectResult> Handle(Command command)
+        private async Task<ObjectResult> Handle(EventCommand command)
         {
             var result = await _commandHandler.Handle(command);
             return Http.mapToMobileEventResult(result);

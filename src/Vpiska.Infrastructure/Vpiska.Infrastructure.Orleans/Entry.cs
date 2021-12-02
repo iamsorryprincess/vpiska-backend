@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,10 +14,7 @@ namespace Vpiska.Infrastructure.Orleans
         public static void AddClusterClient(this IServiceCollection services, IConfigurationSection clusterSection)
         {
             var client = new ClientBuilder()
-                .UseStaticClustering(opt =>
-                {
-                    opt.Gateways.Add(new Uri("gwy.tcp://127.0.0.1:9090/0"));
-                })
+                .AddClustering(clusterSection)
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = clusterSection["ClusterId"];
@@ -49,6 +45,20 @@ namespace Vpiska.Infrastructure.Orleans
                 clusterClient.Close().Wait();
             });
             return host;
+        }
+        
+        private static IClientBuilder AddClustering(this IClientBuilder builder, IConfigurationSection clusterSection)
+        {
+#if DEBUG
+            var result = builder.UseLocalhostClustering();
+#else
+            var result = builder.UseRedisClustering(options =>
+            {
+                options.ConnectionString = $"{clusterSection["Redis:Host"]}:{clusterSection["Redis:Port"]}";
+                options.Database = 0;
+            });
+#endif
+            return result;
         }
     }
 }

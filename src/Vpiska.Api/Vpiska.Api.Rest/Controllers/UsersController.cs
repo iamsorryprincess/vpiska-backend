@@ -6,7 +6,7 @@ using Vpiska.Application.User;
 using Vpiska.Domain.User;
 using UpdateUserArgs = Vpiska.Application.User.UpdateUserArgs;
 
-namespace Vpiska.Api.Controllers
+namespace Vpiska.Api.Rest.Controllers
 {
     [Route("api/users")]
     public sealed class UsersController : ControllerBase

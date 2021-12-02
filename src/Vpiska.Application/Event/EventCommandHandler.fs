@@ -1,10 +1,10 @@
 namespace Vpiska.Application.Event
 
-open System
 open Google.Cloud.Storage.V1
 open Orleans
 open Vpiska.Application.Firebase
 open Vpiska.Domain.Event
+open Vpiska.Domain.Event.Commands
 open Vpiska.Domain.Event.Logic
 open Vpiska.Infrastructure.Orleans.Interfaces
 
@@ -39,6 +39,5 @@ type EventCommandHandler(clusterClient: IClusterClient,
             let removeMedia = EventsCluster.removeMedia clusterClient
             let deleteFile = Storage.deleteFile firebaseClient firebaseSettings.BucketName
             CommandsLogic.removeMedia checkEvent checkOwnership removeMedia deleteFile args
-        | _ -> raise(ArgumentException("unknown command"))
     
     member _.Handle command = handle command

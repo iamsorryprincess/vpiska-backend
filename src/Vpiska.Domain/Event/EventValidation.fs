@@ -1,5 +1,6 @@
 module internal Vpiska.Domain.Event.EventValidation
 
+open Vpiska.Domain.Event.Commands
 open Vpiska.Domain.Validation
 
 let private createEventRules =

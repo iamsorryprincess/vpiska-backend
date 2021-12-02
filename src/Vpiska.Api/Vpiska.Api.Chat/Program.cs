@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Vpiska.Infrastructure.Orleans;
 
-namespace Vpiska.ApiChat
+namespace Vpiska.Api.Chat
 {
     public static class Program
     {

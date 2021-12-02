@@ -4,6 +4,7 @@ open System
 open System.Threading.Tasks
 open FSharp.Control.Tasks
 open Vpiska.Domain.Event
+open Vpiska.Domain.Event.Commands
 
 type EventId = string
 type ConnectionId = Guid
@@ -11,7 +12,7 @@ type UserId = string
 
 type LogError = string -> unit
 type LogErrors = AppError[] -> unit
-type HandleCommand = Command -> Task<Result<DomainEvent, AppError[]>>
+type HandleCommand = ChatCommand -> Task<Result<DomainEvent, AppError[]>>
 
 type CreateUserGroup = EventId -> bool
 type RemoveUserGroup = EventId -> bool
@@ -23,7 +24,7 @@ type GetUsersCount = EventId -> int
 
 type Deserialize = byte[] -> string
 
-let private handle (commandHandler: HandleCommand) (logErrors: LogErrors) (command: Command) =
+let private handle (commandHandler: HandleCommand) (logErrors: LogErrors) (command: ChatCommand) =
     task {
         match! commandHandler command with
         | Error errors -> logErrors errors
@@ -40,7 +41,7 @@ let subscribe
         match createUserGroup eventId with
         | false -> logError $"can't create user group for eventId: {eventId}"
         | true ->
-            let command = { EventId = eventId } |> Command.Subscribe
+            let command = { EventId = eventId } |> ChatCommand.Subscribe
             do! handle commandHandler logErrors command
     }
     
@@ -54,7 +55,7 @@ let unsubscribe
         match removeUserGroup eventId with
         | false -> logError $"can't remove user group for eventId: {eventId}"
         | true ->
-            let command = { EventId = eventId } |> Command.Unsubscribe
+            let command = { EventId = eventId } |> ChatCommand.Unsubscribe
             do! handle commandHandler logErrors command
     }
     
@@ -71,7 +72,7 @@ let connectUser
         | false -> logError $"can't add user connection. UserId: {userInfo.Id}. ConnectionId: {connectionId}"
         | true ->
             let command = { EventId = eventId; UserId = userInfo.Id
-                            Name = userInfo.Name; ImageId = userInfo.ImageId } |> Command.LogUserInChat
+                            Name = userInfo.Name; ImageId = userInfo.ImageId } |> ChatCommand.LogUserInChat
             do! handle commandHandler logErrors command
     }
     
@@ -87,7 +88,7 @@ let disconnectUser
         match removeUserInfo eventId connectionId with
         | false -> logError $"can't remove user connection. UserId: {userId}. ConnectionId: {connectionId}"
         | true ->
-            let command = { EventId = eventId; UserId = userId; } |> Command.LogoutUserFromChat
+            let command = { EventId = eventId; UserId = userId; } |> ChatCommand.LogoutUserFromChat
             do! handle commandHandler logErrors command
     }
     
@@ -143,6 +144,6 @@ let receiveMessage
             let command = { EventId = eventId
                             UserId = userId
                             UserImage = userInfo.ImageId
-                            Message = data |> deserialize } |> Command.SendChatMessage
+                            Message = data |> deserialize } |> ChatCommand.SendChatMessage
             do! handle commandHandler logErrors command
     }

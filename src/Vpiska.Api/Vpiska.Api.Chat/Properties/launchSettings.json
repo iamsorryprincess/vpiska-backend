@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "Vpiska.ApiChat": {
+    "Vpiska.Api.Chat": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": false,

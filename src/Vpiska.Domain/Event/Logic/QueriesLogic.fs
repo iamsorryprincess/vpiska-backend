@@ -1,8 +1,15 @@
 module Vpiska.Domain.Event.Logic.QueriesLogic
 
 open System
+open System.Threading.Tasks
 open FSharp.Control.Tasks
 open Vpiska.Domain.Event
+
+type Area = string
+type CheckArea = Area -> bool
+
+type GetEvent = EventId -> Task<Event>
+type GetEvents = Area -> Task<ShortEventResponse[]>
 
 let private isNull o = Object.ReferenceEquals(o, null)
 

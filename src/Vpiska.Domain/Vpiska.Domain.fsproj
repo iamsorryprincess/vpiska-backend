@@ -15,13 +15,13 @@
       <Compile Include="User\UserValidation.fs" />
       <Compile Include="User\Logic.fs" />
       <Compile Include="Event\Models.fs" />
-      <Compile Include="Event\Commands.fs" />
+      <Compile Include="Event\Commands\EventCommands.fs" />
+      <Compile Include="Event\Commands\ChatCommands.fs" />
       <Compile Include="Event\Events.fs" />
       <Compile Include="Event\Queries.fs" />
       <Compile Include="Event\Responses.fs" />
       <Compile Include="Event\Errors.fs" />
       <Compile Include="Event\EventValidation.fs" />
-      <Compile Include="Event\Logic\Abbreviations.fs" />
       <Compile Include="Event\Logic\CommandsLogic.fs" />
       <Compile Include="Event\Logic\QueriesLogic.fs" />
     </ItemGroup>

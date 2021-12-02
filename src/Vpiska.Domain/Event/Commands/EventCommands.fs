@@ -1,4 +1,6 @@
-namespace Vpiska.Domain.Event
+namespace Vpiska.Domain.Event.Commands
+
+open Vpiska.Domain.Event
 
 [<CLIMutable>]
 type CreateEventArgs =
@@ -15,9 +17,6 @@ type CloseEventArgs =
       EventId: EventId }
 
 [<CLIMutable>]
-type SubscribeArgs = { EventId: EventId }
-
-[<CLIMutable>]
 type AddMediaArgs =
     { EventId: EventId
       OwnerId: UserId
@@ -31,32 +30,8 @@ type RemoveMediaArgs =
       OwnerId: UserId
       MediaLink: string }
 
-[<CLIMutable>]
-type LoginUserArgs =
-    { UserId: UserId
-      EventId: EventId
-      Name: string
-      ImageId: string }
-
-[<CLIMutable>]    
-type LogoutUserArgs =
-    { UserId: UserId
-      EventId: EventId }
-
-[<CLIMutable>]    
-type ChatMessageArgs =
-    { UserId: UserId
-      UserImage: string
-      EventId: EventId
-      Message: string }
-
-type Command =
+type EventCommand =
     | CreateEvent of CreateEventArgs
     | CloseEvent of CloseEventArgs
-    | Subscribe of SubscribeArgs
-    | Unsubscribe of SubscribeArgs
     | AddMedia of AddMediaArgs
     | RemoveMedia of RemoveMediaArgs
-    | LogUserInChat of LoginUserArgs
-    | LogoutUserFromChat of LogoutUserArgs
-    | SendChatMessage of ChatMessageArgs
