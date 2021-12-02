@@ -1,47 +1,23 @@
 version: '3.4'
 
 services:
-  mongo:
-    container_name: vpiska_mongo
-    image: mongo:5.0.3-focal
-    restart: on-failure
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: kekit*
-      MONGO_INITDB_ROOT_PASSWORD: qweasd123*
-    ports:
-      - "27017:27017"
-    volumes:
-      - /data/db:/data/db
 
-  api:
-    container_name: vpiska_api
-    image: api
+  redis:
+    container_name: redis
+    image: redis
     restart: on-failure
+    ports:
+      - "6379:6379"
+    volumes:
+      - /data/redis:/data
+  
+  silo:
+    container_name: silo
+    image: silo
     build:
       context: .
-      dockerfile: src/Vpiska.Api/Dockerfile
-    environment:
-      - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
-      - Mongo__DatabaseName=vpiska
-      - Firebase__BucketName=vpiska-a6e65.appspot.com
-      - OrleansCluster__ClusterId=dev
-      - OrleansCluster__ClusterId=OrleansBasics
+      dockerfile: src/Vpiska.OrleansSilo/Dockerfile
     ports:
-      - "5000:80"
+      - "9090:9090"
     volumes:
-      - /data/logs/api:/logs
-
-  chat:
-    container_name: vpiska_api_chat
-    image: apichat
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: src/Vpiska.ApiChat/Dockerfile
-    environment:
-      - OrleansCluster__ClusterId=dev
-      - OrleansCluster__ClusterId=OrleansBasics
-    ports:
-      - "9000:80"
-    volumes:
-      - /data/logs/api_chat:/logs
+      - /data/logs/silo:/logs

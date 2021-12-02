@@ -37,7 +37,7 @@ namespace Vpiska.ApiChat
                 .Select(x => x.Value)
                 .ToArray();
 
-            services.AddSingleton(new EventClusterClient.AreaSettings(areas));
+            services.AddSingleton(new EventsCluster.AreaSettings(areas));
             services.AddSingleton<ChatCommandHandler>();
             services.AddEventChat();
         }

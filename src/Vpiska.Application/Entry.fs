@@ -65,7 +65,7 @@ type Entry() =
         #if DEBUG
         let path = "../Vpiska.Application/Firebase/settings.json"
         #else
-        let path = "settings.json"
+        let path = "Firebase/settings.json"
         #endif
         let settings = { BucketName = firebaseSection.["BucketName"] }: Storage.FirebaseSettings
         let firebaseApp = FirebaseApp.Create(AppOptions(Credential = GoogleCredential.FromFile(path)))

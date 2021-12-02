@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +15,10 @@ namespace Vpiska.Infrastructure.Orleans
         public static void AddClusterClient(this IServiceCollection services, IConfigurationSection clusterSection)
         {
             var client = new ClientBuilder()
-                .UseLocalhostClustering()
+                .UseStaticClustering(opt =>
+                {
+                    opt.Gateways.Add(new Uri("gwy.tcp://127.0.0.1:9090/0"));
+                })
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = clusterSection["ClusterId"];

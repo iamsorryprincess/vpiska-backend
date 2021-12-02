@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <ServerGarbageCollection>true</ServerGarbageCollection>
+        <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
@@ -8,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
       <PackageReference Include="Microsoft.Orleans.Server" Version="3.5.1" />
+      <PackageReference Include="Orleans.Clustering.Redis" Version="3.2.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -10,33 +10,33 @@ open Vpiska.Infrastructure.Orleans.Interfaces
 
 type EventCommandHandler(clusterClient: IClusterClient,
                          streamProducer: IStreamProducer,
-                         areaSettings: EventClusterClient.AreaSettings,
+                         areaSettings: EventsCluster.AreaSettings,
                          firebaseClient: StorageClient,
                          firebaseSettings: Storage.FirebaseSettings) =
     
     let checkArea (area: string) = areaSettings.Areas |> Array.contains area
     
-    let checkEvent = EventClusterClient.checkEvent clusterClient
+    let checkEvent = EventsCluster.checkEvent clusterClient
     
-    let checkOwnership = EventClusterClient.checkOwnership clusterClient
+    let checkOwnership = EventsCluster.checkOwnership clusterClient
 
     let publish (eventId: string) (event: DomainEvent) = streamProducer.Produce(eventId, event)
     
     let handle command =
         match command with
         | CreateEvent args ->
-            let checkOwner = EventClusterClient.checkOwner clusterClient
-            let createEvent = EventClusterClient.createEvent clusterClient
+            let checkOwner = EventsCluster.checkOwner clusterClient
+            let createEvent = EventsCluster.createEvent clusterClient
             CommandsLogic.createEvent checkArea checkOwner createEvent args
         | CloseEvent args ->
-            let closeEvent = EventClusterClient.closeEvent clusterClient
+            let closeEvent = EventsCluster.closeEvent clusterClient
             CommandsLogic.closeEvent checkEvent checkOwnership publish closeEvent args
         | AddMedia args ->
-            let addMedia = EventClusterClient.addMedia clusterClient
+            let addMedia = EventsCluster.addMedia clusterClient
             let uploadFile = Storage.uploadFile firebaseClient firebaseSettings.BucketName
             CommandsLogic.addMedia checkEvent checkOwnership addMedia uploadFile args
         | RemoveMedia args ->
-            let removeMedia = EventClusterClient.removeMedia clusterClient
+            let removeMedia = EventsCluster.removeMedia clusterClient
             let deleteFile = Storage.deleteFile firebaseClient firebaseSettings.BucketName
             CommandsLogic.removeMedia checkEvent checkOwnership removeMedia deleteFile args
         | _ -> raise(ArgumentException("unknown command"))

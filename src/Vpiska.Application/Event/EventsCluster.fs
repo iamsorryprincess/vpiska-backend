@@ -1,4 +1,4 @@
-module Vpiska.Application.Event.EventClusterClient
+module Vpiska.Application.Event.EventsCluster
 
 open Orleans
 open FSharp.Control.Tasks
