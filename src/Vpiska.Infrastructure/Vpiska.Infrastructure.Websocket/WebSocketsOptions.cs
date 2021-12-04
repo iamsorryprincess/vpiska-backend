@@ -9,7 +9,10 @@ namespace Vpiska.Infrastructure.Websocket
     {
         internal Dictionary<PathString, WebSocketUrlOptions> UrlOptions { get; } = new();
 
-        internal void AddUrl<TReceiver, TConnector>(string url, string[] identityParams, string[] queryParams) 
+        internal void AddUrl<TReceiver, TConnector>(string url,
+            string[] identityParams,
+            Dictionary<string, Func<string>> identityParamsDefaultValueGenerators,
+            string[] queryParams) 
             where TReceiver : IWebSocketReceiver
             where TConnector : IWebSocketConnector
         {
@@ -31,7 +34,10 @@ namespace Vpiska.Infrastructure.Websocket
             }
 
             UrlOptions.Add(url,
-                new WebSocketUrlOptions(identityParams.ToHashSet(), queryParams.ToHashSet(), connectorType,
+                new WebSocketUrlOptions(identityParams.ToHashSet(),
+                    identityParamsDefaultValueGenerators,
+                    queryParams.ToHashSet(),
+                    connectorType,
                     receiverType,
                     typeof(WebSocketHub<TConnector, TReceiver>)));
         }

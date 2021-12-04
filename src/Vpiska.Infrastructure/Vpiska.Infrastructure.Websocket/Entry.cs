@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,11 +11,12 @@ namespace Vpiska.Infrastructure.Websocket
             WebSocketsOptions options,
             string url,
             string[] identityParams,
-            string[] queryParams)
+            string[] queryParams,
+            Dictionary<string, Func<string>> identityParamsDefaultValueGenerators = null)
             where TReceiver : class, IWebSocketReceiver
             where TConnector : class, IWebSocketConnector
         {
-            options.AddUrl<TReceiver, TConnector>(url, identityParams, queryParams);
+            options.AddUrl<TReceiver, TConnector>(url, identityParams, identityParamsDefaultValueGenerators, queryParams);
             services.AddSingleton<TConnector>();
             services.AddSingleton<WebSocketHub<TConnector, TReceiver>>();
             services.AddSingleton<IWebSocketInteracting<TConnector>, WebSocketInteracting<TConnector, TReceiver>>();

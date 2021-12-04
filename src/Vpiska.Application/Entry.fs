@@ -1,6 +1,7 @@
 namespace Vpiska.Application
 
 open System
+open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Threading.Tasks
 open FirebaseAdmin
@@ -39,11 +40,14 @@ type Entry() =
         match context.Request.Query.Count with
         | 0 -> Task.CompletedTask
         | _ ->
-            let accessToken = context.Request.Query.[tokenQueryParam].Item 0
-            let path = context.HttpContext.Request.Path
-            if String.IsNullOrWhiteSpace(accessToken) |> not && path.StartsWithSegments(PathString(webSocketUrl)) then
-                context.Token <- accessToken
-            Task.CompletedTask
+            if context.Request.Query.ContainsKey tokenQueryParam |> not then
+                Task.CompletedTask
+            else
+                let accessToken = context.Request.Query.[tokenQueryParam].Item 0
+                let path = context.HttpContext.Request.Path
+                if String.IsNullOrWhiteSpace(accessToken) |> not && path.StartsWithSegments(PathString(webSocketUrl)) then
+                    context.Token <- accessToken
+                Task.CompletedTask
     
     [<Extension>]
     static member AddJwt(services: IServiceCollection) =
@@ -63,7 +67,7 @@ type Entry() =
     [<Extension>]
     static member AddFirebase(services: IServiceCollection, firebaseSection: IConfigurationSection) =
         #if DEBUG
-        let path = "../Vpiska.Application/Firebase/settings.json"
+        let path = "../../Vpiska.Application/Firebase/settings.json"
         #else
         let path = "Firebase/settings.json"
         #endif
@@ -92,7 +96,9 @@ type Entry() =
         services.AddStreamConsumer<ChatConsumer>()
         services.AddJwtForWebsocket("access_token", "/chat")
         let options = WebSocketsOptions()
-        services.AddVSocket<ChatReceiver, ChatConnector>(options, "/chat", [|"Id"; "Name"; "ImageId"|], [|"eventId"|])
+        let idGen = Dictionary<string, Func<string>>()
+        idGen.Add("Id", Func<string>(fun () -> Guid.NewGuid().ToString("N")))
+        services.AddVSocket<ChatReceiver, ChatConnector>(options, "/chat", [|"Id"; "Name"; "ImageId"|], [|"eventId"|], idGen)
         services.AddSingleton(options) |> ignore
     
     [<Extension>]

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -28,12 +29,6 @@ namespace Vpiska.Infrastructure.Websocket
         {
             if (context.WebSockets.IsWebSocketRequest)
             {
-                if (context.User.Identity == null || !context.User.Identity.IsAuthenticated)
-                {
-                    context.Response.StatusCode = 401;
-                    return;
-                }
-
                 var (url, socketOptions) = _options.UrlOptions
                     .FirstOrDefault(x => context.Request.Path.StartsWithSegments(x.Key));
 
@@ -44,10 +39,8 @@ namespace Vpiska.Infrastructure.Websocket
                     return;
                 }
 
-                var identityParams = socketOptions.IdentityParams
-                    .Select(paramName => new KeyValuePair<string, string>(paramName,
-                        context.User.Claims.FirstOrDefault(x => x.Type == paramName)?.Value))
-                    .ToDictionary(x => x.Key, x => x.Value);
+                var identityParams = GetIdentityParams(context.User, socketOptions.IdentityParams,
+                    socketOptions.IdentityParamsDefaultValueGenerators);
 
                 var queryParams = socketOptions.QueryParams
                     .Where(paramName => context.Request.Query.ContainsKey(paramName))
@@ -89,6 +82,32 @@ namespace Vpiska.Infrastructure.Websocket
             {
                 await _next(context);
             }
+        }
+
+        private static Dictionary<string, string> GetIdentityParams(ClaimsPrincipal user,
+            HashSet<string> paramSettings,
+            Dictionary<string, Func<string>> defaultValueGenerators)
+        {
+            if (user.Identity == null || !user.Identity.IsAuthenticated)
+            {
+                return paramSettings
+                    .Select(paramName =>
+                    {
+                        if (defaultValueGenerators != null && defaultValueGenerators.ContainsKey(paramName))
+                        {
+                            return new KeyValuePair<string, string>(paramName,
+                                defaultValueGenerators[paramName].Invoke());
+                        }
+
+                        return new KeyValuePair<string, string>(paramName, null);
+                    })
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            return paramSettings
+                .Select(paramName => new KeyValuePair<string, string>(paramName,
+                    user.Claims.FirstOrDefault(x => x.Type == paramName)?.Value))
+                .ToDictionary(x => x.Key, x => x.Value);
         }
     }
 }

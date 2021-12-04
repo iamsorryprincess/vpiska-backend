@@ -24,7 +24,7 @@ services:
   
   silo:
     container_name: silo
-    image: silo
+    image: kekit/silo
     restart: on-failure
     build:
       context: .
@@ -34,7 +34,8 @@ services:
 
   rest:
     container_name: rest
-    image: rest
+    image: kekit/rest
+    restart: on-failure
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Rest/Dockerfile
@@ -56,7 +57,8 @@ services:
 
   chat:
     container_name: chat
-    image: chat
+    image: kekit/chat
+    restart: on-failure
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Chat/Dockerfile
