@@ -49,7 +49,7 @@ services:
     ports:
       - "5000:80"
     volumes:
-      - /data/logs/api:/logs
+      - /data/logs/api/rest:/logs
     depends_on:
       - mongo
       - redis
@@ -70,7 +70,7 @@ services:
     ports:
       - "9000:80"
     volumes:
-      - /data/logs/api:/logs
+      - /data/logs/api/chat:/logs
     depends_on:
       - redis
       - silo
