@@ -24,7 +24,7 @@ services:
   
   silo:
     container_name: silo
-    image: kekit/silo
+    image: silo
     restart: on-failure
     build:
       context: .
@@ -34,7 +34,7 @@ services:
 
   rest:
     container_name: rest
-    image: kekit/rest
+    image: rest
     restart: on-failure
     build:
       context: .
@@ -57,7 +57,7 @@ services:
 
   chat:
     container_name: chat
-    image: kekit/chat
+    image: chat
     restart: on-failure
     build:
       context: .
