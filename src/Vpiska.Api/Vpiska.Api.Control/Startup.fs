@@ -5,6 +5,7 @@ open Google.Apis.Auth.OAuth2
 open Google.Cloud.Storage.V1
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.Builder
+open Microsoft.AspNetCore.HttpOverrides
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.IdentityModel.Tokens
@@ -105,3 +106,5 @@ type Startup(configuration: IConfiguration) =
         app.UseAuthentication() |> ignore
         app.UseAuthorization() |> ignore
         app.UseEndpoints(fun endpoints -> endpoints.MapControllers() |> ignore) |> ignore
+        let forwardedHeaders = ForwardedHeaders.XForwardedFor ||| ForwardedHeaders.XForwardedProto
+        app.UseForwardedHeaders(ForwardedHeadersOptions(ForwardedHeaders = forwardedHeaders)) |> ignore
