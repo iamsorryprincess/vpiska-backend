@@ -13,17 +13,15 @@ namespace Vpiska.Infrastructure.Websocket
         where TReceiver : IWebSocketReceiver
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IWebSocketConnector _connector;
         private readonly ConcurrentDictionary<Guid, WebSocket> _connections;
+        private readonly Type _connectorType;
         private readonly Type _receiverType;
 
         public WebSocketHub(IServiceScopeFactory serviceScopeFactory, IServiceProvider serviceProvider)
         {
             _serviceScopeFactory = serviceScopeFactory;
-            var connectorType = typeof(TConnector);
-            _connector = serviceProvider.GetRequiredService(connectorType) as IWebSocketConnector
-                ?? throw new InvalidOperationException($"Can't resolve connector {connectorType.FullName}");
             _connections = new ConcurrentDictionary<Guid, WebSocket>();
+            _connectorType = typeof(TConnector);
             _receiverType = typeof(TReceiver);
         }
 
@@ -34,7 +32,11 @@ namespace Vpiska.Infrastructure.Websocket
 
             if (_connections.TryAdd(connectionId, webSocket))
             {
-                await _connector.OnConnect(connectionId, identityParams, queryParams);
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                var connector = scope.ServiceProvider.GetRequiredService(_connectorType) as IWebSocketConnector
+                                ?? throw new InvalidOperationException(
+                                    $"Can't resolve connector {_connectorType.FullName}");
+                await connector.OnConnect(connectionId, identityParams, queryParams);
                 return connectionId;
             }
 
@@ -47,7 +49,11 @@ namespace Vpiska.Infrastructure.Websocket
             if (_connections.TryRemove(connectionId, out var socket))
             {
                 await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "close connection", CancellationToken.None);
-                await _connector.OnDisconnect(connectionId, identityParams, queryParams);
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                var connector = scope.ServiceProvider.GetRequiredService(_connectorType) as IWebSocketConnector
+                                ?? throw new InvalidOperationException(
+                                    $"Can't resolve connector {_connectorType.FullName}");
+                await connector.OnDisconnect(connectionId, identityParams, queryParams);
                 return true;
             }
 
@@ -73,7 +79,11 @@ namespace Vpiska.Infrastructure.Websocket
                 if (_connections.TryRemove(connectionId, out var socket))
                 {
                     await socket.CloseAsync(WebSocketCloseStatus.InternalServerError, "close connection", CancellationToken.None);
-                    await _connector.OnDisconnect(connectionId, identityParams, queryParams);
+                    await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                    var connector = scope.ServiceProvider.GetRequiredService(_connectorType) as IWebSocketConnector
+                                    ?? throw new InvalidOperationException(
+                                        $"Can't resolve connector {_connectorType.FullName}");
+                    await connector.OnDisconnect(connectionId, identityParams, queryParams);
                 }
             }
         }

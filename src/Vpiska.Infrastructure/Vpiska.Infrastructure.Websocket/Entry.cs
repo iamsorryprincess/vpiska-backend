@@ -17,7 +17,7 @@ namespace Vpiska.Infrastructure.Websocket
             where TConnector : class, IWebSocketConnector
         {
             options.AddUrl<TReceiver, TConnector>(url, identityParams, identityParamsDefaultValueGenerators, queryParams);
-            services.AddSingleton<TConnector>();
+            services.AddTransient<TConnector>();
             services.AddSingleton<WebSocketHub<TConnector, TReceiver>>();
             services.AddSingleton<IWebSocketInteracting<TConnector>, WebSocketInteracting<TConnector, TReceiver>>();
             services.AddTransient<TReceiver>();

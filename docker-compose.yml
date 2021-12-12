@@ -32,13 +32,13 @@ services:
     depends_on:
       - redis
 
-  rest:
-    container_name: rest
-    image: kekit/rest
+  api:
+    container_name: api
+    image: kekit/api
     restart: on-failure
     build:
       context: .
-      dockerfile: src/Vpiska.Api/Vpiska.Api.Rest/Dockerfile
+      dockerfile: src/Vpiska.Api/Vpiska.Api.Control/Dockerfile
     environment:
       - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
       - Mongo__DatabaseName=vpiska

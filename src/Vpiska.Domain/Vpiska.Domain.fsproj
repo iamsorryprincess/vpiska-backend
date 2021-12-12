@@ -8,13 +8,13 @@
 
     <ItemGroup>
       <Compile Include="Validation.fs" />
-      <Compile Include="User\Models.fs" />
+      <Compile Include="User\Types.fs" />
       <Compile Include="User\Commands.fs" />
       <Compile Include="User\Events.fs" />
       <Compile Include="User\Errors.fs" />
       <Compile Include="User\UserValidation.fs" />
       <Compile Include="User\Logic.fs" />
-      <Compile Include="Event\Models.fs" />
+      <Compile Include="Event\Types.fs" />
       <Compile Include="Event\Commands\EventCommands.fs" />
       <Compile Include="Event\Commands\ChatCommands.fs" />
       <Compile Include="Event\Events.fs" />

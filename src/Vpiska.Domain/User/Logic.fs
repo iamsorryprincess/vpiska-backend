@@ -8,8 +8,6 @@ let private phoneCode: PhoneCode = "+7"
 
 let private isNull o = Object.ReferenceEquals(o, null)
 
-type GenerateUserId = unit -> UserId
-type GenerateImageId = unit -> ImageId
 type GenerateCode = unit -> VerificationCode
 
 type CheckUser = Phone -> Username -> Task<CheckPhoneNameResult>
@@ -35,7 +33,7 @@ let createUser
   (create: CreateUser)
   (hashPassword: HashPassword)
   (encodeToken: EncodeToken)
-  (generateId: GenerateUserId)
+  (userId: UserId)
   (args: CreateUserArgs) =
   task {
     match UserValidation.validateCreateUserArgs args with
@@ -50,8 +48,7 @@ let createUser
           return [|DomainError.NameAlreadyUse; DomainError.PhoneAlreadyUse|] |> Errors.fromDomainArr
         | { CheckPhoneNameResult.IsPhoneExist = false; CheckPhoneNameResult.IsNameExist = false } ->
           let password = hashPassword args.Password
-          let id = generateId ()
-          let user = args.toDomain id phoneCode password
+          let user = args.toDomain userId phoneCode password
           let! userId = create user
           let token = encodeToken userId user.Name user.ImageId
           return DomainEvent.UserLogged { UserId = userId; AccessToken = token } |> Ok
@@ -133,7 +130,7 @@ let updateUser
   (checkName: CheckName)
   (uploadFile: UploadFile)
   (updateUser: UpdateUser)
-  (generateId: GenerateImageId)
+  (imageId: ImageId)
   (args: UpdateUserArgs) =
   task {
     match UserValidation.validateUpdateUserArgs args with
@@ -153,7 +150,7 @@ let updateUser
             return DomainEvent.UserUpdated |> Ok
           else
             let! imageId = if String.IsNullOrWhiteSpace user.ImageId
-                           then uploadFile (generateId ()) args.ImageData args.ContentType
+                           then uploadFile imageId args.ImageData args.ContentType
                            else uploadFile user.ImageId args.ImageData args.ContentType
             let! _ = updateUser args.Id args.Name args.Phone imageId
             return DomainEvent.UserUpdated |> Ok
