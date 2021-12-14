@@ -2,25 +2,19 @@ version: '3.4'
 
 services:
   silo:
-    container_name: silo
     image: kekit/silo
-    restart: on-failure
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Silo/Dockerfile
 
   api:
-    container_name: api
     image: kekit/api
-    restart: on-failure
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Control/Dockerfile
 
   chat:
-    container_name: chat
     image: kekit/chat
-    restart: on-failure
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Chat/Dockerfile
