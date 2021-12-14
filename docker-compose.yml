@@ -1,27 +1,6 @@
 version: '3.4'
 
 services:
-  mongo:
-    container_name: mongo
-    image: mongo:5.0.3-focal
-    restart: on-failure
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: kekit*
-      MONGO_INITDB_ROOT_PASSWORD: qweasd123*
-    ports:
-      - "27017:27017"
-    volumes:
-      - /data/db:/data/db
-
-  redis:
-    container_name: redis
-    image: redis:6.2
-    restart: on-failure
-    ports:
-      - "6379:6379"
-    volumes:
-      - /data/redis:/data
-  
   silo:
     container_name: silo
     image: kekit/silo
@@ -29,8 +8,6 @@ services:
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Silo/Dockerfile
-    depends_on:
-      - redis
 
   api:
     container_name: api
@@ -39,21 +16,6 @@ services:
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Control/Dockerfile
-    environment:
-      - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
-      - Mongo__DatabaseName=vpiska
-      - OrleansCluster__ClusterId=dev
-      - OrleansCluster__ServiceId=OrleansBasics
-      - OrleansCluster__Redis__Host=redis
-      - OrleansCluster__Redis__Port=6379
-    ports:
-      - "5000:5000"
-    volumes:
-      - /data/logs/api/control:/logs
-    depends_on:
-      - mongo
-      - redis
-      - silo
 
   chat:
     container_name: chat
@@ -62,15 +24,3 @@ services:
     build:
       context: .
       dockerfile: src/Vpiska.Api/Vpiska.Api.Chat/Dockerfile
-    environment:
-      - OrleansCluster__ClusterId=dev
-      - OrleansCluster__ServiceId=OrleansBasics
-      - OrleansCluster__Redis__Host=redis
-      - OrleansCluster__Redis__Port=6379
-    ports:
-      - "9000:9000"
-    volumes:
-      - /data/logs/api/chat:/logs
-    depends_on:
-      - redis
-      - silo

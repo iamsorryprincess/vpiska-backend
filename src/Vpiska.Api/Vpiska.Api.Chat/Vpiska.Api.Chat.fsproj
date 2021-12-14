@@ -11,7 +11,6 @@
         <Compile Include="WebSocket\EventsLogic.fs" />
         <Compile Include="Infrastructure\Cluster.fs" />
         <Compile Include="Infrastructure\Storage.fs" />
-        <Compile Include="Infrastructure\Jwt.fs" />
         <Compile Include="CommandHandler.fs" />
         <Compile Include="Connectors\ChatConnector.fs" />
         <Compile Include="Receivers\ChatReceiver.fs" />
@@ -21,15 +20,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Vpiska.Infrastructure\Vpiska.Infrastructure.Jwt\Vpiska.Infrastructure.Jwt.fsproj" />
       <ProjectReference Include="..\..\Vpiska.Infrastructure\Vpiska.Infrastructure.Orleans\Vpiska.Infrastructure.Orleans.csproj" />
       <ProjectReference Include="..\..\Vpiska.Infrastructure\Vpiska.Infrastructure.Websocket\Vpiska.Infrastructure.Websocket.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.12" />
       <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
       <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00947" />
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
     </ItemGroup>
 
 </Project>

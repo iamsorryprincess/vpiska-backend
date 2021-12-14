@@ -1,4 +1,4 @@
-module Vpiska.Api.Control.Infrastructure.User.Jwt
+module Vpiska.Infrastructure.Jwt.Jwt
 
 open System
 open System.IdentityModel.Tokens.Jwt
@@ -10,22 +10,16 @@ open Vpiska.Domain.User
 let private lifetimeDays = 3.0
 
 let private getClaims (userId: UserId) (name: string) (imageId: string) =
-    match String.IsNullOrWhiteSpace imageId with
-    | true ->
-        let claims = ResizeArray<Claim>(2)
-        Claim("Id", userId) |> claims.Add
-        Claim("Name", name) |> claims.Add
-        claims
-    | false ->
-        let claims = ResizeArray<Claim>(3)
-        Claim("Id", userId) |> claims.Add
-        Claim("Name", name) |> claims.Add
+    let claims = ResizeArray<Claim>(2)
+    Claim("Id", userId) |> claims.Add
+    Claim("Name", name) |> claims.Add
+    if String.IsNullOrWhiteSpace imageId |> not then
         Claim("ImageId", imageId) |> claims.Add
-        claims
-
-let internal key = "vpiska_secretkey!123"
-let internal issuer = "VpiskaServer"
-let internal audience = "VpiskaClient"
+    claims
+        
+let mutable internal key = "vpiska_secretkey!123"
+let mutable internal issuer = "VpiskaServer"
+let mutable internal audience = "VpiskaClient"
 
 let internal getKey (key: string) = key |> Encoding.ASCII.GetBytes |> SymmetricSecurityKey
 

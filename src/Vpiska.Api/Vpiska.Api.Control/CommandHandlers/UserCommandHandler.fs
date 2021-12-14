@@ -7,6 +7,7 @@ open MongoDB.Driver
 open Vpiska.Api.Control.Infrastructure.Firebase
 open Vpiska.Api.Control.Infrastructure.User
 open Vpiska.Domain.User
+open Vpiska.Infrastructure.Jwt
 
 type UserPersistence =
     { MongoClient: MongoClient

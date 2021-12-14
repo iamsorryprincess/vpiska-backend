@@ -3,12 +3,10 @@ namespace Vpiska.Api.Control
 open FirebaseAdmin
 open Google.Apis.Auth.OAuth2
 open Google.Cloud.Storage.V1
-open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.HttpOverrides
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.IdentityModel.Tokens
 open Microsoft.OpenApi.Models
 open MongoDB.Bson.Serialization
 open MongoDB.Bson.Serialization.Conventions
@@ -22,18 +20,9 @@ open Vpiska.Api.Control.Infrastructure.User
 open Vpiska.Api.Control.QueryHandlers
 open Vpiska.Domain.User
 open Vpiska.Infrastructure.Orleans
+open Vpiska.Infrastructure.Jwt
 
 type Startup(configuration: IConfiguration) =
-
-    static let createTokenParams () =
-        TokenValidationParameters(
-          ValidateIssuer = true,
-          ValidIssuer = Jwt.issuer,
-          ValidateAudience = true,
-          ValidAudience = Jwt.audience,
-          ValidateLifetime = true,
-          IssuerSigningKey = Jwt.getKey Jwt.key,
-          ValidateIssuerSigningKey = true)
     
     member _.ConfigureServices(services: IServiceCollection) =
         // logger
@@ -45,9 +34,7 @@ type Startup(configuration: IConfiguration) =
         services.AddSingleton(Log.Logger) |> ignore
         
         // jwt
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(fun options -> options.RequireHttpsMetadata <- false
-                                         options.TokenValidationParameters <- createTokenParams()) |> ignore
+        services.AddJwt(configuration.GetSection("Jwt"))
         
         // swagger  
         services.AddSwaggerGen(fun options ->
