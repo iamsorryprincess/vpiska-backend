@@ -26,7 +26,7 @@ type Startup(configuration: IConfiguration) =
         services.AddSingleton(Log.Logger) |> ignore
         
         // jwt
-        services.AddJwt(configuration.GetSection("Jwt"))
+        services.AddJwtWebsocket(configuration.GetSection("Jwt"), "access_token", "/chat")
         
         // orleans
         services.AddClusterClient(configuration.GetSection("OrleansCluster"))
