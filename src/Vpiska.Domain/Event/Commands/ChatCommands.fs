@@ -20,6 +20,7 @@ type LogoutUserArgs =
 [<CLIMutable>]    
 type ChatMessageArgs =
     { UserId: UserId
+      UserName: string
       UserImage: string
       EventId: EventId
       Message: string }

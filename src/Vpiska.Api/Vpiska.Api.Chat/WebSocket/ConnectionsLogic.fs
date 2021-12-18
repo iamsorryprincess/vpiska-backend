@@ -142,6 +142,7 @@ let receiveMessage
         | Some userInfo ->
             let command = { EventId = eventId
                             UserId = userId
+                            UserName = userInfo.Name
                             UserImage = userInfo.ImageId
                             Message = data |> deserialize } |> ChatCommand.SendChatMessage
             do! handle commandHandler logErrors command

@@ -76,6 +76,52 @@ let closeEvent
                         return Ok domainEvent
     }
     
+let addMedia
+    (checkEvent: CheckEvent)
+    (checkOwnership: CheckOwnership)
+    (addMedia: AddMedia)
+    (uploadFile: UploadFile)
+    (args: AddMediaArgs) =
+    task {
+        match EventValidation.validateAddMediaArgs args with
+        | Error errors -> return errors |> Errors.fromValidation
+        | Ok _ ->
+            match! checkEvent args.EventId with
+            | false -> return DomainError.EventNotFound |> Errors.fromDomain
+            | true ->
+                match! checkOwnership args.EventId args.OwnerId with
+                | false -> return DomainError.UserNotOwner |> Errors.fromDomain
+                | true ->
+                    match! addMedia args.EventId args.ImageId with
+                    | false -> return DomainError.MediaAlreadyAdded |> Errors.fromDomain
+                    | true ->
+                        let! result = uploadFile args.ImageId args.MediaData args.ContentType
+                        return { ImageId = result } |> DomainEvent.MediaAdded |> Ok
+    }
+    
+let removeMedia
+    (checkEvent: CheckEvent)
+    (checkOwnership: CheckOwnership)
+    (removeMedia: RemoveMedia)
+    (deleteFile: DeleteFile)
+    (args: RemoveMediaArgs) =
+    task {
+        match EventValidation.validateRemoveMediaArgs args with
+        | Error errors -> return errors |> Errors.fromValidation
+        | Ok _ ->
+            match! checkEvent args.EventId with
+            | false -> return DomainError.EventNotFound |> Errors.fromDomain
+            | true ->
+                match! checkOwnership args.EventId args.OwnerId with
+                | false -> return DomainError.UserNotOwner |> Errors.fromDomain
+                | true ->
+                    match! removeMedia args.EventId args.MediaLink with
+                    | false -> return DomainError.MediaNotFound |> Errors.fromDomain
+                    | true ->
+                        let! _ = deleteFile args.MediaLink
+                        return { ImageId = args.MediaLink } |> DomainEvent.MediaRemoved |> Ok
+    }
+    
 let subscribe (createSubscription: CreateSubscription) (args: SubscribeArgs) =
     task {
         match! createSubscription args.EventId with
@@ -136,57 +182,12 @@ let sendChatMessage
         match! checkEvent args.EventId with
         | false -> return DomainError.EventNotFound |> Errors.fromDomain
         | true ->
-            let chatData = { UserId = args.UserId; Message = args.Message; UserImage = args.UserImage }
+            let chatData = { UserId = args.UserId; Message = args.Message
+                             UserImage = args.UserImage; UserName = args.UserName }
             match! addMessage args.EventId chatData with
             | false -> return DomainError.UserNotFound |> Errors.fromDomain
             | true ->
                 let domainEvent = chatData |> DomainEvent.ChatMessageSent
                 do! publish args.EventId domainEvent
                 return Ok domainEvent
-    }
-    
-let addMedia
-    (checkEvent: CheckEvent)
-    (checkOwnership: CheckOwnership)
-    (addMedia: AddMedia)
-    (uploadFile: UploadFile)
-    (args: AddMediaArgs) =
-    task {
-        match EventValidation.validateAddMediaArgs args with
-        | Error errors -> return errors |> Errors.fromValidation
-        | Ok _ ->
-            match! checkEvent args.EventId with
-            | false -> return DomainError.EventNotFound |> Errors.fromDomain
-            | true ->
-                match! checkOwnership args.EventId args.OwnerId with
-                | false -> return DomainError.UserNotOwner |> Errors.fromDomain
-                | true ->
-                    match! addMedia args.EventId args.ImageId with
-                    | false -> return DomainError.MediaAlreadyAdded |> Errors.fromDomain
-                    | true ->
-                        let! result = uploadFile args.ImageId args.MediaData args.ContentType
-                        return { ImageId = result } |> DomainEvent.MediaAdded |> Ok
-    }
-    
-let removeMedia
-    (checkEvent: CheckEvent)
-    (checkOwnership: CheckOwnership)
-    (removeMedia: RemoveMedia)
-    (deleteFile: DeleteFile)
-    (args: RemoveMediaArgs) =
-    task {
-        match EventValidation.validateRemoveMediaArgs args with
-        | Error errors -> return errors |> Errors.fromValidation
-        | Ok _ ->
-            match! checkEvent args.EventId with
-            | false -> return DomainError.EventNotFound |> Errors.fromDomain
-            | true ->
-                match! checkOwnership args.EventId args.OwnerId with
-                | false -> return DomainError.UserNotOwner |> Errors.fromDomain
-                | true ->
-                    match! removeMedia args.EventId args.MediaLink with
-                    | false -> return DomainError.MediaNotFound |> Errors.fromDomain
-                    | true ->
-                        let! _ = deleteFile args.MediaLink
-                        return { ImageId = args.MediaLink } |> DomainEvent.MediaRemoved |> Ok
     }
