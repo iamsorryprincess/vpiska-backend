@@ -87,7 +87,7 @@ namespace Vpiska.Api.Silo
 #if DEBUG
                 .AddMemoryGrainStorage("PubSubStore");
 #else
-                .AddRedisGrainStorage("Redis", optionsBuilder => optionsBuilder.Configure(options =>
+                .AddRedisGrainStorage("PubSubStore", optionsBuilder => optionsBuilder.Configure(options =>
                 {
                     options.ConnectionString = $"{redisSection["Host"]}:{redisSection["Port"]}";
                     options.UseJson = true;
