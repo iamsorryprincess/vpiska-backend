@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
 using Vpiska.Api.Constants;
-using Vpiska.Api.Requests;
+using Vpiska.Api.Requests.User;
 
-namespace Vpiska.Api.Validation
+namespace Vpiska.Api.Validation.User
 {
     public sealed class CheckCodeValidator : AbstractValidator<CheckCodeRequest>
     {

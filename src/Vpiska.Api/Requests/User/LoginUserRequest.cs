@@ -1,4 +1,4 @@
-namespace Vpiska.Api.Requests
+namespace Vpiska.Api.Requests.User
 {
     public sealed class LoginUserRequest
     {

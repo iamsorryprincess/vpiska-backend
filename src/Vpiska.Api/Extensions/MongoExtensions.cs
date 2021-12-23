@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using MongoDB.Driver;
 using Vpiska.Api.Requests;
+using Vpiska.Api.Requests.User;
 using Vpiska.Domain.Models;
 
 namespace Vpiska.Api.Extensions
@@ -24,11 +25,31 @@ namespace Vpiska.Api.Extensions
 
         public static FilterDefinition<TModel> Or<TModel>(this FilterDefinition<TModel> filterDefinition,
             FilterDefinition<TModel> anotherFilterDefinition) =>
-            Builders<TModel>.Filter.Or(anotherFilterDefinition);
+            Builders<TModel>.Filter.Or(filterDefinition, anotherFilterDefinition);
 
         public static FilterDefinition<TModel> And<TModel>(this FilterDefinition<TModel> filterDefinition,
             FilterDefinition<TModel> anotherFilterDefinition) =>
-            Builders<TModel>.Filter.And(anotherFilterDefinition);
+            Builders<TModel>.Filter.And(filterDefinition, anotherFilterDefinition);
+        
+        public static FilterDefinition<User> CreateCheckFilter(this UpdateUserRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Name) && !string.IsNullOrWhiteSpace(request.Phone))
+            {
+                return request.Name.CreateNameFilter();
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Name) && string.IsNullOrWhiteSpace(request.Phone))
+            {
+                return request.Phone.CreatePhoneFilter();
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Name) && string.IsNullOrWhiteSpace(request.Phone))
+            {
+                return request.Phone.CreatePhoneFilter().Or(request.Name.CreateNameFilter());
+            }
+
+            return null;
+        }
 
         public static UpdateDefinition<User> CreateUpdateDefinition(this UpdateUserRequest request, string imageId)
         {

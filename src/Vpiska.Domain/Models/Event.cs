@@ -7,10 +7,10 @@ namespace Vpiska.Domain.Models
         public string OwnerId { get; set; }
 
         public string Name { get; set; }
-
-        public string Coordinates { get; set; }
-
+        
         public string Address { get; set; }
+
+        public Coordinates Coordinates { get; set; }
 
         public string[] MediaLinks { get; set; }
 

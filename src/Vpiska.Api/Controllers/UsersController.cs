@@ -12,8 +12,9 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Vpiska.Api.Constants;
 using Vpiska.Api.Extensions;
-using Vpiska.Api.Requests;
+using Vpiska.Api.Requests.User;
 using Vpiska.Api.Responses;
+using Vpiska.Api.Responses.User;
 using Vpiska.Api.Settings;
 using Vpiska.Domain.Models;
 
@@ -55,8 +56,11 @@ namespace Vpiska.Api.Controllers
 
             var checks = await users
                 .Find(filter)
-                .Project(user => new
-                    { IsPhoneExist = user.Phone == request.Phone, IsNameExist = user.Name == request.Name })
+                .Project(user => new 
+                    {
+                        IsPhoneExist = user.Phone == request.Phone,
+                        IsNameExist = user.Name == request.Name
+                    })
                 .ToListAsync(cancellationToken: cancellationToken);
 
             var (isPhoneExist, isNameExist) = checks
@@ -269,58 +273,53 @@ namespace Vpiska.Api.Controllers
                 return Ok(ApiResponse.Error(UserConstants.UserNotFound));
             }
 
-            var checks = await Task.WhenAll(
-                CheckPhone(users, request.Phone, cancellationToken),
-                CheckName(users, request.Name, cancellationToken));
+            var checkFilter = request.CreateCheckFilter();
 
-            if (checks[0] && !checks[1])
+            var (isPhoneExist, isNameExist) = checkFilter == null
+                ? (false, false)
+                : (await users
+                    .Find(checkFilter)
+                    .Project(x => new
+                    {
+                        IsPhoneExist = x.Phone == request.Phone,
+                        IsNameExist = x.Name == request.Name
+                    })
+                    .ToListAsync(cancellationToken))
+                .Aggregate((false, false), (acc, item) =>
+                {
+                    if (item.IsPhoneExist)
+                        acc.Item1 = true;
+                    if (item.IsNameExist)
+                        acc.Item2 = true;
+                    return acc;
+                });
+
+            switch (isNameExist)
             {
-                return Ok(ApiResponse.Error(UserConstants.PhoneAlreadyUse));
+                case true when !isPhoneExist:
+                    return Ok(ApiResponse.Error(UserConstants.NameAlreadyUse));
+                case false when isPhoneExist:
+                    return Ok(ApiResponse.Error(UserConstants.PhoneAlreadyUse));
+                case true:
+                    return Ok(ApiResponse.Error(UserConstants.NameAlreadyUse, UserConstants.PhoneAlreadyUse));
+                default:
+                {
+                    var imageId = request.Image == null
+                        ? user.ImageId
+                        : string.IsNullOrWhiteSpace(user.ImageId)
+                            ? (await fileStorage.UploadObjectAsync(firebaseSettings.Value.BucketName,
+                                Guid.NewGuid().ToString("N"),
+                                request.Image.ContentType, request.Image.OpenReadStream(),
+                                cancellationToken: cancellationToken)).Name
+                            : (await fileStorage.UploadObjectAsync(firebaseSettings.Value.BucketName, user.ImageId,
+                                request.Image.ContentType, request.Image.OpenReadStream(),
+                                cancellationToken: cancellationToken)).Name;
+
+                    var update = request.CreateUpdateDefinition(imageId);
+                    await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+                    return Ok(ApiResponse.Success());
+                }
             }
-
-            if (!checks[0] && checks[1])
-            {
-                return Ok(ApiResponse.Error(UserConstants.NameAlreadyUse));
-            }
-
-            if (checks[0] && checks[1])
-            {
-                return Ok(ApiResponse.Error(UserConstants.PhoneAlreadyUse, UserConstants.NameAlreadyUse));
-            }
-
-            string imageId = null;
-            
-            if (request.Image != null)
-            {
-                var link = string.IsNullOrWhiteSpace(user.ImageId)
-                    ? await fileStorage.UploadObjectAsync(firebaseSettings.Value.BucketName,
-                        Guid.NewGuid().ToString("N"),
-                        request.Image.ContentType, request.Image.OpenReadStream(), cancellationToken: cancellationToken)
-                    : await fileStorage.UploadObjectAsync(firebaseSettings.Value.BucketName, user.ImageId,
-                        request.Image.ContentType, request.Image.OpenReadStream(),
-                        cancellationToken: cancellationToken);
-                imageId = link.Name;
-            }
-
-            var update = request.CreateUpdateDefinition(imageId);
-            await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
-            return Ok(ApiResponse.Success());
-        }
-        
-        private static async Task<bool> CheckPhone(IMongoCollection<User> users, string phone, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(phone)) return false;
-            var phoneFilter = phone.CreatePhoneFilter();
-            var result = await users.Find(phoneFilter).AnyAsync(cancellationToken);
-            return result;
-        }
-
-        private static async Task<bool> CheckName(IMongoCollection<User> users, string name, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return false;
-            var nameFilter = name.CreateNameFilter();
-            var result = await users.Find(nameFilter).AnyAsync(cancellationToken);
-            return result;
         }
     }
 }

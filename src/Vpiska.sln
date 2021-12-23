@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.Domain", "Vpiska.Dom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.Jwt", "Vpiska.Jwt\Vpiska.Jwt.csproj", "{04A80C77-BFA0-4696-A78A-B5628E53B38C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.Orleans", "Vpiska.Orleans\Vpiska.Orleans.csproj", "{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,5 +60,17 @@ Global
 		{04A80C77-BFA0-4696-A78A-B5628E53B38C}.Release|x64.Build.0 = Release|Any CPU
 		{04A80C77-BFA0-4696-A78A-B5628E53B38C}.Release|x86.ActiveCfg = Release|Any CPU
 		{04A80C77-BFA0-4696-A78A-B5628E53B38C}.Release|x86.Build.0 = Release|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Debug|x64.Build.0 = Debug|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Debug|x86.Build.0 = Debug|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Release|x64.ActiveCfg = Release|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Release|x64.Build.0 = Release|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Release|x86.ActiveCfg = Release|Any CPU
+		{B671BBBA-356C-45B6-B39C-8DE3BF9BBFA2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

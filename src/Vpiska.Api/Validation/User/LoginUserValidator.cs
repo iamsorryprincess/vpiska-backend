@@ -1,13 +1,13 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
 using Vpiska.Api.Constants;
-using Vpiska.Api.Requests;
+using Vpiska.Api.Requests.User;
 
-namespace Vpiska.Api.Validation
+namespace Vpiska.Api.Validation.User
 {
-    public sealed class CreateUserValidator : AbstractValidator<CreateUserRequest>
+    public sealed class LoginUserValidator : AbstractValidator<LoginUserRequest>
     {
-        public CreateUserValidator()
+        public LoginUserValidator()
         {
             RuleFor(x => x.Phone)
                 .NotEmpty()
@@ -18,19 +18,12 @@ namespace Vpiska.Api.Validation
                 .When(x => x.Phone != null)
                 .WithMessage(UserConstants.PhoneRegexInvalid);
 
-            RuleFor(x => x.Name)
-                .NotEmpty().WithMessage(UserConstants.NameIsEmpty);
-
             RuleFor(x => x.Password)
                 .NotEmpty()
                 .WithMessage(UserConstants.PasswordIsEmpty)
                 .Must(x => x.Length >= UserConstants.PasswordLength)
                 .When(x => x.Password != null)
                 .WithMessage(UserConstants.PasswordLengthInvalid);
-
-            RuleFor(x => x.ConfirmPassword)
-                .Equal(x => x.Password)
-                .WithMessage(UserConstants.ConfirmPasswordInvalid);
         }
     }
 }

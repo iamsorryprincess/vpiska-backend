@@ -1,4 +1,4 @@
-namespace Vpiska.Api.Responses
+namespace Vpiska.Api.Responses.User
 {
     public sealed class LoginResponse
     {
