@@ -38,9 +38,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
-        public async Task<IActionResult> Create(CancellationToken cancellationToken,
-            [FromServices] IValidator<CreateUserRequest> validator,
-            [FromBody] CreateUserRequest request)
+        public async Task<IActionResult> Create([FromServices] IValidator<CreateUserRequest> validator,
+            [FromBody] CreateUserRequest request,
+            CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -85,7 +85,7 @@ namespace Vpiska.Api.Controllers
                 {
                     var user = new User()
                     {
-                        Id = Guid.NewGuid().ToString("N"),
+                        Id = Guid.NewGuid().ToString(),
                         Phone = request.Phone,
                         PhoneCode = UserConstants.PhoneCode,
                         Name = request.Name,
@@ -96,6 +96,8 @@ namespace Vpiska.Api.Controllers
                     var response = new LoginResponse()
                     {
                         UserId = user.Id,
+                        UserName = user.Name,
+                        ImageId = user.ImageId,
                         AccessToken = Jwt.Jwt.EncodeJwt(user.Id, user.Name, user.ImageId)
                     };
                     return Ok(ApiResponse<LoginResponse>.Success(response));
@@ -107,9 +109,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
-        public async Task<IActionResult> Login(CancellationToken cancellationToken,
-            [FromServices] IValidator<LoginUserRequest> validator,
-            [FromBody] LoginUserRequest request)
+        public async Task<IActionResult> Login([FromServices] IValidator<LoginUserRequest> validator,
+            [FromBody] LoginUserRequest request,
+            CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -135,6 +137,8 @@ namespace Vpiska.Api.Controllers
             var response = new LoginResponse()
             {
                 UserId = user.Id,
+                UserName = user.Name,
+                ImageId = user.ImageId,
                 AccessToken = Jwt.Jwt.EncodeJwt(user.Id, user.Name, user.ImageId)
             };
             return Ok(ApiResponse<LoginResponse>.Success(response));
@@ -144,9 +148,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
-        public async Task<IActionResult> SetVerificationCode(CancellationToken cancellationToken,
-            [FromServices] IValidator<SetCodeRequest> validator,
-            [FromBody] SetCodeRequest request)
+        public async Task<IActionResult> SetVerificationCode([FromServices] IValidator<SetCodeRequest> validator,
+            [FromBody] SetCodeRequest request,
+            CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -184,9 +188,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
-        public async Task<IActionResult> CheckCode(CancellationToken cancellationToken,
-            [FromServices] IValidator<CheckCodeRequest> validator,
-            [FromBody] CheckCodeRequest request)
+        public async Task<IActionResult> CheckCode([FromServices] IValidator<CheckCodeRequest> validator,
+            [FromBody] CheckCodeRequest request,
+            CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -212,6 +216,8 @@ namespace Vpiska.Api.Controllers
             var response = new LoginResponse()
             {
                 UserId = user.Id,
+                UserName = user.Name,
+                ImageId = user.ImageId,
                 AccessToken = Jwt.Jwt.EncodeJwt(user.Id, user.Name, user.ImageId)
             };
             return Ok(ApiResponse<LoginResponse>.Success(response));
@@ -222,9 +228,9 @@ namespace Vpiska.Api.Controllers
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
-        public async Task<IActionResult> ChangePassword(CancellationToken cancellationToken,
-            [FromServices] IValidator<ChangePasswordRequest> validator,
-            [FromBody] ChangePasswordRequest request)
+        public async Task<IActionResult> ChangePassword([FromServices] IValidator<ChangePasswordRequest> validator,
+            [FromBody] ChangePasswordRequest request,
+            CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -244,12 +250,12 @@ namespace Vpiska.Api.Controllers
         [HttpPost("update")]
         [Produces("application/json")]
         [Consumes("multipart/form-data")]
-        [ProducesResponseType(typeof(ApiResponse), 200)]
-        public async Task<IActionResult> Update(CancellationToken cancellationToken,
-            [FromServices] IValidator<UpdateUserRequest> validator,
+        [ProducesResponseType(typeof(ApiResponse<ImageIdResponse>), 200)]
+        public async Task<IActionResult> Update([FromServices] IValidator<UpdateUserRequest> validator,
             [FromServices] StorageClient fileStorage,
             [FromServices] IOptions<FirebaseSettings> firebaseSettings,
-            [FromForm] UpdateUserRequest request)
+            [FromForm] UpdateUserRequest request,
+            CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
@@ -261,7 +267,7 @@ namespace Vpiska.Api.Controllers
             if (string.IsNullOrWhiteSpace(request.Name) && string.IsNullOrWhiteSpace(request.Phone) &&
                 request.Image == null)
             {
-                return Ok(ApiResponse.Success());
+                return Ok(ApiResponse<ImageIdResponse>.Success(new ImageIdResponse() { ImageId = null }));
             }
             
             var users = _mongoClient.GetUsers(_databaseName);
@@ -270,7 +276,7 @@ namespace Vpiska.Api.Controllers
 
             if (user == null)
             {
-                return Ok(ApiResponse.Error(UserConstants.UserNotFound));
+                return Ok(ApiResponse<ImageIdResponse>.Error(UserConstants.UserNotFound));
             }
 
             var checkFilter = request.CreateCheckFilter();
@@ -297,18 +303,18 @@ namespace Vpiska.Api.Controllers
             switch (isNameExist)
             {
                 case true when !isPhoneExist:
-                    return Ok(ApiResponse.Error(UserConstants.NameAlreadyUse));
+                    return Ok(ApiResponse<ImageIdResponse>.Error(UserConstants.NameAlreadyUse));
                 case false when isPhoneExist:
-                    return Ok(ApiResponse.Error(UserConstants.PhoneAlreadyUse));
+                    return Ok(ApiResponse<ImageIdResponse>.Error(UserConstants.PhoneAlreadyUse));
                 case true:
-                    return Ok(ApiResponse.Error(UserConstants.NameAlreadyUse, UserConstants.PhoneAlreadyUse));
+                    return Ok(ApiResponse<ImageIdResponse>.Error(UserConstants.NameAlreadyUse, UserConstants.PhoneAlreadyUse));
                 default:
                 {
                     var imageId = request.Image == null
                         ? user.ImageId
                         : string.IsNullOrWhiteSpace(user.ImageId)
                             ? (await fileStorage.UploadObjectAsync(firebaseSettings.Value.BucketName,
-                                Guid.NewGuid().ToString("N"),
+                                Guid.NewGuid().ToString(),
                                 request.Image.ContentType, request.Image.OpenReadStream(),
                                 cancellationToken: cancellationToken)).Name
                             : (await fileStorage.UploadObjectAsync(firebaseSettings.Value.BucketName, user.ImageId,
@@ -317,7 +323,7 @@ namespace Vpiska.Api.Controllers
 
                     var update = request.CreateUpdateDefinition(imageId);
                     await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
-                    return Ok(ApiResponse.Success());
+                    return Ok(ApiResponse<ImageIdResponse>.Success(new ImageIdResponse() { ImageId = imageId }));
                 }
             }
         }

@@ -7,7 +7,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Vpiska.Domain\Vpiska.Domain.csproj" />
     <ProjectReference Include="..\Vpiska.Jwt\Vpiska.Jwt.csproj" />
-    <ProjectReference Include="..\Vpiska.Orleans\Vpiska.Orleans.csproj" />
   </ItemGroup>
 
   <ItemGroup>

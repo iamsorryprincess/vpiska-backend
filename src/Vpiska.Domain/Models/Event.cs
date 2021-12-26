@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Vpiska.Domain.Models
 {
     public sealed class Event
@@ -10,12 +12,12 @@ namespace Vpiska.Domain.Models
         
         public string Address { get; set; }
 
-        public Coordinates Coordinates { get; set; }
+        public Coordinates Coordinates { get; set; } = new Coordinates();
 
-        public string[] MediaLinks { get; set; }
+        public List<string> MediaLinks { get; set; } = new List<string>();
 
-        public UserInfo[] Users { get; set; }
+        public List<UserInfo> Users { get; set; } = new List<UserInfo>();
 
-        public ChatData[] ChatData { get; set; }
+        public List<ChatData> ChatData { get; set; } = new List<ChatData>();
     }
 }

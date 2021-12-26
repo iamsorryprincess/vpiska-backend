@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 using FluentValidation;
 using Vpiska.Api.Constants;
@@ -11,6 +12,11 @@ namespace Vpiska.Api.Validation.User
         {
             RuleFor(x => x.Id)
                 .NotEmpty().WithMessage(UserConstants.IdIsEmpty);
+
+            RuleFor(x => x.Id)
+                .Must(id => Guid.TryParse(id, out _))
+                .When(x => x.Id != null)
+                .WithMessage(UserConstants.IdIsEmpty);
 
             RuleFor(x => x.Phone)
                 .Must(x => Regex.IsMatch(x, UserConstants.PhoneRegex))

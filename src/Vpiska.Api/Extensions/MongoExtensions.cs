@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using MongoDB.Driver;
-using Vpiska.Api.Requests;
 using Vpiska.Api.Requests.User;
 using Vpiska.Domain.Models;
 
@@ -14,8 +13,17 @@ namespace Vpiska.Api.Extensions
             return database.GetCollection<User>("users");
         }
 
+        public static IMongoCollection<Event> GetEvents(this IMongoClient mongoClient, string databaseName)
+        {
+            var database = mongoClient.GetDatabase(databaseName);
+            return database.GetCollection<Event>("events");
+        }
+
         public static FilterDefinition<User> CreateUserIdFilter(this string id) =>
             Builders<User>.Filter.Eq(x => x.Id, id);
+        
+        public static FilterDefinition<Event> CreateEventIdFilter(this string id) =>
+            Builders<Event>.Filter.Eq(x => x.Id, id);
 
         public static FilterDefinition<User> CreatePhoneFilter(this string phone) =>
             Builders<User>.Filter.Eq(x => x.Phone, phone);
@@ -30,25 +38,18 @@ namespace Vpiska.Api.Extensions
         public static FilterDefinition<TModel> And<TModel>(this FilterDefinition<TModel> filterDefinition,
             FilterDefinition<TModel> anotherFilterDefinition) =>
             Builders<TModel>.Filter.And(filterDefinition, anotherFilterDefinition);
-        
+
         public static FilterDefinition<User> CreateCheckFilter(this UpdateUserRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Name) && !string.IsNullOrWhiteSpace(request.Phone))
+            var isNameEmpty = string.IsNullOrWhiteSpace(request.Name);
+            var isPhoneEmpty = string.IsNullOrWhiteSpace(request.Phone);
+            return isNameEmpty switch
             {
-                return request.Name.CreateNameFilter();
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.Name) && string.IsNullOrWhiteSpace(request.Phone))
-            {
-                return request.Phone.CreatePhoneFilter();
-            }
-
-            if (string.IsNullOrWhiteSpace(request.Name) && string.IsNullOrWhiteSpace(request.Phone))
-            {
-                return request.Phone.CreatePhoneFilter().Or(request.Name.CreateNameFilter());
-            }
-
-            return null;
+                true when isPhoneEmpty => null,
+                false when isPhoneEmpty => request.Name.CreateNameFilter(),
+                true => request.Phone.CreatePhoneFilter(),
+                _ => request.Name.CreateNameFilter().Or(request.Phone.CreatePhoneFilter())
+            };
         }
 
         public static UpdateDefinition<User> CreateUpdateDefinition(this UpdateUserRequest request, string imageId)
