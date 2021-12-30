@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Vpiska.Api.Extensions;
 using Vpiska.Api.Filters;
 using Vpiska.Jwt;
+using Vpiska.Mongo;
 
 namespace Vpiska.Api
 {

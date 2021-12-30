@@ -9,7 +9,6 @@ using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using Vpiska.Api.Constants;
 using Vpiska.Api.Extensions;
 using Vpiska.Api.Requests.Event;
@@ -17,27 +16,20 @@ using Vpiska.Api.Responses;
 using Vpiska.Api.Responses.Event;
 using Vpiska.Api.Settings;
 using Vpiska.Domain.Models;
+using Vpiska.Mongo;
 
 namespace Vpiska.Api.Controllers
 {
     [Route("api/events")]
     public sealed class EventsController : ControllerBase
     {
-        private readonly IMongoClient _mongoClient;
-        private readonly string _databaseName;
-
-        public EventsController(IMongoClient mongoClient, IOptions<MongoSettings> mongoOptions)
-        {
-            _mongoClient = mongoClient;
-            _databaseName = mongoOptions.Value.DatabaseName;
-        }
-
         [Authorize]
         [HttpPost("create")]
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<Event>), 200)]
         public async Task<IActionResult> Create([FromServices] IValidator<CreateEventRequest> validator,
+            [FromServices] IEventRepository repository,
             [FromBody] CreateEventRequest request,
             CancellationToken cancellationToken)
         {
@@ -47,11 +39,9 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-
-            var events = _mongoClient.GetEvents(_databaseName);
+            
             var ownerId = HttpContext.GetUserId();
-            var filter = Builders<Event>.Filter.Eq(x => x.OwnerId, ownerId);
-            var isOwnerHasEvent = await events.Find(filter).AnyAsync(cancellationToken: cancellationToken);
+            var isOwnerHasEvent = await repository.CheckAsync(x => x.OwnerId, ownerId, cancellationToken);
 
             if (isOwnerHasEvent)
             {
@@ -70,8 +60,8 @@ namespace Vpiska.Api.Controllers
                     Y = request.Coordinates.Y.Value
                 }
             };
-            
-            await events.InsertOneAsync(model, cancellationToken: cancellationToken);
+
+            await repository.InsertAsync(model, cancellationToken);
             return Ok(ApiResponse<Event>.Success(model));
         }
         
@@ -80,6 +70,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<Event>), 200)]
         public async Task<IActionResult> Get([FromServices] IValidator<EventIdRequest> validator,
+            [FromServices] IEventRepository repository,
             [FromBody] EventIdRequest request,
             CancellationToken cancellationToken)
         {
@@ -90,9 +81,7 @@ namespace Vpiska.Api.Controllers
                 return Ok(validationResult.MapToResponse());
             }
 
-            var events = _mongoClient.GetEvents(_databaseName);
-            var filter = request.EventId.CreateEventIdFilter();
-            var eventData = await events.Find(filter).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            var eventData = await repository.GetAsync(x => x.Id, request.EventId, cancellationToken);
 
             return Ok(eventData == null
                 ? ApiResponse<Event>.Error(EventConstants.EventNotFound)
@@ -104,6 +93,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<EventShortResponse[]>), 200)]
         public async Task<IActionResult> GetAll([FromServices] IValidator<GetEventsRequest> validator,
+            [FromServices] IEventRepository repository,
             [FromBody] GetEventsRequest request,
             CancellationToken cancellationToken)
         {
@@ -113,25 +103,22 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-
-            var events = _mongoClient.GetEvents(_databaseName);
+            
             var xLeft = request.Coordinates.X.Value - request.Range.Value;
             var xRight = request.Coordinates.X.Value + request.Range.Value;
             var yBottom = request.Coordinates.Y.Value - request.Range.Value;
             var yTop = request.Coordinates.Y.Value + request.Range.Value;
-            var filter = Builders<Event>.Filter
-                .Where(x => x.Coordinates.X >= xLeft && x.Coordinates.X <= xRight &&
-                            x.Coordinates.Y >= yBottom && x.Coordinates.Y <= yTop);
 
-            var response = await events.Find(filter)
-                .Project(x => new EventShortResponse()
+            var response = await repository.WhereProjectListAsync(x =>
+                    x.Coordinates.X >= xLeft && x.Coordinates.X <= xRight &&
+                    x.Coordinates.Y >= yBottom && x.Coordinates.Y <= yTop,
+                x => new EventShortResponse()
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Coordinates = x.Coordinates,
                     UsersCount = x.Users.Count
-                })
-                .ToListAsync(cancellationToken: cancellationToken);
+                }, cancellationToken);
 
             return Ok(ApiResponse<List<EventShortResponse>>.Success(response));
         }
@@ -142,6 +129,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
         public async Task<IActionResult> Close([FromServices] IValidator<EventIdRequest> validator,
+            [FromServices] IEventRepository repository,
             [FromBody] EventIdRequest request,
             CancellationToken cancellationToken)
         {
@@ -151,26 +139,23 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-
-            var ownerId = HttpContext.GetUserId();
-            var events = _mongoClient.GetEvents(_databaseName);
-            var idFilter = request.EventId.CreateEventIdFilter();
-            var isEventNotExist = !await events.Find(idFilter).AnyAsync(cancellationToken: cancellationToken);
+            
+            var isEventNotExist = !await repository.CheckAsync(x => x.Id, request.EventId, cancellationToken);
 
             if (isEventNotExist)
             {
                 return Ok(ApiResponse.Error(EventConstants.EventNotFound));
             }
 
-            var ownerFilter = Builders<Event>.Filter.Eq(x => x.OwnerId, ownerId).And(idFilter);
-            var isWrongOwner = !await events.Find(ownerFilter).AnyAsync(cancellationToken: cancellationToken);
+            var isWrongOwner =
+                !await repository.CheckForOwnershipAsync(request.EventId, HttpContext.GetUserId(), cancellationToken);
 
             if (isWrongOwner)
             {
                 return Ok(ApiResponse.Error(EventConstants.UserIsNotOwner));
             }
 
-            await events.DeleteOneAsync(idFilter, cancellationToken);
+            await repository.DeleteAsync(x => x.Id, request.EventId, cancellationToken);
             return Ok(ApiResponse.Success());
         }
 
@@ -180,6 +165,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ApiResponse<ImageIdResponse>), 200)]
         public async Task<IActionResult> AddMedia([FromServices] IValidator<AddMediaRequest> validator,
+            [FromServices] IEventRepository repository,
             [FromServices] StorageClient fileStorage,
             [FromServices] IOptions<FirebaseSettings> firebaseSettings,
             [FromForm] AddMediaRequest request,
@@ -191,18 +177,16 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-
-            var events = _mongoClient.GetEvents(_databaseName);
-            var filter = request.EventId.CreateEventIdFilter();
-            var isEventNotExist = !await events.Find(filter).AnyAsync(cancellationToken: cancellationToken);
+            
+            var isEventNotExist = !await repository.CheckAsync(x => x.Id, request.EventId, cancellationToken);
 
             if (isEventNotExist)
             {
                 return Ok(ApiResponse<ImageIdResponse>.Error(EventConstants.EventNotFound));
             }
 
-            var ownerFilter = Builders<Event>.Filter.Eq(x => x.OwnerId, HttpContext.GetUserId()).And(filter);
-            var isWrongOwner = !await events.Find(ownerFilter).AnyAsync(cancellationToken: cancellationToken);
+            var isWrongOwner =
+                !await repository.CheckForOwnershipAsync(request.EventId, HttpContext.GetUserId(), cancellationToken);
 
             if (isWrongOwner)
             {
@@ -213,8 +197,7 @@ namespace Vpiska.Api.Controllers
                 Guid.NewGuid().ToString(),
                 request.Media.ContentType, request.Media.OpenReadStream(), cancellationToken: cancellationToken);
 
-            var update = Builders<Event>.Update.AddToSet(x => x.MediaLinks, image.Name);
-            await events.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+            await repository.AddMediaAsync(request.EventId, image.Name, cancellationToken);
             return Ok(ApiResponse<ImageIdResponse>.Success(new ImageIdResponse() { ImageId = image.Name }));
         }
 
@@ -224,6 +207,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
         public async Task<IActionResult> RemoveMedia([FromServices] IValidator<RemoveMediaRequest> validator,
+            [FromServices] IEventRepository repository,
             [FromServices] StorageClient fileStorage,
             [FromServices] IOptions<FirebaseSettings> firebaseSettings,
             [FromBody] RemoveMediaRequest request,
@@ -236,25 +220,22 @@ namespace Vpiska.Api.Controllers
                 return Ok(validationResult.MapToResponse());
             }
 
-            var events = _mongoClient.GetEvents(_databaseName);
-            var filter = request.EventId.CreateEventIdFilter();
-            var isEventNotExist = !await events.Find(filter).AnyAsync(cancellationToken: cancellationToken);
+            var isEventNotExist = !await repository.CheckAsync(x => x.Id, request.EventId, cancellationToken);
 
             if (isEventNotExist)
             {
                 return Ok(ApiResponse.Error(EventConstants.EventNotFound));
             }
 
-            var ownerFilter = Builders<Event>.Filter.Eq(x => x.OwnerId, HttpContext.GetUserId()).And(filter);
-            var isWrongOwner = !await events.Find(ownerFilter).AnyAsync(cancellationToken: cancellationToken);
+            var isWrongOwner =
+                !await repository.CheckForOwnershipAsync(request.EventId, HttpContext.GetUserId(), cancellationToken);
 
             if (isWrongOwner)
             {
                 return Ok(ApiResponse.Error(EventConstants.UserIsNotOwner));
             }
-
-            var mediaIdFilter = Builders<Event>.Filter.AnyEq(x => x.MediaLinks, request.MediaId).And(filter);
-            var isMediaNotExist = !await events.Find(mediaIdFilter).AnyAsync(cancellationToken: cancellationToken);
+            
+            var isMediaNotExist = !await repository.CheckMediaAsync(request.EventId, request.MediaId, cancellationToken);
 
             if (isMediaNotExist)
             {
@@ -274,8 +255,7 @@ namespace Vpiska.Api.Controllers
                 }
             }
 
-            var update = Builders<Event>.Update.Pull(x => x.MediaLinks, request.MediaId);
-            await events.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+            await repository.DeleteMediaAsync(request.EventId, request.MediaId, cancellationToken);
             return Ok(ApiResponse.Success());
         }
     }

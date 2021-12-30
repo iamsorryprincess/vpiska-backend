@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
@@ -9,7 +8,6 @@ using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using Vpiska.Api.Constants;
 using Vpiska.Api.Extensions;
 using Vpiska.Api.Requests.User;
@@ -17,28 +15,21 @@ using Vpiska.Api.Responses;
 using Vpiska.Api.Responses.User;
 using Vpiska.Api.Settings;
 using Vpiska.Domain.Models;
+using Vpiska.Mongo;
 
 namespace Vpiska.Api.Controllers
 {
     [Route("api/users")]
     public sealed class UsersController : ControllerBase
     {
-        private static readonly Random Random = new Random();
-        
-        private readonly IMongoClient _mongoClient;
-        private readonly string _databaseName;
-
-        public UsersController(IMongoClient mongoClient, IOptions<MongoSettings> mongoOptions)
-        {
-            _mongoClient = mongoClient;
-            _databaseName = mongoOptions.Value.DatabaseName;
-        }
+        private static readonly Random Random = new();
 
         [HttpPost("create")]
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
         public async Task<IActionResult> Create([FromServices] IValidator<CreateUserRequest> validator,
+            [FromServices] IUserRepository repository,
             [FromBody] CreateUserRequest request,
             CancellationToken cancellationToken)
         {
@@ -48,30 +39,9 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-            
-            var phoneFilter = request.Phone.CreatePhoneFilter();
-            var nameFilter = request.Name.CreateNameFilter();
-            var filter = phoneFilter.Or(nameFilter);
-            var users = _mongoClient.GetUsers(_databaseName);
 
-            var checks = await users
-                .Find(filter)
-                .Project(user => new 
-                    {
-                        IsPhoneExist = user.Phone == request.Phone,
-                        IsNameExist = user.Name == request.Name
-                    })
-                .ToListAsync(cancellationToken: cancellationToken);
-
-            var (isPhoneExist, isNameExist) = checks
-                .Aggregate((false, false), (acc, item) =>
-                {
-                    if (item.IsPhoneExist)
-                        acc.Item1 = true;
-                    if (item.IsNameExist)
-                        acc.Item2 = true;
-                    return acc;
-                });
+            var (isPhoneExist, isNameExist) =
+                await repository.CheckPhoneAndName(request.Phone, request.Name, cancellationToken);
 
             switch (isNameExist)
             {
@@ -92,7 +62,8 @@ namespace Vpiska.Api.Controllers
                         Password = request.Password.HashPassword()
                     };
 
-                    await users.InsertOneAsync(user, cancellationToken: cancellationToken);
+                    await repository.InsertAsync(user, cancellationToken);
+                    
                     var response = new LoginResponse()
                     {
                         UserId = user.Id,
@@ -100,6 +71,7 @@ namespace Vpiska.Api.Controllers
                         ImageId = user.ImageId,
                         AccessToken = Jwt.Jwt.EncodeJwt(user.Id, user.Name, user.ImageId)
                     };
+                    
                     return Ok(ApiResponse<LoginResponse>.Success(response));
                 }
             }
@@ -110,6 +82,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
         public async Task<IActionResult> Login([FromServices] IValidator<LoginUserRequest> validator,
+            [FromServices] IUserRepository repository,
             [FromBody] LoginUserRequest request,
             CancellationToken cancellationToken)
         {
@@ -119,10 +92,8 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-            
-            var users = _mongoClient.GetUsers(_databaseName);
-            var filter = request.Phone.CreatePhoneFilter();
-            var user = await users.Find(filter).FirstOrDefaultAsync(cancellationToken);
+
+            var user = await repository.GetAsync(x => x.Phone, request.Phone, cancellationToken);
 
             if (user == null)
             {
@@ -149,6 +120,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
         public async Task<IActionResult> SetVerificationCode([FromServices] IValidator<SetCodeRequest> validator,
+            [FromServices] IUserRepository repository,
             [FromBody] SetCodeRequest request,
             CancellationToken cancellationToken)
         {
@@ -160,12 +132,11 @@ namespace Vpiska.Api.Controllers
             }
             
             var code = Random.Next(111111, 777777);
-            var users = _mongoClient.GetUsers(_databaseName);
-            var filter = request.Phone.CreatePhoneFilter();
-            var update = Builders<User>.Update.Set(x => x.VerificationCode, code);
-            var updateResult = await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+            var isNotSuccess = !await repository.UpdateAsync(x => x.Phone, request.Phone,
+                x => x.VerificationCode, code,
+                cancellationToken);
 
-            if (updateResult.MatchedCount < 1)
+            if (isNotSuccess)
             {
                 return Ok(ApiResponse.Error(UserConstants.UserByPhoneNotFound));
             }
@@ -189,6 +160,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), 200)]
         public async Task<IActionResult> CheckCode([FromServices] IValidator<CheckCodeRequest> validator,
+            [FromServices] IUserRepository repository,
             [FromBody] CheckCodeRequest request,
             CancellationToken cancellationToken)
         {
@@ -198,10 +170,8 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-            
-            var users = _mongoClient.GetUsers(_databaseName);
-            var filter = request.Phone.CreatePhoneFilter();
-            var user = await users.Find(filter).FirstOrDefaultAsync(cancellationToken);
+
+            var user = await repository.GetAsync(x => x.Phone, request.Phone, cancellationToken);
 
             if (user == null)
             {
@@ -229,6 +199,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse), 200)]
         public async Task<IActionResult> ChangePassword([FromServices] IValidator<ChangePasswordRequest> validator,
+            [FromServices] IUserRepository repository,
             [FromBody] ChangePasswordRequest request,
             CancellationToken cancellationToken)
         {
@@ -238,12 +209,10 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(validationResult.MapToResponse());
             }
-            
-            var users = _mongoClient.GetUsers(_databaseName);
-            var filter = request.Id.CreateUserIdFilter();
-            var update = Builders<User>.Update.Set(x => x.Password, request.Password.HashPassword());
-            var updateResult = await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
-            return Ok(updateResult.MatchedCount < 1 ? ApiResponse.Error(UserConstants.UserNotFound) : ApiResponse.Success());
+
+            var isSuccess = await repository.UpdateAsync(x => x.Id, request.Id, x => x.Password,
+                request.Password.HashPassword(), cancellationToken);
+            return Ok(isSuccess ? ApiResponse.Success() : ApiResponse.Error(UserConstants.UserNotFound));
         }
 
         [Authorize]
@@ -252,6 +221,7 @@ namespace Vpiska.Api.Controllers
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ApiResponse<ImageIdResponse>), 200)]
         public async Task<IActionResult> Update([FromServices] IValidator<UpdateUserRequest> validator,
+            [FromServices] IUserRepository repository,
             [FromServices] StorageClient fileStorage,
             [FromServices] IOptions<FirebaseSettings> firebaseSettings,
             [FromForm] UpdateUserRequest request,
@@ -269,36 +239,16 @@ namespace Vpiska.Api.Controllers
             {
                 return Ok(ApiResponse<ImageIdResponse>.Success(new ImageIdResponse() { ImageId = null }));
             }
-            
-            var users = _mongoClient.GetUsers(_databaseName);
-            var filter = request.Id.CreateUserIdFilter();
-            var user = await users.Find(filter).FirstOrDefaultAsync(cancellationToken);
+
+            var user = await repository.GetAsync(x => x.Id, request.Id, cancellationToken);
 
             if (user == null)
             {
                 return Ok(ApiResponse<ImageIdResponse>.Error(UserConstants.UserNotFound));
             }
 
-            var checkFilter = request.CreateCheckFilter();
-
-            var (isPhoneExist, isNameExist) = checkFilter == null
-                ? (false, false)
-                : (await users
-                    .Find(checkFilter)
-                    .Project(x => new
-                    {
-                        IsPhoneExist = x.Phone == request.Phone,
-                        IsNameExist = x.Name == request.Name
-                    })
-                    .ToListAsync(cancellationToken))
-                .Aggregate((false, false), (acc, item) =>
-                {
-                    if (item.IsPhoneExist)
-                        acc.Item1 = true;
-                    if (item.IsNameExist)
-                        acc.Item2 = true;
-                    return acc;
-                });
+            var (isPhoneExist, isNameExist) =
+                await repository.CheckPhoneAndName(request.Phone, request.Name, cancellationToken);
 
             switch (isNameExist)
             {
@@ -321,8 +271,7 @@ namespace Vpiska.Api.Controllers
                                 request.Image.ContentType, request.Image.OpenReadStream(),
                                 cancellationToken: cancellationToken)).Name;
 
-                    var update = request.CreateUpdateDefinition(imageId);
-                    await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+                    await repository.UpdateUser(request.Id, request.Name, request.Phone, imageId, cancellationToken);
                     return Ok(ApiResponse<ImageIdResponse>.Success(new ImageIdResponse() { ImageId = imageId }));
                 }
             }

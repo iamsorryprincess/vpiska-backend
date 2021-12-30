@@ -15,7 +15,7 @@ namespace Vpiska.Api.Extensions
                 throw new InvalidOperationException("Can't resolve userId from token");
             }
 
-            if (!Guid.TryParse(userId.Value, out var result))
+            if (!Guid.TryParse(userId.Value, out _))
             {
                 throw new InvalidOperationException("Can't resolve userId from token");
             }

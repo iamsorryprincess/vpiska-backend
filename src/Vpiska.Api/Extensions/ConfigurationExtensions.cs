@@ -50,24 +50,6 @@ namespace Vpiska.Api.Extensions
                 });
             });
         }
-        
-        public static void AddMongo(this IServiceCollection services, IConfigurationSection mongoSection)
-        {
-            var conventionPack = new ConventionPack()
-            {
-                new CamelCaseElementNameConvention()
-            };
-            ConventionRegistry.Register("default", conventionPack, _ => true);
-            BsonClassMap.RegisterClassMap<User>(options =>
-            {
-                options.AutoMap();
-                options.MapIdMember(x => x.Id);
-            });
-
-            var mongoClient = new MongoClient(mongoSection["ConnectionString"]);
-            services.AddSingleton<IMongoClient>(mongoClient);
-            services.Configure<MongoSettings>(mongoSection);
-        }
 
         public static void AddFirebase(this IServiceCollection services, IConfigurationSection firebaseSection)
         {
