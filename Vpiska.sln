@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9995CCD9-8B5A-44D4-A354-AD3145B29AFD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F7B1EDA3-95EE-4E7B-B2A1-6869C42756EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.Api", "src\Vpiska.Api\Vpiska.Api.csproj", "{11FB54D6-AFC7-45B8-BB33-E7BEB13CB04F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{11FB54D6-AFC7-45B8-BB33-E7BEB13CB04F} = {9995CCD9-8B5A-44D4-A354-AD3145B29AFD}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11FB54D6-AFC7-45B8-BB33-E7BEB13CB04F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11FB54D6-AFC7-45B8-BB33-E7BEB13CB04F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11FB54D6-AFC7-45B8-BB33-E7BEB13CB04F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11FB54D6-AFC7-45B8-BB33-E7BEB13CB04F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
