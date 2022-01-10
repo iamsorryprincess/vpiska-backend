@@ -9,5 +9,13 @@ namespace Vpiska.Api.Orleans
         Task SetData(Event data);
 
         Task<Event> GetData();
+
+        Task Init(Event data);
+
+        Task Close();
+
+        Task<bool> AddMedia(string mediaLink);
+
+        Task<bool> RemoveMedia(string mediaLink);
     }
 }

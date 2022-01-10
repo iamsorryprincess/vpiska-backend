@@ -11,6 +11,9 @@ namespace Vpiska.Api.Constants
         public const string CoordinatesAreEmpty = "CoordinatesAreEmpty";
         public const string HorizontalRangeIsEmpty = "HorizontalRangeIsEmpty";
         public const string VerticalRangeIsEmpty = "VerticalRangeIsEmpty";
+        public const string MediaIsEmpty = "MediaIsEmpty";
+        public const string MediaIdIsEmpty = "MediaIdIsEmpty";
+        public const string MediaNotFound = "MediaNotFound";
 
         #endregion
 
@@ -18,6 +21,7 @@ namespace Vpiska.Api.Constants
 
         public const string OwnerAlreadyHasEvent = "OwnerAlreadyHasEvent";
         public const string EventNotFound = "EventNotFound";
+        public const string UserIsNotOwner = "UserIsNotOwner";
 
         #endregion
     }

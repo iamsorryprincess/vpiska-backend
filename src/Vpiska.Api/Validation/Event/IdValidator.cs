@@ -5,9 +5,9 @@ using Vpiska.Api.Requests.Event;
 
 namespace Vpiska.Api.Validation.Event
 {
-    public sealed class GetByIdValidator : AbstractValidator<GetByIdRequest>
+    public sealed class IdValidator : AbstractValidator<IdRequest>
     {
-        public GetByIdValidator()
+        public IdValidator()
         {
             RuleFor(x => x.Id)
                 .Cascade(CascadeMode.Stop)
