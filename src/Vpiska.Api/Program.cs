@@ -49,6 +49,7 @@ namespace Vpiska.Api
                                 options.ClusterId = configurationSection["ClusterId"];
                                 options.ServiceId = configurationSection["ServiceId"];
                             })
+                            .ConfigureEndpoints(11111, 30000, listenOnAnyHostAddress: true)
                             .AddSimpleMessageStreamProvider("SMSProvider",
                                 options => options.OptimizeForImmutableData = false)
                             .AddRedisGrainStorage("PubSubStore", optionsBuilder => optionsBuilder.Configure(
