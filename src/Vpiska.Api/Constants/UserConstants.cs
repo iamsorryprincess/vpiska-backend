@@ -20,6 +20,7 @@ namespace Vpiska.Api.Constants
         public const string CodeIsEmpty = "CodeIsEmpty";
         public const string CodeLengthInvalid = "CodeLengthInvalid";
         public const string TokenIsEmpty = "TokenIsEmpty";
+        public const string IdInvalidFormat = "IdInvalidFormat";
 
         #endregion
 

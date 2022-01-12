@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using FluentValidation;
 using Vpiska.Api.Constants;
 using Vpiska.Api.Requests.User;
@@ -10,15 +9,14 @@ namespace Vpiska.Api.Validation.User
         public CheckCodeValidator()
         {
             RuleFor(x => x.Phone)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage(UserConstants.PhoneIsEmpty);
-            
-            RuleFor(x => x.Phone)
-                .Must(x => Regex.IsMatch(x, UserConstants.PhoneRegex))
-                .When(x => x.Phone != null)
+                .WithMessage(UserConstants.PhoneIsEmpty)
+                .Matches(UserConstants.PhoneRegex)
                 .WithMessage(UserConstants.PhoneRegexInvalid);
 
             RuleFor(x => x.Code)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage(UserConstants.CodeIsEmpty)
                 .Must(x => x >= UserConstants.MinCodeLength && x <= UserConstants.MaxCodeLength)

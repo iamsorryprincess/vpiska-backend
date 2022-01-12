@@ -1,4 +1,4 @@
-using Vpiska.Domain.Models;
+using Vpiska.Api.Models.Event;
 
 namespace Vpiska.Api.Responses.Event
 {

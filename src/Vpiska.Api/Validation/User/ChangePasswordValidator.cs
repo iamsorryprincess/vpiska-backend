@@ -1,3 +1,4 @@
+using System;
 using FluentValidation;
 using Vpiska.Api.Constants;
 using Vpiska.Api.Requests.User;
@@ -9,14 +10,17 @@ namespace Vpiska.Api.Validation.User
         public ChangePasswordValidator()
         {
             RuleFor(x => x.Id)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage(UserConstants.IdIsEmpty);
+                .WithMessage(UserConstants.IdIsEmpty)
+                .Must(id => Guid.TryParse(id, out _))
+                .WithMessage(UserConstants.IdInvalidFormat);
             
             RuleFor(x => x.Password)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage(UserConstants.PasswordIsEmpty)
                 .Must(x => x.Length >= UserConstants.PasswordLength)
-                .When(x => x.Password != null)
                 .WithMessage(UserConstants.PasswordLengthInvalid);
 
             RuleFor(x => x.ConfirmPassword)

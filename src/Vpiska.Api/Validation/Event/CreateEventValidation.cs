@@ -4,18 +4,18 @@ using Vpiska.Api.Requests.Event;
 
 namespace Vpiska.Api.Validation.Event
 {
-    public sealed class GetEventsValidator : AbstractValidator<GetEventsRequest>
+    public sealed class CreateEventValidation : AbstractValidator<CreateEventRequest>
     {
-        public GetEventsValidator()
+        public CreateEventValidation()
         {
-            RuleFor(x => x.HorizontalRange)
-                .NotNull()
-                .WithMessage(EventConstants.HorizontalRangeIsEmpty);
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .WithMessage(EventConstants.NameIsEmpty);
 
-            RuleFor(x => x.VerticalRange)
-                .NotNull()
-                .WithMessage(EventConstants.VerticalRangeIsEmpty);
-            
+            RuleFor(x => x.Address)
+                .NotEmpty()
+                .WithMessage(EventConstants.AddressIsEmpty);
+
             RuleFor(x => x.Coordinates)
                 .Cascade(CascadeMode.Stop)
                 .NotNull()

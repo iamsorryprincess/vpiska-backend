@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using FluentValidation;
 using Vpiska.Api.Constants;
 using Vpiska.Api.Requests.User;
@@ -10,19 +9,17 @@ namespace Vpiska.Api.Validation.User
         public LoginUserValidator()
         {
             RuleFor(x => x.Phone)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage(UserConstants.PhoneIsEmpty);
-            
-            RuleFor(x => x.Phone)
-                .Must(x => Regex.IsMatch(x, UserConstants.PhoneRegex))
-                .When(x => x.Phone != null)
+                .WithMessage(UserConstants.PhoneIsEmpty)
+                .Matches(UserConstants.PhoneRegex)
                 .WithMessage(UserConstants.PhoneRegexInvalid);
 
             RuleFor(x => x.Password)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage(UserConstants.PasswordIsEmpty)
                 .Must(x => x.Length >= UserConstants.PasswordLength)
-                .When(x => x.Password != null)
                 .WithMessage(UserConstants.PasswordLengthInvalid);
         }
     }

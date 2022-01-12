@@ -5,20 +5,16 @@ using Vpiska.Api.Requests.Event;
 
 namespace Vpiska.Api.Validation.Event
 {
-    public sealed class RemoveMediaValidator : AbstractValidator<RemoveMediaRequest>
+    public sealed class IdValidator : AbstractValidator<IdRequest>
     {
-        public RemoveMediaValidator()
+        public IdValidator()
         {
-            RuleFor(x => x.EventId)
+            RuleFor(x => x.Id)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage(EventConstants.IdIsEmpty)
                 .Must(x => Guid.TryParse(x, out _))
                 .WithMessage(EventConstants.InvalidIdFormat);
-
-            RuleFor(x => x.MediaId)
-                .NotEmpty()
-                .WithMessage(EventConstants.MediaIdIsEmpty);
         }
     }
 }

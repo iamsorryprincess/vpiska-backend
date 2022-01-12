@@ -1,5 +1,4 @@
 using System;
-using System.Text.RegularExpressions;
 using FluentValidation;
 using Vpiska.Api.Constants;
 using Vpiska.Api.Requests.User;
@@ -11,15 +10,14 @@ namespace Vpiska.Api.Validation.User
         public UpdateUserValidator()
         {
             RuleFor(x => x.Id)
-                .NotEmpty().WithMessage(UserConstants.IdIsEmpty);
-
-            RuleFor(x => x.Id)
+                .Cascade(CascadeMode.Stop)
+                .NotEmpty()
+                .WithMessage(UserConstants.IdIsEmpty)
                 .Must(id => Guid.TryParse(id, out _))
-                .When(x => x.Id != null)
-                .WithMessage(UserConstants.IdIsEmpty);
+                .WithMessage(UserConstants.IdInvalidFormat);
 
             RuleFor(x => x.Phone)
-                .Must(x => Regex.IsMatch(x, UserConstants.PhoneRegex))
+                .Matches(UserConstants.PhoneRegex)
                 .When(x => !string.IsNullOrWhiteSpace(x.Phone))
                 .WithMessage(UserConstants.PhoneRegexInvalid);
         }

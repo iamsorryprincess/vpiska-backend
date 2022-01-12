@@ -10,13 +10,11 @@ namespace Vpiska.Api.Validation.Event
         public AddMediaValidator()
         {
             RuleFor(x => x.EventId)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage(EventConstants.IdIsEmpty);
-
-            RuleFor(x => x.EventId)
-                .Must(id => Guid.TryParse(id, out _))
-                .When(x => x.EventId != null)
-                .WithMessage(EventConstants.IdIsEmpty);
+                .WithMessage(EventConstants.IdIsEmpty)
+                .Must(x => Guid.TryParse(x, out _))
+                .WithMessage(EventConstants.InvalidIdFormat);
 
             RuleFor(x => x.Media)
                 .NotEmpty()

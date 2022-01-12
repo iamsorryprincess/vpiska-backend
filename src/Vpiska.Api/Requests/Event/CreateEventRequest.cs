@@ -6,6 +6,6 @@ namespace Vpiska.Api.Requests.Event
 
         public string Address { get; set; }
 
-        public CoordinatesRequest Coordinates { get; set; }
+        public CoordinatesDto Coordinates { get; set; }
     }
 }
