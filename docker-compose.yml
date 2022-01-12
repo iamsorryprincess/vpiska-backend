@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  api:
+    image: kekit/api
+    build:
+      context: .
+      dockerfile: src/Vpiska.Api/Dockerfile
