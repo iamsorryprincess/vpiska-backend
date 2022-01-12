@@ -22,36 +22,45 @@ namespace Vpiska.Api
                     
                     if (context.HostingEnvironment.IsDevelopment())
                     {
-                        siloBuilder.UseLocalhostClustering();
-                        siloBuilder.AddMemoryGrainStorageAsDefault();
+                        siloBuilder.UseLocalhostClustering()
+                            .Configure<ClusterOptions>(options =>
+                            {
+                                options.ClusterId = configurationSection["ClusterId"];
+                                options.ServiceId = configurationSection["ServiceId"];
+                            })
+                            .AddSimpleMessageStreamProvider("SMSProvider",
+                                options => options.OptimizeForImmutableData = false)
+                            .AddMemoryGrainStorage("PubSubStore")
+                            .ConfigureApplicationParts(parts =>
+                                parts.AddApplicationPart(typeof(IEventGrain).Assembly).WithReferences());
                     }
                     else
                     {
                         var redisConnectionString =
                             $"{configurationSection["Redis:Host"]}:{configurationSection["Redis:Port"]}";
-                        
+
                         siloBuilder.UseRedisClustering(configuration =>
-                        {
-                            configuration.ConnectionString = redisConnectionString;
-                            configuration.Database = 0;
-                        });
-                        
-                        siloBuilder.AddRedisGrainStorage("PubSubStore", optionsBuilder => optionsBuilder.Configure(
-                            configuration =>
                             {
                                 configuration.ConnectionString = redisConnectionString;
-                                configuration.UseJson = true;
-                                configuration.DatabaseNumber = 1;
-                            }));
+                                configuration.Database = 0;
+                            })
+                            .Configure<ClusterOptions>(options =>
+                            {
+                                options.ClusterId = configurationSection["ClusterId"];
+                                options.ServiceId = configurationSection["ServiceId"];
+                            })
+                            .AddSimpleMessageStreamProvider("SMSProvider",
+                                options => options.OptimizeForImmutableData = false)
+                            .AddRedisGrainStorage("PubSubStore", optionsBuilder => optionsBuilder.Configure(
+                                configuration =>
+                                {
+                                    configuration.ConnectionString = redisConnectionString;
+                                    configuration.UseJson = true;
+                                    configuration.DatabaseNumber = 1;
+                                }))
+                            .ConfigureApplicationParts(parts =>
+                                parts.AddApplicationPart(typeof(IEventGrain).Assembly).WithReferences());
                     }
-
-                    siloBuilder.Configure<ClusterOptions>(options =>
-                    {
-                        options.ClusterId = configurationSection["ClusterId"];
-                        options.ServiceId = configurationSection["ServiceId"];
-                    });
-                    siloBuilder.ConfigureApplicationParts(parts =>
-                        parts.AddApplicationPart(typeof(IEventGrain).Assembly).WithReferences());
                 })
                 .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
     }

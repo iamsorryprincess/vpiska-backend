@@ -107,7 +107,7 @@ namespace Vpiska.Api.Controllers
                 return Ok(ApiResponse.Error(EventConstants.EventNotFound));
             }
 
-            await grain.SetData(model);
+            await grain.Init(model);
             return Ok(ApiResponse<Event>.Success(model));
         }
 
@@ -247,7 +247,6 @@ namespace Vpiska.Api.Controllers
             return Ok(ApiResponse<MediaResponse>.Success(new MediaResponse() { MediaId = uploadResult.Name }));
         }
 
-        
         [Authorize]
         [HttpPost("media/remove")]
         [Produces("application/json")]

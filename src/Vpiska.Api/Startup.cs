@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -16,9 +17,12 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using Vpiska.Api.Common;
+using Vpiska.Api.Connectors;
 using Vpiska.Api.Filters;
 using Vpiska.Api.Models.User;
+using Vpiska.Api.Receivers;
 using Vpiska.Api.Settings;
+using Vpiska.WebSocket;
 
 namespace Vpiska.Api
 {
@@ -158,6 +162,17 @@ namespace Vpiska.Api
 
             #endregion
 
+            #region WebSockets
+
+            services.AddSingleton<Storage>();
+            var webSocketsOptions = new WebSocketsOptions();
+            var idGenerators = new Dictionary<string, Func<string>> { { "Id", () => Guid.NewGuid().ToString() } };
+            services.AddVSocket<ChatReceiver, ChatConnector>(webSocketsOptions, "/chat",
+                new[] { "Id", "Name", "ImageId" }, new[] { "eventId" }, idGenerators);
+            services.AddSingleton(webSocketsOptions);
+
+            #endregion
+            
             services.AddControllers(options => options.Filters.Add<ExceptionFilter>());
         }
         
@@ -169,6 +184,8 @@ namespace Vpiska.Api
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseWebSockets();
+            app.UseVSocket();
         }
     }
 }
