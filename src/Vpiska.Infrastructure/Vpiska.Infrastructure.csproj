@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Vpiska.Domain\Vpiska.Domain.csproj" />
+      <ProjectReference Include="..\Vpiska.WebSocket\Vpiska.WebSocket.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FirebaseAdmin" Version="2.2.0" />
+      <PackageReference Include="Google.Cloud.Storage.V1" Version="3.6.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
+      <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="3.5.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.Orleans.Server" Version="3.5.1" />
+      <PackageReference Include="MongoDB.Driver" Version="2.14.1" />
+      <PackageReference Include="Orleans.Clustering.Redis" Version="3.2.1" />
+      <PackageReference Include="Orleans.Persistence.Redis" Version="3.2.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+      <PackageReference Include="System.Reactive" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Firebase\settings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>

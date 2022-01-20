@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,9 +70,13 @@ namespace Vpiska.WebSocket
                 if (_connections.ContainsKey(connectionId))
                 {
                     await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                    var strData = Encoding.UTF8.GetString(data);
+                    var splitIndex = strData.IndexOf('/');
+                    var route = strData[..splitIndex];
+                    var message = strData[(splitIndex + 1)..];
                     var receiver = scope.ServiceProvider.GetRequiredService(_receiverType) as IWebSocketReceiver
                                    ?? throw new InvalidOperationException($"Can't resolve receiver {_receiverType.FullName}");
-                    await receiver.Receive(connectionId, data, identityParams, queryParams);
+                    await receiver.Receive(connectionId, route, message, identityParams, queryParams);
                 }
             }
             catch (Exception)

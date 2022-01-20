@@ -21,7 +21,7 @@ namespace Vpiska.Api.Responses
         private ApiResponse(string[] errors)
         {
             IsSuccess = false;
-            Errors = errors.Select(ErrorResponse.Create).ToArray();
+            Errors = errors.Select(errorCode => new ErrorResponse(errorCode)).ToArray();
         }
 
         public static ApiResponse<TResult> Success(TResult result) => new(result);
@@ -47,7 +47,7 @@ namespace Vpiska.Api.Responses
         private ApiResponse(string[] errors)
         {
             IsSuccess = false;
-            Errors = errors.Select(ErrorResponse.Create).ToArray();
+            Errors = errors.Select(errorCode => new ErrorResponse(errorCode)).ToArray();
         }
 
         public static ApiResponse Success() => new();

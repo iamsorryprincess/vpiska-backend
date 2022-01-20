@@ -4,11 +4,9 @@ namespace Vpiska.Api.Responses
     {
         public string ErrorCode { get; }
 
-        private ErrorResponse(string errorCode)
+        public ErrorResponse(string errorCode)
         {
             ErrorCode = errorCode;
         }
-
-        public static ErrorResponse Create(string errorCode) => new(errorCode);
     }
 }
