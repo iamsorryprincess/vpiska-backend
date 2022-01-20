@@ -190,7 +190,7 @@ namespace Vpiska.Infrastructure
 #if DEBUG
             const string path = "../Vpiska.Infrastructure/Firebase/settings.json";
 #else
-            const string path = "settings.json";
+            const string path = "Firebase/settings.json";
 #endif
             return path;
         }
