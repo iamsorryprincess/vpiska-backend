@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 namespace Vpiska.Domain.Event.Interfaces
 {
@@ -8,9 +7,5 @@ namespace Vpiska.Domain.Event.Interfaces
         IObservable<IDomainEvent> EventStream { get; }
 
         void Publish(IDomainEvent domainEvent);
-
-        Task SubscribeAsync(string eventId);
-
-        Task UnsubscribeAsync(string eventId);
     }
 }

@@ -11,10 +11,6 @@ namespace Vpiska.Infrastructure.Orleans
 
         Task Init(Event data);
 
-        Task<bool> SubscribeAsync(string streamNamespace);
-
-        Task<bool> UnsubscribeAsync(string streamNamespace);
-
         Task<bool> Close();
 
         Task AddChatMessage(ChatMessage chatMessage);

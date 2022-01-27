@@ -202,7 +202,6 @@ namespace Vpiska.Infrastructure
         public static void AddEventBus(this IServiceCollection services)
         {
             services.AddSingleton<IEventBus, EventBus>();
-            services.AddSingleton<EventHandlersResolver>();
         }
 
         public static void AddEventCache(this IServiceCollection services)

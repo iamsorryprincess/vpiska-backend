@@ -38,8 +38,6 @@ namespace Vpiska.Domain.Event.Commands.AddUserCommand
                     _logger.LogWarning("Can't create event group for event: {}", command.EventId);
                     return;
                 }
-
-                await _eventBus.SubscribeAsync(command.EventId);
             }
 
             if (!_storage.AddConnection(command.EventId, command.ConnectionId, command.UserInfo.UserId))

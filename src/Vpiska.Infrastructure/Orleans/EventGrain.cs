@@ -1,12 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Orleans;
 using Orleans.Providers;
 using Orleans.Streams;
 using Vpiska.Domain.Event;
-using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Models;
+using Vpiska.Domain.Event.Interfaces;
+using Vpiska.Domain.Event.Events.ChatMessageEvent;
+using Vpiska.Domain.Event.Events.EventClosedEvent;
+using Vpiska.Domain.Event.Events.MediaAddedEvent;
+using Vpiska.Domain.Event.Events.MediaRemovedEvent;
+using Vpiska.Domain.Event.Events.UserConnectedEvent;
+using Vpiska.Domain.Event.Events.UserDisconnectedEvent;
 
 namespace Vpiska.Infrastructure.Orleans
 {
@@ -14,65 +23,46 @@ namespace Vpiska.Infrastructure.Orleans
     internal sealed class EventGrain : Grain<Event>, IEventGrain
     {
         private readonly IEventBus _eventBus;
-        private readonly EventHandlersResolver _eventHandlersResolver;
-        
-        private IDisposable _eventBusSubscription;
-        private StreamSubscriptionHandle<IDomainEvent> _streamSubscription;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly List<IDisposable> _busSubscriptions;
 
-        public EventGrain(IEventBus eventBus, EventHandlersResolver eventHandlersResolver)
+        private Guid _chatStreamId;
+        private StreamSubscriptionHandle<ChatMessageEvent> _chatSubscription;
+
+        private Guid _eventClosedStreamId;
+        private StreamSubscriptionHandle<EventClosedEvent> _eventClosedSubscription;
+
+        private Guid _mediaAddedStreamId;
+        private StreamSubscriptionHandle<MediaAddedEvent> _mediaAddedSubscription;
+
+        private Guid _mediaRemovedStreamId;
+        private StreamSubscriptionHandle<MediaRemovedEvent> _mediaRemovedSubscription;
+
+        private Guid _userConnectedStreamId;
+        private StreamSubscriptionHandle<UserConnectedEvent> _userConnectedSubscription;
+
+        private Guid _userDisconnectedStreamId;
+        private StreamSubscriptionHandle<UserDisconnectedEvent> _userDisconnectedSubscription;
+
+        public EventGrain(IEventBus eventBus, IServiceScopeFactory scopeFactory)
         {
             _eventBus = eventBus;
-            _eventHandlersResolver = eventHandlersResolver;
+            _scopeFactory = scopeFactory;
+            _busSubscriptions = new List<IDisposable>();
         }
-        
+
         public Task<Event> GetData() => Task.FromResult(State.Id == null ? null : State);
 
-        public Task Init(Event data)
+        public async Task Init(Event data)
         {
             State = data;
-            return Task.CompletedTask;
-        }
-
-        public async Task<bool> SubscribeAsync(string streamNamespace)
-        {
-            if (State.Id == null)
-            {
-                return false;
-            }
-
-            var sp = GetStreamProvider(Constants.StreamMessageProvider);
-            var stream = sp.GetStream<IDomainEvent>(Guid.Parse(State.Id), streamNamespace);
-
-            if (_eventBusSubscription != null || _streamSubscription != null)
-            {
-                return false;
-            }
-
-            _eventBusSubscription = _eventBus.EventStream.Subscribe(domainEvent => stream.OnNextAsync(domainEvent));
-            _streamSubscription = await stream.SubscribeAsync((domainEvent, _) => _eventHandlersResolver.Resolve(domainEvent));
-            return true;
-        }
-
-        public async Task<bool> UnsubscribeAsync(string streamNamespace)
-        {
-            if (State.Id == null)
-            {
-                return false;
-            }
-            
-            if (_eventBusSubscription != null)
-            {
-                _eventBusSubscription.Dispose();
-                _eventBusSubscription = null;
-            }
-
-            if (_streamSubscription != null)
-            {
-                await _streamSubscription.UnsubscribeAsync();
-                _streamSubscription = null;
-            }
-            
-            return true;
+            var streamProvider = GetStreamProvider(Constants.StreamMessageProvider);
+            (_chatStreamId, _chatSubscription) = await SubscribeAsync<ChatMessageEvent>(streamProvider);
+            (_eventClosedStreamId, _eventClosedSubscription) = await SubscribeAsync<EventClosedEvent>(streamProvider);
+            (_mediaAddedStreamId, _mediaAddedSubscription) = await SubscribeAsync<MediaAddedEvent>(streamProvider);
+            (_mediaRemovedStreamId, _mediaRemovedSubscription) = await SubscribeAsync<MediaRemovedEvent>(streamProvider);
+            (_userConnectedStreamId, _userConnectedSubscription) = await SubscribeAsync<UserConnectedEvent>(streamProvider);
+            (_userDisconnectedStreamId, _userDisconnectedSubscription) = await SubscribeAsync<UserDisconnectedEvent>(streamProvider);
         }
 
         public async Task<bool> Close()
@@ -82,20 +72,45 @@ namespace Vpiska.Infrastructure.Orleans
                 return false;
             }
             
-            State = new Event();
+            var streamProvider = GetStreamProvider(Constants.StreamMessageProvider);
             
-            if (_eventBusSubscription != null)
-            {
-                _eventBusSubscription.Dispose();
-                _eventBusSubscription = null;
-            }
+            await _chatSubscription.UnsubscribeAsync();
+            var chatStream = streamProvider.GetStream<ChatMessageEvent>(_chatStreamId, Constants.EventStreamNamespace);
+            await chatStream.OnCompletedAsync();
+            _chatSubscription = null;
 
-            if (_streamSubscription != null)
-            {
-                await _streamSubscription.UnsubscribeAsync();
-                _streamSubscription = null;
-            }
+            await _eventClosedSubscription.UnsubscribeAsync();
+            var eventClosedStream = streamProvider.GetStream<EventClosedEvent>(_eventClosedStreamId, Constants.EventStreamNamespace);
+            await eventClosedStream.OnCompletedAsync();
+            _eventClosedSubscription = null;
 
+            await _mediaAddedSubscription.UnsubscribeAsync();
+            var mediaAddedStream = streamProvider.GetStream<MediaAddedEvent>(_mediaAddedStreamId, Constants.EventStreamNamespace);
+            await mediaAddedStream.OnCompletedAsync();
+            _mediaAddedSubscription = null;
+
+            await _mediaRemovedSubscription.UnsubscribeAsync();
+            var mediaRemovedStream = streamProvider.GetStream<MediaRemovedEvent>(_mediaRemovedStreamId, Constants.EventStreamNamespace);
+            await mediaRemovedStream.OnCompletedAsync();
+            _mediaRemovedSubscription = null;
+
+            await _userConnectedSubscription.UnsubscribeAsync();
+            var userConnectedStream = streamProvider.GetStream<UserConnectedEvent>(_userConnectedStreamId, Constants.EventStreamNamespace);
+            await userConnectedStream.OnCompletedAsync();
+            _userConnectedSubscription = null;
+
+            await _userDisconnectedSubscription.UnsubscribeAsync();
+            var userDisconnectedStream = streamProvider.GetStream<UserDisconnectedEvent>(_userDisconnectedStreamId, Constants.EventStreamNamespace);
+            await userDisconnectedStream.OnCompletedAsync();
+            _userDisconnectedSubscription = null;
+
+            foreach (var busSubscription in _busSubscriptions)
+            {
+                busSubscription?.Dispose();
+            }
+            
+            _busSubscriptions.Clear();
+            State = new Event();
             await ClearStateAsync();
             return true;
         }
@@ -161,5 +176,27 @@ namespace Vpiska.Infrastructure.Orleans
 
         public Task<bool> RemoveMediaLink(string mediaLink) =>
             Task.FromResult(State.Id != null && State.MediaLinks.Remove(mediaLink));
+        
+        private async Task<(Guid, StreamSubscriptionHandle<TEvent>)> SubscribeAsync<TEvent>(
+            IStreamProvider streamProvider) where TEvent : class, IDomainEvent
+        {
+            var streamId = Guid.NewGuid();
+            var stream = streamProvider.GetStream<TEvent>(streamId, Constants.EventStreamNamespace);
+
+            var streamSubscription = await stream.SubscribeAsync(async (domainEvent, _) =>
+            {
+                await using var scope = _scopeFactory.CreateAsyncScope();
+                var eventHandler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
+                await eventHandler.Handle(domainEvent);
+            });
+
+            var busSubscription = _eventBus.EventStream
+                .Where(domainEvent => domainEvent is TEvent)
+                .Select(domainEvent => domainEvent as TEvent)
+                .Subscribe(domainEvent => stream.OnNextAsync(domainEvent));
+            
+            _busSubscriptions.Add(busSubscription);
+            return (streamId, streamSubscription);
+        }
     }
 }
