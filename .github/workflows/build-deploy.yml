@@ -10,9 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: build-container
-        run: ls
+        run: docker-compose build api
   deploy:
     runs-on: [self-hosted, linux, X64]
     steps:
       - name: deploy
-        run: pwd
+        run: docker service update --image api api
