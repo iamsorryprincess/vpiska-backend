@@ -15,4 +15,4 @@ jobs:
     runs-on: [self-hosted, linux, X64]
     steps:
       - name: deploy
-        run: docker service update --image api api
+        run: docker service update --image api vpiska_api
