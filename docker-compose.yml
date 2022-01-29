@@ -1,8 +1,80 @@
 version: '3.4'
 
 services:
+  mongo:
+    image: mongo:4.4.10
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=kekit*
+      - MONGO_INITDB_ROOT_PASSWORD=qweasd123*
+    ports:
+      - "27017:27017"
+    volumes:
+      - /home/vpiska/data/mongo:/data/db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          memory: 1024M
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+
+  redis:
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+    volumes:
+      - /home/vpiska/data/redis:/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          memory: 4096M
+          cpus: "1.0"
+        reservations:
+          memory: 2048M
+          cpus: "0.5"
+
   api:
-    image: kekit/api
+    image: api
     build:
       context: .
       dockerfile: src/Vpiska.Api/Dockerfile
+    environment:
+      - Jwt__Issuer=VpiskaServer
+      - Jwt__Audience=VpiskaClient
+      - Jwt__Key=vpiska_secretkey!123
+      - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
+      - Mongo__DatabaseName=vpiska
+      - Firebase__BucketName=vpiska-a6e65.appspot.com
+      - Orleans__ClusterId=dev
+      - Orleans__ServiceId=OrleansBasics
+      - Orleans__Redis__Host=redis
+      - Orleans__Redis__Port=6379
+    ports:
+      - "5000:5000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          memory: 8192M
+          cpus: "4"
+        reservations:
+          memory: 4096M
+          cpus: "2"
