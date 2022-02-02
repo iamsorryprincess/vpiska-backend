@@ -9,21 +9,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Vpiska.WebSocket
 {
-    internal sealed class WebSocketHub<TConnector, TReceiver> : IWebSocketHub
-        where TConnector : IWebSocketConnector
-        where TReceiver : IWebSocketReceiver
+    internal sealed class WebSocketHub<TListener> : IWebSocketHub where TListener : IWebSocketListener
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ConcurrentDictionary<Guid, System.Net.WebSockets.WebSocket> _connections;
-        private readonly Type _connectorType;
-        private readonly Type _receiverType;
+        private readonly Type _listenerType;
 
         public WebSocketHub(IServiceScopeFactory serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _connections = new ConcurrentDictionary<Guid, System.Net.WebSockets.WebSocket>();
-            _connectorType = typeof(TConnector);
-            _receiverType = typeof(TReceiver);
+            _listenerType = typeof(TListener);
         }
 
         public async Task<Guid> AddConnection(System.Net.WebSockets.WebSocket webSocket, Dictionary<string, string> identityParams,
@@ -34,10 +30,11 @@ namespace Vpiska.WebSocket
             if (_connections.TryAdd(connectionId, webSocket))
             {
                 await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                var connector = scope.ServiceProvider.GetRequiredService(_connectorType) as IWebSocketConnector
-                                ?? throw new InvalidOperationException(
-                                    $"Can't resolve connector {_connectorType.FullName}");
-                await connector.OnConnect(connectionId, identityParams, queryParams);
+                var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
+                               ?? throw new InvalidOperationException(
+                                   $"Can't resolve listener {_listenerType.FullName}");
+                await listener.OnConnect(new WebSocketContext(connectionId, queryParams, identityParams,
+                    scope.ServiceProvider));
                 return connectionId;
             }
 
@@ -51,10 +48,11 @@ namespace Vpiska.WebSocket
             {
                 await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "close connection", CancellationToken.None);
                 await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                var connector = scope.ServiceProvider.GetRequiredService(_connectorType) as IWebSocketConnector
-                                ?? throw new InvalidOperationException(
-                                    $"Can't resolve connector {_connectorType.FullName}");
-                await connector.OnDisconnect(connectionId, identityParams, queryParams);
+                var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
+                               ?? throw new InvalidOperationException(
+                                   $"Can't resolve listener {_listenerType.FullName}");
+                await listener.OnDisconnect(new WebSocketContext(connectionId, queryParams, identityParams,
+                    scope.ServiceProvider));
                 return true;
             }
 
@@ -74,9 +72,12 @@ namespace Vpiska.WebSocket
                     var splitIndex = strData.IndexOf('/');
                     var route = strData[..splitIndex];
                     var message = strData[(splitIndex + 1)..];
-                    var receiver = scope.ServiceProvider.GetRequiredService(_receiverType) as IWebSocketReceiver
-                                   ?? throw new InvalidOperationException($"Can't resolve receiver {_receiverType.FullName}");
-                    await receiver.Receive(connectionId, route, message, identityParams, queryParams);
+                    var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
+                                   ?? throw new InvalidOperationException(
+                                       $"Can't resolve listener {_listenerType.FullName}");
+                    await listener.Receive(
+                        new WebSocketContext(connectionId, queryParams, identityParams, scope.ServiceProvider), route,
+                        message);
                 }
             }
             catch (Exception)
@@ -85,10 +86,11 @@ namespace Vpiska.WebSocket
                 {
                     await socket.CloseAsync(WebSocketCloseStatus.InternalServerError, "close connection", CancellationToken.None);
                     await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                    var connector = scope.ServiceProvider.GetRequiredService(_connectorType) as IWebSocketConnector
-                                    ?? throw new InvalidOperationException(
-                                        $"Can't resolve connector {_connectorType.FullName}");
-                    await connector.OnDisconnect(connectionId, identityParams, queryParams);
+                    var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
+                                   ?? throw new InvalidOperationException(
+                                       $"Can't resolve listener {_listenerType.FullName}");
+                    await listener.OnDisconnect(new WebSocketContext(connectionId, queryParams, identityParams,
+                        scope.ServiceProvider));
                 }
             }
         }

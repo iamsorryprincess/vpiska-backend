@@ -9,9 +9,9 @@ namespace Vpiska.Infrastructure.WebSocket
 {
     internal sealed class EventSender : IEventSender
     {
-        private readonly IWebSocketInteracting<ChatConnector> _webSocketInteracting;
+        private readonly IWebSocketInteracting<ChatListener> _webSocketInteracting;
 
-        public EventSender(IWebSocketInteracting<ChatConnector> webSocketInteracting)
+        public EventSender(IWebSocketInteracting<ChatListener> webSocketInteracting)
         {
             _webSocketInteracting = webSocketInteracting;
         }

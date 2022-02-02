@@ -5,18 +5,16 @@ using System.Threading.Tasks;
 
 namespace Vpiska.WebSocket
 {
-    internal sealed class WebSocketInteracting<TConnector, TReceiver> : IWebSocketInteracting<TConnector>
-        where TConnector : IWebSocketConnector
-        where TReceiver : IWebSocketReceiver
+    internal sealed class WebSocketInteracting<TListener> : IWebSocketInteracting<TListener> where TListener : IWebSocketListener
     {
         private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
         
-        private readonly WebSocketHub<TConnector, TReceiver> _hub;
+        private readonly WebSocketHub<TListener> _hub;
 
-        public WebSocketInteracting(WebSocketHub<TConnector, TReceiver> hub)
+        public WebSocketInteracting(WebSocketHub<TListener> hub)
         {
             _hub = hub;
         }

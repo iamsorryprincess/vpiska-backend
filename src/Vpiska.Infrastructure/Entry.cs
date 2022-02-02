@@ -283,7 +283,7 @@ namespace Vpiska.Infrastructure
         {
             var options = new WebSocketsOptions();
             var idGenerators = new Dictionary<string, Func<string>> { { "Id", () => Guid.NewGuid().ToString() } };
-            services.AddVSocket<ChatReceiver, ChatConnector>(options, "/event", new[] { "Id", "Name", "ImageId" },
+            services.AddVSocket<ChatListener>(options, "/event", new[] { "Id", "Name", "ImageId" },
                 new[] { "eventId" }, idGenerators);
             services.AddSingleton(options);
         }

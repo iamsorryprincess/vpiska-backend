@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans;
@@ -190,10 +189,13 @@ namespace Vpiska.Infrastructure.Orleans
                 await eventHandler.Handle(domainEvent);
             });
 
-            var busSubscription = _eventBus.EventStream
-                .Where(domainEvent => domainEvent is TEvent)
-                .Select(domainEvent => domainEvent as TEvent)
-                .Subscribe(domainEvent => stream.OnNextAsync(domainEvent));
+            var busSubscription = _eventBus.EventStream.Subscribe(data =>
+            {
+                if (data is TEvent domainEvent)
+                {
+                    stream.OnNextAsync(domainEvent);
+                }
+            });
             
             _busSubscriptions.Add(busSubscription);
             return (streamId, streamSubscription);

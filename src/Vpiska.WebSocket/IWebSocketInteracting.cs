@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Vpiska.WebSocket
 {
-    public interface IWebSocketInteracting<TConnector> where TConnector : IWebSocketConnector
+    public interface IWebSocketInteracting<TListener> where TListener : IWebSocketListener
     {
         Task SendMessage<TMessage>(Guid connectionId, string route, TMessage message) where TMessage : class, new();
 
