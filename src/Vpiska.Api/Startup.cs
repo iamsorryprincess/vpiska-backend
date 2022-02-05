@@ -27,8 +27,8 @@ namespace Vpiska.Api
             services.AddEventCache();
             services.AddEventStateManager();
             services.AddWebSockets();
-            services.AddEventSender();
-            services.AddConnectionsStorage();
+            services.AddSenders();
+            services.AddConnectionsStorages();
             services.AddUserDomain();
             services.AddEventDomain();
             services.AddSwagger();

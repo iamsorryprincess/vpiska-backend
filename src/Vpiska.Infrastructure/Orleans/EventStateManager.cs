@@ -49,5 +49,11 @@ namespace Vpiska.Infrastructure.Orleans
             var grain = _clusterClient.GetGrain<IEventGrain>(eventId);
             return grain.RemoveMediaLink(mediaLink);
         }
+
+        public Task<bool> UpdateLocation(string eventId, string address, Coordinates coordinates)
+        {
+            var grain = _clusterClient.GetGrain<IEventGrain>(eventId);
+            return grain.UpdateData(address, coordinates);
+        }
     }
 }

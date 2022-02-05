@@ -3,14 +3,20 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Vpiska.Domain.Common;
 using Vpiska.Domain.Event.Commands.AddMediaCommand;
+using Vpiska.Domain.Event.Commands.AddRangeListenerCommand;
 using Vpiska.Domain.Event.Commands.AddUserCommand;
+using Vpiska.Domain.Event.Commands.ChangeLocationCommand;
+using Vpiska.Domain.Event.Commands.ChangeUserPositionCommand;
 using Vpiska.Domain.Event.Commands.ChatMessageCommand;
 using Vpiska.Domain.Event.Commands.CloseEventCommand;
 using Vpiska.Domain.Event.Commands.CreateEventCommand;
 using Vpiska.Domain.Event.Commands.RemoveMediaCommand;
+using Vpiska.Domain.Event.Commands.RemoveRangeListenerCommand;
 using Vpiska.Domain.Event.Commands.RemoveUserCommand;
 using Vpiska.Domain.Event.Events.ChatMessageEvent;
 using Vpiska.Domain.Event.Events.EventClosedEvent;
+using Vpiska.Domain.Event.Events.EventCreatedEvent;
+using Vpiska.Domain.Event.Events.EventUpdatedEvent;
 using Vpiska.Domain.Event.Events.MediaAddedEvent;
 using Vpiska.Domain.Event.Events.MediaRemovedEvent;
 using Vpiska.Domain.Event.Events.UserConnectedEvent;
@@ -57,6 +63,7 @@ namespace Vpiska.Domain
         {
             services.AddTransient<IValidator<CreateEventCommand>, CreateEventValidator>();
             services.AddTransient<ICommandHandler<CreateEventCommand, EventResponse>, CreateEventHandler>();
+            services.AddTransient<IEventHandler<EventCreatedEvent>, EventCreatedHandler>();
             
             services.AddTransient<IValidator<GetEventsQuery>, GetEventsValidator>();
             services.AddTransient<IQueryHandler<GetEventsQuery, List<EventShortResponse>>, GetEventsHandler>();
@@ -84,6 +91,14 @@ namespace Vpiska.Domain
             services.AddTransient<IValidator<RemoveMediaCommand>, RemoveMediaValidator>();
             services.AddTransient<ICommandHandler<RemoveMediaCommand>, RemoveMediaHandler>();
             services.AddTransient<IEventHandler<MediaRemovedEvent>, MediaRemovedHandler>();
+
+            services.AddTransient<ICommandHandler<AddRangeListenerCommand>, AddRangeListenerHandler>();
+            services.AddTransient<ICommandHandler<ChangeUserPositionCommand>, ChangeUserPositionHandler>();
+            services.AddTransient<ICommandHandler<RemoveRangeListenerCommand>, RemoveRangeListenerHandler>();
+
+            services.AddTransient<IValidator<ChangeLocationCommand>, ChangeLocationValidator>();
+            services.AddTransient<ICommandHandler<ChangeLocationCommand>, ChangeLocationHandler>();
+            services.AddTransient<IEventHandler<EventUpdatedEvent>, EventUpdatedHandler>();
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Vpiska.Domain.Event.Interfaces;
+using Vpiska.Domain.Event.Models;
 using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Common
@@ -9,18 +10,24 @@ namespace Vpiska.Domain.Event.Common
     {
         private readonly ICache<Event> _cache;
         private readonly IEventRepository _repository;
-        private readonly IConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _eventConnectionsStorage;
         private readonly IEventSender _eventSender;
+        private readonly IUserConnectionsStorage _userConnectionsStorage;
+        private readonly IUserSender _userSender;
 
         protected UsersCountUpdatedHandler(ICache<Event> cache,
             IEventRepository repository,
-            IConnectionsStorage storage,
-            IEventSender eventSender)
+            IEventConnectionsStorage eventConnectionsStorage,
+            IEventSender eventSender,
+            IUserConnectionsStorage userConnectionsStorage,
+            IUserSender userSender)
         {
             _cache = cache;
             _repository = repository;
-            _storage = storage;
+            _eventConnectionsStorage = eventConnectionsStorage;
             _eventSender = eventSender;
+            _userConnectionsStorage = userConnectionsStorage;
+            _userSender = userSender;
         }
 
         public async Task Handle(TEvent domainEvent)
@@ -39,14 +46,22 @@ namespace Vpiska.Domain.Event.Common
                 await _cache.SetData(model);
             }
 
-            if (_storage.IsEventGroupExist(domainEvent.EventId))
+            if (_eventConnectionsStorage.IsEventGroupExist(domainEvent.EventId))
             {
-                var connections = _storage.GetConnections(domainEvent.EventId);
+                var connections = _eventConnectionsStorage.GetConnections(domainEvent.EventId);
 
                 if (connections.Any())
                 {
                     await _eventSender.SendUsersCountUpdate(connections, model.Users.Count);
                 }
+            }
+
+            var rangeConnections =
+                _userConnectionsStorage.GetConnectionsByRange(model.Coordinates.X, model.Coordinates.Y);
+
+            if (rangeConnections.Any())
+            {
+                await _userSender.SendEventUpdatedInfo(rangeConnections, EventUpdatedInfo.FromModel(model));
             }
         }
     }

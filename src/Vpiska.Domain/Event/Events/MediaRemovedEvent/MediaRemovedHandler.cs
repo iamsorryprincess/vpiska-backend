@@ -6,10 +6,10 @@ namespace Vpiska.Domain.Event.Events.MediaRemovedEvent
 {
     internal sealed class MediaRemovedHandler : IEventHandler<MediaRemovedEvent>
     {
-        private readonly IConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _storage;
         private readonly IEventSender _eventSender;
 
-        public MediaRemovedHandler(IConnectionsStorage storage, IEventSender eventSender)
+        public MediaRemovedHandler(IEventConnectionsStorage storage, IEventSender eventSender)
         {
             _storage = storage;
             _eventSender = eventSender;

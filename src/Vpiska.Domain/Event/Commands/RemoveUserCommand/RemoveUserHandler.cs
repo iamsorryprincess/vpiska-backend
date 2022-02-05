@@ -10,12 +10,12 @@ namespace Vpiska.Domain.Event.Commands.RemoveUserCommand
     internal sealed class RemoveUserHandler : ICommandHandler<RemoveUserCommand>
     {
         private readonly ILogger<RemoveUserHandler> _logger;
-        private readonly IConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _storage;
         private readonly IEventStateManager _stateManager;
         private readonly IEventBus _eventBus;
 
         public RemoveUserHandler(ILogger<RemoveUserHandler> logger,
-            IConnectionsStorage storage,
+            IEventConnectionsStorage storage,
             IEventStateManager stateManager,
             IEventBus eventBus)
         {

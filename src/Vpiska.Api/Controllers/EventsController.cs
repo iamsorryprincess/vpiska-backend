@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vpiska.Api.Requests;
 using Vpiska.Api.Responses;
 using Vpiska.Domain.Event.Commands.AddMediaCommand;
+using Vpiska.Domain.Event.Commands.ChangeLocationCommand;
 using Vpiska.Domain.Event.Commands.CloseEventCommand;
 using Vpiska.Domain.Event.Commands.CreateEventCommand;
 using Vpiska.Domain.Event.Commands.RemoveMediaCommand;
@@ -49,7 +50,7 @@ namespace Vpiska.Api.Controllers
             return Ok(ApiResponse<List<EventShortResponse>>.Success(result));
         }
 
-        [HttpPost("single")]
+        [HttpPost("get")]
         [Produces("application/json")]
         [Consumes("application/json")]
         [ProducesResponseType(typeof(ApiResponse<EventResponse>), 200)]
@@ -60,6 +61,19 @@ namespace Vpiska.Api.Controllers
         {
             var result = await queryHandler.HandleAsync(query, cancellationToken);
             return Ok(ApiResponse<EventResponse>.Success(result));
+        }
+
+        [HttpPost("update")]
+        [Produces("application/json")]
+        [Consumes("application/json")]
+        [ProducesResponseType(typeof(ApiResponse), 200)]
+        public async Task<IActionResult> UpdateLocation(
+            [FromServices] ICommandHandler<ChangeLocationCommand> commandHandler,
+            [FromBody] ChangeLocationCommand command,
+            CancellationToken cancellationToken)
+        {
+            await commandHandler.HandleAsync(command, cancellationToken);
+            return Ok(ApiResponse.Success());
         }
 
         [Authorize]

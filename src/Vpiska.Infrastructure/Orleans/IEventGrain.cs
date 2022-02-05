@@ -24,5 +24,7 @@ namespace Vpiska.Infrastructure.Orleans
         Task<bool> AddMediaLink(string mediaLink);
 
         Task<bool> RemoveMediaLink(string mediaLink);
+
+        Task<bool> UpdateData(string address, Coordinates coordinates);
     }
 }

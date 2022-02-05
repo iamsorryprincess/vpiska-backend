@@ -6,10 +6,10 @@ namespace Vpiska.Domain.Event.Events.ChatMessageEvent
 {
     internal sealed class ChatMessageHandler : IEventHandler<ChatMessageEvent>
     {
-        private readonly IConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _storage;
         private readonly IEventSender _eventSender;
 
-        public ChatMessageHandler(IConnectionsStorage storage, IEventSender eventSender)
+        public ChatMessageHandler(IEventConnectionsStorage storage, IEventSender eventSender)
         {
             _storage = storage;
             _eventSender = eventSender;

@@ -16,5 +16,7 @@ namespace Vpiska.Domain.Event.Interfaces
         Task<bool> AddMediaLink(string eventId, string mediaLink);
 
         Task<bool> RemoveMediaLink(string eventId, string mediaLink);
+
+        Task<bool> UpdateLocation(string eventId, string address, Coordinates coordinates);
     }
 }

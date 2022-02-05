@@ -269,14 +269,16 @@ namespace Vpiska.Infrastructure
 
         #region WebSocket
 
-        public static void AddEventSender(this IServiceCollection services)
+        public static void AddSenders(this IServiceCollection services)
         {
             services.AddTransient<IEventSender, EventSender>();
+            services.AddTransient<IUserSender, UserSender>();
         }
 
-        public static void AddConnectionsStorage(this IServiceCollection services)
+        public static void AddConnectionsStorages(this IServiceCollection services)
         {
-            services.AddSingleton<IConnectionsStorage, Storage>();
+            services.AddSingleton<IEventConnectionsStorage, EventConnectionsStorage>();
+            services.AddSingleton<IUserConnectionsStorage, UserConnectionsStorage>();
         }
 
         public static void AddWebSockets(this IServiceCollection services)
@@ -285,6 +287,7 @@ namespace Vpiska.Infrastructure
             var idGenerators = new Dictionary<string, Func<string>> { { "Id", () => Guid.NewGuid().ToString() } };
             services.AddVSocket<ChatListener>(options, "/event", new[] { "Id", "Name", "ImageId" },
                 new[] { "eventId" }, idGenerators);
+            services.AddVSocket<RangeListener>(options, "/range", Array.Empty<string>(), Array.Empty<string>());
             services.AddSingleton(options);
         }
 

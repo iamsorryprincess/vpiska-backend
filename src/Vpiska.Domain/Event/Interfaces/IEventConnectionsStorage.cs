@@ -2,7 +2,7 @@ using System;
 
 namespace Vpiska.Domain.Event.Interfaces
 {
-    public interface IConnectionsStorage
+    public interface IEventConnectionsStorage
     {
         bool IsEventGroupExist(string eventId);
 
@@ -15,7 +15,5 @@ namespace Vpiska.Domain.Event.Interfaces
         bool RemoveConnection(string eventId, Guid connectionId);
 
         Guid[] GetConnections(string eventId);
-
-        Guid GetUserConnectionId(string userId);
     }
 }

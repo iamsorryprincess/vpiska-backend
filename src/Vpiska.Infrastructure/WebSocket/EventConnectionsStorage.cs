@@ -5,12 +5,12 @@ using Vpiska.Domain.Event.Interfaces;
 
 namespace Vpiska.Infrastructure.WebSocket
 {
-    internal sealed class Storage : IConnectionsStorage
+    internal sealed class EventConnectionsStorage : IEventConnectionsStorage
     {
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, string>> _eventGroups;
         private readonly ConcurrentDictionary<string, Guid> _usersConnections;
         
-        public Storage()
+        public EventConnectionsStorage()
         {
             _eventGroups = new ConcurrentDictionary<string, ConcurrentDictionary<Guid, string>>();
             _usersConnections = new ConcurrentDictionary<string, Guid>();
@@ -52,10 +52,5 @@ namespace Vpiska.Infrastructure.WebSocket
                 ? users.Select(x => x.Key).ToArray()
                 : Array.Empty<Guid>();
         }
-
-        public Guid GetUserConnectionId(string userId) =>
-            _usersConnections.TryGetValue(userId, out var connectionId)
-                ? connectionId
-                : Guid.Empty;
     }
 }

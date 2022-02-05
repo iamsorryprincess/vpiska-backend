@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using Vpiska.Domain.Common;
+using Vpiska.Domain.Event.Events.EventCreatedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Responses;
@@ -14,13 +15,16 @@ namespace Vpiska.Domain.Event.Commands.CreateEventCommand
     {
         private readonly IEventRepository _repository;
         private readonly ICache<Event> _cache;
-        
+        private readonly IEventBus _eventBus;
+
         public CreateEventHandler(IValidator<CreateEventCommand> validator,
             IEventRepository repository,
-            ICache<Event> cache) : base(validator)
+            ICache<Event> cache,
+            IEventBus eventBus) : base(validator)
         {
             _repository = repository;
             _cache = cache;
+            _eventBus = eventBus;
         }
 
         protected override async Task<EventResponse> Handle(CreateEventCommand command, CancellationToken cancellationToken)
@@ -36,6 +40,8 @@ namespace Vpiska.Domain.Event.Commands.CreateEventCommand
             var model = command.ToModel(eventId);
             await _repository.InsertAsync(model, cancellationToken);
             await _cache.SetData(model);
+            var domainEvent = EventCreatedEvent.FromModel(model);
+            _eventBus.Publish(domainEvent);
             return command.ToEventResponse(eventId);
         }
     }

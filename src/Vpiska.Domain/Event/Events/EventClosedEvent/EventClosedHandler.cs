@@ -8,33 +8,46 @@ namespace Vpiska.Domain.Event.Events.EventClosedEvent
     internal sealed class EventClosedHandler : IEventHandler<EventClosedEvent>
     {
         private readonly ILogger<EventClosedHandler> _logger;
-        private readonly IConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _eventConnectionsStorage;
         private readonly IEventSender _eventSender;
-        
+        private readonly IUserConnectionsStorage _userConnectionsStorage;
+        private readonly IUserSender _userSender;
+
         public EventClosedHandler(ILogger<EventClosedHandler> logger,
-            IConnectionsStorage storage,
-            IEventSender eventSender)
+            IEventConnectionsStorage eventConnectionsStorage,
+            IEventSender eventSender,
+            IUserConnectionsStorage userConnectionsStorage,
+            IUserSender userSender)
         {
             _logger = logger;
-            _storage = storage;
+            _eventConnectionsStorage = eventConnectionsStorage;
             _eventSender = eventSender;
+            _userConnectionsStorage = userConnectionsStorage;
+            _userSender = userSender;
         }
-        
+
         public async Task Handle(EventClosedEvent domainEvent)
         {
-            if (_storage.IsEventGroupExist(domainEvent.EventId))
+            if (_eventConnectionsStorage.IsEventGroupExist(domainEvent.EventId))
             {
-                var connections = _storage.GetConnections(domainEvent.EventId);
+                var connections = _eventConnectionsStorage.GetConnections(domainEvent.EventId);
 
                 if (connections.Any())
                 {
                     await Task.WhenAll(connections.Select(_eventSender.SendCloseStatus));
                 }
 
-                if (!_storage.RemoveEventGroup(domainEvent.EventId))
+                if (!_eventConnectionsStorage.RemoveEventGroup(domainEvent.EventId))
                 {
                     _logger.LogWarning("Can't remove event group {}", domainEvent.EventId);
                 }
+            }
+            
+            var rangeConnections = _userConnectionsStorage.GetConnectionsByRange(domainEvent.Coordinates.X, domainEvent.Coordinates.Y);
+
+            if (rangeConnections.Any())
+            {
+                await _userSender.SendEventClosed(rangeConnections, domainEvent.EventId);
             }
         }
     }

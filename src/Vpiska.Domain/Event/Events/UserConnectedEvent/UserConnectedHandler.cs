@@ -6,8 +6,12 @@ namespace Vpiska.Domain.Event.Events.UserConnectedEvent
 {
     internal sealed class UserConnectedHandler : UsersCountUpdatedHandler<UserConnectedEvent>
     {
-        public UserConnectedHandler(ICache<Event> cache, IEventRepository repository, IConnectionsStorage storage, IEventSender eventSender)
-            : base(cache, repository, storage, eventSender)
+        public UserConnectedHandler(ICache<Event> cache,
+            IEventRepository repository,
+            IEventConnectionsStorage eventConnectionsStorage,
+            IEventSender eventSender,
+            IUserConnectionsStorage userConnectionsStorage,
+            IUserSender userSender) : base(cache, repository, eventConnectionsStorage, eventSender, userConnectionsStorage, userSender)
         {
         }
     }

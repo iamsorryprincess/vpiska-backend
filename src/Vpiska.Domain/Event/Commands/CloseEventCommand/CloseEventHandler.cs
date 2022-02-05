@@ -42,8 +42,8 @@ namespace Vpiska.Domain.Event.Commands.CloseEventCommand
             {
                 throw new UserIsNotOwnerException();
             }
-            
-            _eventBus.Publish(new EventClosedEvent() { EventId = command.EventId });
+
+            _eventBus.Publish(new EventClosedEvent() { EventId = command.EventId, Coordinates = model.Coordinates });
             await _repository.RemoveByFieldAsync("_id", command.EventId, cancellationToken);
             await _cache.RemoveData(command.EventId);
         }

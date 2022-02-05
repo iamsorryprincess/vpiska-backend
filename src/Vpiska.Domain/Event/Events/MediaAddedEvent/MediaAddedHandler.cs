@@ -6,10 +6,10 @@ namespace Vpiska.Domain.Event.Events.MediaAddedEvent
 {
     internal sealed class MediaAddedHandler : IEventHandler<MediaAddedEvent>
     {
-        private readonly IConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _storage;
         private readonly IEventSender _eventSender;
 
-        public MediaAddedHandler(IConnectionsStorage storage, IEventSender eventSender)
+        public MediaAddedHandler(IEventConnectionsStorage storage, IEventSender eventSender)
         {
             _storage = storage;
             _eventSender = eventSender;

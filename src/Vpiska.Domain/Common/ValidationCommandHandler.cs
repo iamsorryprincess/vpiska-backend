@@ -23,8 +23,8 @@ namespace Vpiska.Domain.Common
 
         protected abstract Task<TResult> Handle(TCommand command, CancellationToken cancellationToken);
     }
-    
-    internal abstract class ValidationCommandHandler<TCommand> : ICommandHandler<TCommand>
+
+    public abstract class ValidationCommandHandler<TCommand> : ICommandHandler<TCommand>
     {
         private readonly IValidator<TCommand> _validator;
 

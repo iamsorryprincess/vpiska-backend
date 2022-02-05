@@ -11,13 +11,13 @@ namespace Vpiska.Domain.Event.Commands.AddUserCommand
     internal sealed class AddUserHandler : ICommandHandler<AddUserCommand>
     {
         private readonly ILogger<AddUserHandler> _logger;
-        private readonly IConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _storage;
         private readonly IEventStateManager _stateManager;
         private readonly IEventSender _eventSender;
         private readonly IEventBus _eventBus;
 
         public AddUserHandler(ILogger<AddUserHandler> logger,
-            IConnectionsStorage storage,
+            IEventConnectionsStorage storage,
             IEventStateManager stateManager,
             IEventSender eventSender,
             IEventBus eventBus)

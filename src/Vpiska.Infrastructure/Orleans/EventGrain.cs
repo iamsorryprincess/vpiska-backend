@@ -11,6 +11,8 @@ using Vpiska.Domain.Event.Models;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Events.ChatMessageEvent;
 using Vpiska.Domain.Event.Events.EventClosedEvent;
+using Vpiska.Domain.Event.Events.EventCreatedEvent;
+using Vpiska.Domain.Event.Events.EventUpdatedEvent;
 using Vpiska.Domain.Event.Events.MediaAddedEvent;
 using Vpiska.Domain.Event.Events.MediaRemovedEvent;
 using Vpiska.Domain.Event.Events.UserConnectedEvent;
@@ -25,8 +27,14 @@ namespace Vpiska.Infrastructure.Orleans
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly List<IDisposable> _busSubscriptions;
 
+        private Guid _eventCreatedStreamId;
+        private StreamSubscriptionHandle<EventCreatedEvent> _eventCreatedSubscription;
+
         private Guid _chatStreamId;
         private StreamSubscriptionHandle<ChatMessageEvent> _chatSubscription;
+
+        private Guid _eventUpdatedStreamId;
+        private StreamSubscriptionHandle<EventUpdatedEvent> _eventUpdatedSubscription;
 
         private Guid _eventClosedStreamId;
         private StreamSubscriptionHandle<EventClosedEvent> _eventClosedSubscription;
@@ -56,7 +64,9 @@ namespace Vpiska.Infrastructure.Orleans
         {
             State = data;
             var streamProvider = GetStreamProvider(Constants.StreamMessageProvider);
+            (_eventCreatedStreamId, _eventCreatedSubscription) = await SubscribeAsync<EventCreatedEvent>(streamProvider);
             (_chatStreamId, _chatSubscription) = await SubscribeAsync<ChatMessageEvent>(streamProvider);
+            (_eventUpdatedStreamId, _eventUpdatedSubscription) = await SubscribeAsync<EventUpdatedEvent>(streamProvider);
             (_eventClosedStreamId, _eventClosedSubscription) = await SubscribeAsync<EventClosedEvent>(streamProvider);
             (_mediaAddedStreamId, _mediaAddedSubscription) = await SubscribeAsync<MediaAddedEvent>(streamProvider);
             (_mediaRemovedStreamId, _mediaRemovedSubscription) = await SubscribeAsync<MediaRemovedEvent>(streamProvider);
@@ -72,11 +82,21 @@ namespace Vpiska.Infrastructure.Orleans
             }
             
             var streamProvider = GetStreamProvider(Constants.StreamMessageProvider);
+
+            await _eventCreatedSubscription.UnsubscribeAsync();
+            var eventCreatedStream = streamProvider.GetStream<EventCreatedEvent>(_eventCreatedStreamId, Constants.EventStreamNamespace);
+            await eventCreatedStream.OnCompletedAsync();
+            _eventCreatedSubscription = null;
             
             await _chatSubscription.UnsubscribeAsync();
             var chatStream = streamProvider.GetStream<ChatMessageEvent>(_chatStreamId, Constants.EventStreamNamespace);
             await chatStream.OnCompletedAsync();
             _chatSubscription = null;
+
+            await _eventUpdatedSubscription.UnsubscribeAsync();
+            var eventUpdatedStream = streamProvider.GetStream<EventUpdatedEvent>(_eventUpdatedStreamId, Constants.EventStreamNamespace);
+            await eventUpdatedStream.OnCompletedAsync();
+            _eventUpdatedSubscription = null;
 
             await _eventClosedSubscription.UnsubscribeAsync();
             var eventClosedStream = streamProvider.GetStream<EventClosedEvent>(_eventClosedStreamId, Constants.EventStreamNamespace);
@@ -175,7 +195,19 @@ namespace Vpiska.Infrastructure.Orleans
 
         public Task<bool> RemoveMediaLink(string mediaLink) =>
             Task.FromResult(State.Id != null && State.MediaLinks.Remove(mediaLink));
-        
+
+        public Task<bool> UpdateData(string address, Coordinates coordinates)
+        {
+            if (State.Id == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            State.Address = address;
+            State.Coordinates = coordinates;
+            return Task.FromResult(true);
+        }
+
         private async Task<(Guid, StreamSubscriptionHandle<TEvent>)> SubscribeAsync<TEvent>(
             IStreamProvider streamProvider) where TEvent : class, IDomainEvent
         {
