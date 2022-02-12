@@ -38,6 +38,7 @@ namespace Vpiska.Infrastructure.RabbitMq
         private readonly List<IModel> _consumers;
 
         private IConnection _connection;
+        private bool _isConnectionOpened;
 
         public RabbitMqHostedService(ILogger<RabbitMqHostedService> logger,
             RabbitMqSettings settings,
@@ -57,7 +58,7 @@ namespace Vpiska.Infrastructure.RabbitMq
             _retryPolicy = Policy
                 .Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
-                .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     (exception, _, _) => _logger.LogError(exception, "Trying reconnect to RabbitMQ"));
 
             _subscriptions = new List<IDisposable>();
@@ -91,45 +92,51 @@ namespace Vpiska.Infrastructure.RabbitMq
                 _connection = factory.CreateConnection();
             });
             
-            SubscribeToEvent<ChatMessageEvent>("chat");
-            SubscribeToEvent<EventClosedEvent>("closeEvent");
-            SubscribeToEvent<EventCreatedEvent>("createEvent");
-            SubscribeToEvent<EventUpdatedEvent>("updateEvent");
-            SubscribeToEvent<MediaAddedEvent>("mediaAdd");
-            SubscribeToEvent<MediaRemovedEvent>("mediaRemove");
-            SubscribeToEvent<UserConnectedEvent>("userConnect");
-            SubscribeToEvent<UserDisconnectedEvent>("userDisconnect");
+            SubscribeToEvent<ChatMessageEvent>("event.chat");
+            SubscribeToEvent<EventClosedEvent>("event.close");
+            SubscribeToEvent<EventCreatedEvent>("event.create");
+            SubscribeToEvent<EventUpdatedEvent>("event.update");
+            SubscribeToEvent<MediaAddedEvent>("event.media.add");
+            SubscribeToEvent<MediaRemovedEvent>("event.media.remove");
+            SubscribeToEvent<UserConnectedEvent>("event.user.connect");
+            SubscribeToEvent<UserDisconnectedEvent>("event.user.disconnect");
 
             _connection.ConnectionShutdown += OnConnectionShutdown;
             _connection.CallbackException += OnCallbackException;
             _connection.ConnectionBlocked += OnConnectionBlocked;
+            _isConnectionOpened = true;
             _logger.LogInformation("Connected to RabbitMQ host {}", _settings.Host);
         }
 
         private void CloseConnection()
         {
-            foreach (var consumer in _consumers)
+            if (_isConnectionOpened)
             {
-                consumer?.Close();
-            }
+                _connection.ConnectionShutdown -= OnConnectionShutdown;
+                _connection.CallbackException -= OnCallbackException;
+                _connection.ConnectionBlocked -= OnConnectionBlocked;
+                
+                foreach (var consumer in _consumers)
+                {
+                    consumer?.Close();
+                }
 
-            foreach (var producer in _producers)
-            {
-                producer?.Close();
-            }
+                foreach (var producer in _producers)
+                {
+                    producer?.Close();
+                }
 
-            foreach (var subscription in _subscriptions)
-            {
-                subscription?.Dispose();
-            }
+                foreach (var subscription in _subscriptions)
+                {
+                    subscription?.Dispose();
+                }
             
-            _consumers.Clear();
-            _producers.Clear();
-            _subscriptions.Clear();
-            _connection.Close();
-            _connection.ConnectionShutdown -= OnConnectionShutdown;
-            _connection.CallbackException -= OnCallbackException;
-            _connection.ConnectionBlocked -= OnConnectionBlocked;
+                _consumers.Clear();
+                _producers.Clear();
+                _subscriptions.Clear();
+                _connection.Close();
+                _isConnectionOpened = false;
+            }
         }
 
         private void SubscribeToEvent<TEvent>(string eventName) where TEvent : class, IDomainEvent, new()
