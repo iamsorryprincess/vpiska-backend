@@ -26,18 +26,29 @@ namespace Vpiska.WebSocket
             Dictionary<string, string> queryParams)
         {
             var connectionId = Guid.NewGuid();
-
+            
             if (_connections.TryAdd(connectionId, webSocket))
             {
-                await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
-                               ?? throw new InvalidOperationException(
-                                   $"Can't resolve listener {_listenerType.FullName}");
-                await listener.OnConnect(new WebSocketContext(connectionId, queryParams, identityParams,
-                    scope.ServiceProvider));
-                return connectionId;
+                try
+                {
+                    await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                    var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
+                                   ?? throw new InvalidOperationException(
+                                       $"Can't resolve listener {_listenerType.FullName}");
+                    await listener.OnConnect(new WebSocketContext(connectionId, queryParams, identityParams,
+                        scope.ServiceProvider));
+                    return connectionId;
+                }
+                catch (Exception ex)
+                {
+                    HandleException(connectionId, identityParams, queryParams, ex);
+                    await CloseConnection(webSocket, "error while trying create connection", WebSocketCloseStatus.InternalServerError,
+                        connectionId,
+                        identityParams,
+                        queryParams);
+                }
             }
-
+            
             throw new InvalidOperationException("Can't add webSocket");
         }
 
@@ -46,14 +57,11 @@ namespace Vpiska.WebSocket
         {
             if (_connections.TryRemove(connectionId, out var socket))
             {
-                await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "close connection", CancellationToken.None);
-                await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
-                               ?? throw new InvalidOperationException(
-                                   $"Can't resolve listener {_listenerType.FullName}");
-                await listener.OnDisconnect(new WebSocketContext(connectionId, queryParams, identityParams,
-                    scope.ServiceProvider));
-                return true;
+                var result = await CloseConnection(socket, "close connection", WebSocketCloseStatus.NormalClosure,
+                    connectionId,
+                    identityParams,
+                    queryParams);
+                return result;
             }
 
             return false;
@@ -80,17 +88,17 @@ namespace Vpiska.WebSocket
                         message);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                HandleException(connectionId, identityParams, queryParams, ex);
+                
                 if (_connections.TryRemove(connectionId, out var socket))
                 {
-                    await socket.CloseAsync(WebSocketCloseStatus.InternalServerError, "close connection", CancellationToken.None);
-                    await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                    var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
-                                   ?? throw new InvalidOperationException(
-                                       $"Can't resolve listener {_listenerType.FullName}");
-                    await listener.OnDisconnect(new WebSocketContext(connectionId, queryParams, identityParams,
-                        scope.ServiceProvider));
+                    await CloseConnection(socket, "error while receive message",
+                        WebSocketCloseStatus.InternalServerError,
+                        connectionId,
+                        identityParams,
+                        queryParams);
                 }
             }
         }
@@ -113,6 +121,39 @@ namespace Vpiska.WebSocket
             }
 
             throw new InvalidOperationException($"Can't find connection {connectionId}");
+        }
+        
+        private async Task<bool> CloseConnection(System.Net.WebSockets.WebSocket socket,
+            string statusDescription,
+            WebSocketCloseStatus socketCloseStatus,
+            Guid connectionId,
+            Dictionary<string, string> identityParams,
+            Dictionary<string, string> queryParams)
+        {
+            try
+            {
+                await socket.CloseAsync(socketCloseStatus, statusDescription, CancellationToken.None);
+                await using var scope = _serviceScopeFactory.CreateAsyncScope();
+                var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
+                               ?? throw new InvalidOperationException(
+                                   $"Can't resolve listener {_listenerType.FullName}");
+                await listener.OnDisconnect(new WebSocketContext(connectionId, queryParams, identityParams,
+                    scope.ServiceProvider));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                HandleException(connectionId, identityParams, queryParams, ex);
+                return false;
+            }
+        }
+
+        private void HandleException(Guid connectionId, Dictionary<string, string> identityParams, Dictionary<string, string> queryParams, Exception ex)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var exceptionHandler = scope.ServiceProvider.GetService<IWebSocketExceptionHandler>();
+            exceptionHandler?.Handle(
+                new WebSocketContext(connectionId, queryParams, identityParams, scope.ServiceProvider), ex);
         }
     }
 }

@@ -2,27 +2,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Models;
-using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Common
 {
     internal abstract class UsersCountUpdatedHandler<TEvent> : IEventHandler<TEvent> where TEvent : IDomainEvent
     {
-        private readonly ICache<Event> _cache;
+        private readonly IEventState _eventState;
         private readonly IEventRepository _repository;
         private readonly IEventConnectionsStorage _eventConnectionsStorage;
         private readonly IEventSender _eventSender;
         private readonly IUserConnectionsStorage _userConnectionsStorage;
         private readonly IUserSender _userSender;
 
-        protected UsersCountUpdatedHandler(ICache<Event> cache,
+        protected UsersCountUpdatedHandler(IEventState eventState,
             IEventRepository repository,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,
             IUserConnectionsStorage userConnectionsStorage,
             IUserSender userSender)
         {
-            _cache = cache;
+            _eventState = eventState;
             _repository = repository;
             _eventConnectionsStorage = eventConnectionsStorage;
             _eventSender = eventSender;
@@ -30,20 +29,13 @@ namespace Vpiska.Domain.Event.Common
             _userSender = userSender;
         }
 
-        public async Task Handle(TEvent domainEvent)
+        public virtual async Task Handle(TEvent domainEvent)
         {
-            var model = await _cache.GetData(domainEvent.EventId);
+            var model = await _eventState.GetEvent(_repository, domainEvent.EventId);
 
             if (model == null)
             {
-                model = await _repository.GetByFieldAsync("_id", domainEvent.EventId);
-                
-                if (model == null)
-                {
-                    return;
-                }
-
-                await _cache.SetData(model);
+                return;
             }
 
             if (_eventConnectionsStorage.IsEventGroupExist(domainEvent.EventId))

@@ -2,9 +2,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Vpiska.Domain.Event.Commands.AddRangeListenerCommand;
 using Vpiska.Domain.Event.Commands.ChangeUserPositionCommand;
-using Vpiska.Domain.Event.Commands.RemoveRangeListenerCommand;
+using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
 using Vpiska.WebSocket;
 
@@ -19,18 +18,22 @@ namespace Vpiska.Infrastructure.WebSocket
         
         public Task OnConnect(WebSocketContext socketContext)
         {
-            var command = new AddRangeListenerCommand() { ConnectionId = socketContext.ConnectionId };
-            var commandHandler = socketContext.ServiceProvider
-                .GetRequiredService<ICommandHandler<AddRangeListenerCommand>>();
-            return commandHandler.HandleAsync(command);
+            var storage = socketContext.ServiceProvider.GetRequiredService<IUserConnectionsStorage>();
+            storage.AddConnection(socketContext.ConnectionId);
+            return Task.CompletedTask;
         }
 
         public Task OnDisconnect(WebSocketContext socketContext)
         {
-            var command = new RemoveRangeListenerCommand() { ConnectionId = socketContext.ConnectionId };
-            var commandHandler = socketContext.ServiceProvider
-                .GetRequiredService<ICommandHandler<RemoveRangeListenerCommand>>();
-            return commandHandler.HandleAsync(command);
+            var logger = socketContext.ServiceProvider.GetRequiredService<ILogger<RangeListener>>();
+            var storage = socketContext.ServiceProvider.GetRequiredService<IUserConnectionsStorage>();
+            
+            if (!storage.RemoveConnection(socketContext.ConnectionId))
+            {
+                logger.LogWarning("Can't remove user connection {}", socketContext.ConnectionId);
+            }
+            
+            return Task.CompletedTask;
         }
 
         public Task Receive(WebSocketContext socketContext, string route, string message)

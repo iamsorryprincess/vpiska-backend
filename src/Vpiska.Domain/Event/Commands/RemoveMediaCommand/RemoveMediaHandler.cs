@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using Vpiska.Domain.Common;
+using Vpiska.Domain.Event.Common;
 using Vpiska.Domain.Event.Events.MediaRemovedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
@@ -11,40 +12,30 @@ namespace Vpiska.Domain.Event.Commands.RemoveMediaCommand
 {
     internal sealed class RemoveMediaHandler : ValidationCommandHandler<RemoveMediaCommand>
     {
-        private readonly ICache<Event> _cache;
         private readonly IEventRepository _repository;
         private readonly IFileStorage _fileStorage;
-        private readonly IEventStateManager _stateManager;
+        private readonly IEventState _eventState;
         private readonly IEventBus _eventBus;
 
         public RemoveMediaHandler(IValidator<RemoveMediaCommand> validator,
-            ICache<Event> cache,
             IEventRepository repository,
             IFileStorage fileStorage,
-            IEventStateManager stateManager,
+            IEventState eventState,
             IEventBus eventBus) : base(validator)
         {
-            _cache = cache;
             _repository = repository;
             _fileStorage = fileStorage;
-            _stateManager = stateManager;
+            _eventState = eventState;
             _eventBus = eventBus;
         }
 
         protected override async Task Handle(RemoveMediaCommand command, CancellationToken cancellationToken)
         {
-            var model = await _cache.GetData(command.EventId);
+            var model = await _eventState.GetEvent(_repository, command.EventId, cancellationToken: cancellationToken);
 
             if (model == null)
             {
-                model = await _repository.GetByFieldAsync("_id", command.EventId, cancellationToken);
-                
-                if (model == null)
-                {
-                    throw new EventNotFoundException();
-                }
-
-                await _cache.SetData(model);
+                throw new EventNotFoundException();
             }
 
             if (model.OwnerId != command.OwnerId)
@@ -58,7 +49,6 @@ namespace Vpiska.Domain.Event.Commands.RemoveMediaCommand
             }
 
             await _fileStorage.DeleteFileAsync(command.MediaId, cancellationToken);
-            await _stateManager.RemoveMediaLink(command.EventId, command.MediaId);
             await _repository.RemoveMediaLink(command.EventId, command.MediaId, cancellationToken);
             _eventBus.Publish(new MediaRemovedEvent() { EventId = command.EventId, MediaId = command.MediaId });
         }

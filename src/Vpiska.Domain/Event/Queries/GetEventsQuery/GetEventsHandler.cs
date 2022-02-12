@@ -10,11 +10,11 @@ namespace Vpiska.Domain.Event.Queries.GetEventsQuery
 {
     internal sealed class GetEventsHandler : ValidationQueryHandler<GetEventsQuery, List<EventShortResponse>>
     {
-        private readonly IEventRepository _repository;
-        
-        public GetEventsHandler(IValidator<GetEventsQuery> validator, IEventRepository repository) : base(validator)
+        private readonly IEventState _eventState;
+
+        public GetEventsHandler(IValidator<GetEventsQuery> validator, IEventState eventState) : base(validator)
         {
-            _repository = repository;
+            _eventState = eventState;
         }
 
         protected override Task<List<EventShortResponse>> Handle(GetEventsQuery query, CancellationToken cancellationToken)
@@ -25,7 +25,7 @@ namespace Vpiska.Domain.Event.Queries.GetEventsQuery
             var xRight = query.Coordinates.X.Value + halfHorizontalRange;
             var yLeft = query.Coordinates.Y.Value - halfVerticalRange;
             var yRight = query.Coordinates.Y.Value + halfVerticalRange;
-            return _repository.GetByRange(xLeft, xRight, yLeft, yRight, cancellationToken);
+            return _eventState.GetDataByRange(xLeft, xRight, yLeft, yRight);
         }
     }
 }

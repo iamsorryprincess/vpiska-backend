@@ -7,15 +7,20 @@ namespace Vpiska.WebSocket
 {
     public static class Entry
     {
+        public static void AddWebSocketExceptionHandler<THandler>(this IServiceCollection services) where THandler : class, IWebSocketExceptionHandler
+        {
+            services.AddTransient<IWebSocketExceptionHandler, THandler>();
+        }
+        
         public static void AddVSocket<TListener>(this IServiceCollection services,
-            WebSocketsOptions options,
             string url,
             string[] identityParams,
             string[] queryParams,
             Dictionary<string, Func<string>> identityParamsDefaultValueGenerators = null)
             where TListener : class, IWebSocketListener
         {
-            options.AddUrl<TListener>(url, identityParams, identityParamsDefaultValueGenerators, queryParams);
+            WebSocketHandlingMiddleware.WebSocketsOptions.AddUrl<TListener>(url, identityParams,
+                identityParamsDefaultValueGenerators, queryParams);
             services.AddSingleton<WebSocketHub<TListener>>();
             services.AddSingleton<IWebSocketInteracting<TListener>, WebSocketInteracting<TListener>>();
             services.AddTransient<TListener>();

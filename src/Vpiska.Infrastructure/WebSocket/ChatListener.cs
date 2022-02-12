@@ -2,8 +2,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Vpiska.Domain.Event.Commands.AddUserCommand;
-using Vpiska.Domain.Event.Commands.ChatMessageCommand;
 using Vpiska.Domain.Event.Commands.RemoveUserCommand;
+using Vpiska.Domain.Event.Events.ChatMessageEvent;
+using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Models;
 using Vpiska.Domain.Interfaces;
 using Vpiska.WebSocket;
@@ -42,8 +43,8 @@ namespace Vpiska.Infrastructure.WebSocket
             {
                 case "chatMessage":
                 {
-                    var commandHandler = socketContext.ServiceProvider.GetRequiredService<ICommandHandler<ChatMessageCommand>>();
-                    var command = new ChatMessageCommand()
+                    var eventBus = socketContext.ServiceProvider.GetRequiredService<IEventBus>();
+                    var domainEvent = new ChatMessageEvent()
                     {
                         EventId = socketContext.QueryParams["eventId"],
                         ChatMessage = new ChatMessage()
@@ -54,7 +55,8 @@ namespace Vpiska.Infrastructure.WebSocket
                             Message = message
                         }
                     };
-                    return commandHandler.HandleAsync(command);
+                    eventBus.Publish(domainEvent);
+                    return Task.CompletedTask;
                 }
                 default:
                     var logger = socketContext.ServiceProvider.GetRequiredService<ILogger<ChatListener>>();

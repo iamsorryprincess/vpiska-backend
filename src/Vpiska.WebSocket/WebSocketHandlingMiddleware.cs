@@ -12,16 +12,15 @@ namespace Vpiska.WebSocket
 {
     internal sealed class WebSocketHandlingMiddleware
     {
+        internal static readonly WebSocketsOptions WebSocketsOptions = new();
+        
         private readonly RequestDelegate _next;
-        private readonly WebSocketsOptions _options;
         private readonly IServiceProvider _serviceProvider;
 
         public WebSocketHandlingMiddleware(RequestDelegate next,
-            WebSocketsOptions options,
             IServiceProvider serviceProvider)
         {
             _next = next;
-            _options = options;
             _serviceProvider = serviceProvider;
         }
 
@@ -29,7 +28,7 @@ namespace Vpiska.WebSocket
         {
             if (context.WebSockets.IsWebSocketRequest)
             {
-                var (url, socketOptions) = _options.UrlOptions
+                var (url, socketOptions) = WebSocketsOptions.UrlOptions
                     .FirstOrDefault(x => context.Request.Path.StartsWithSegments(x.Key));
 
                 if (socketOptions == null)

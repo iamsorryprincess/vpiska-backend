@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Vpiska.Domain.Event.Common;
 using Vpiska.Domain.Event.Interfaces;
 
 namespace Vpiska.Domain.Event.Events.MediaRemovedEvent
@@ -8,11 +9,18 @@ namespace Vpiska.Domain.Event.Events.MediaRemovedEvent
     {
         private readonly IEventConnectionsStorage _storage;
         private readonly IEventSender _eventSender;
+        private readonly IEventRepository _repository;
+        private readonly IEventState _eventState;
 
-        public MediaRemovedHandler(IEventConnectionsStorage storage, IEventSender eventSender)
+        public MediaRemovedHandler(IEventConnectionsStorage storage,
+            IEventSender eventSender,
+            IEventRepository repository,
+            IEventState eventState)
         {
             _storage = storage;
             _eventSender = eventSender;
+            _repository = repository;
+            _eventState = eventState;
         }
 
         public async Task Handle(MediaRemovedEvent domainEvent)
@@ -26,6 +34,15 @@ namespace Vpiska.Domain.Event.Events.MediaRemovedEvent
                     await _eventSender.NotifyMediaRemoved(connections, domainEvent.MediaId);
                 }
             }
+
+            var model = await _eventState.GetEvent(_repository, domainEvent.EventId);
+
+            if (model == null)
+            {
+                return;
+            }
+            
+            await _eventState.RemoveMediaLink(domainEvent.EventId, domainEvent.MediaId);
         }
     }
 }

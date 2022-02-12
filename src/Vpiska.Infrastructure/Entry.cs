@@ -7,15 +7,11 @@ using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Hosting;
 using Vpiska.Domain.Event;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
@@ -24,7 +20,7 @@ using Vpiska.Domain.User.Interfaces;
 using Vpiska.Infrastructure.Database;
 using Vpiska.Infrastructure.Firebase;
 using Vpiska.Infrastructure.Identity;
-using Vpiska.Infrastructure.Orleans;
+using Vpiska.Infrastructure.RabbitMq;
 using Vpiska.Infrastructure.WebSocket;
 using Vpiska.WebSocket;
 
@@ -197,76 +193,32 @@ namespace Vpiska.Infrastructure
 
         #endregion
 
-        #region Orleans
-        
-        public static void AddEventBus(this IServiceCollection services)
+        #region EventState
+
+        public static void AddEventState(this IServiceCollection services)
         {
-            services.AddSingleton<IEventBus, EventBus>();
-        }
-
-        public static void AddEventCache(this IServiceCollection services)
-        {
-            services.AddTransient<ICache<Event>, EventsCache>();
-        }
-
-        public static void AddEventStateManager(this IServiceCollection services)
-        {
-            services.AddTransient<IEventStateManager, EventStateManager>();
-        }
-
-        public static IHostBuilder AddOrleans(this IHostBuilder builder)
-        {
-            return builder.UseOrleans((context, siloBuilder) =>
-            {
-                var configurationSection = context.Configuration.GetSection("Orleans");
-
-                if (context.HostingEnvironment.IsDevelopment())
-                {
-                    siloBuilder.UseLocalhostClustering()
-                        .Configure<ClusterOptions>(options =>
-                        {
-                            options.ClusterId = configurationSection["ClusterId"];
-                            options.ServiceId = configurationSection["ServiceId"];
-                        })
-                        .AddSimpleMessageStreamProvider(Constants.StreamMessageProvider,
-                            options => options.OptimizeForImmutableData = false)
-                        .AddMemoryGrainStorage(Constants.StorageProvider)
-                        .ConfigureApplicationParts(parts =>
-                            parts.AddApplicationPart(typeof(IEventGrain).Assembly).WithReferences());
-                }
-                else
-                {
-                    var redisConnectionString =
-                        $"{configurationSection["Redis:Host"]}:{configurationSection["Redis:Port"]}";
-
-                    siloBuilder.UseRedisClustering(configuration =>
-                        {
-                            configuration.ConnectionString = redisConnectionString;
-                            configuration.Database = 0;
-                        })
-                        .Configure<ClusterOptions>(options =>
-                        {
-                            options.ClusterId = configurationSection["ClusterId"];
-                            options.ServiceId = configurationSection["ServiceId"];
-                        })
-                        .ConfigureEndpoints(11111, 30000, listenOnAnyHostAddress: true)
-                        .AddSimpleMessageStreamProvider(Constants.StreamMessageProvider,
-                            options => options.OptimizeForImmutableData = false)
-                        .AddRedisGrainStorage(Constants.StorageProvider, optionsBuilder => optionsBuilder.Configure(
-                            configuration =>
-                            {
-                                configuration.ConnectionString = redisConnectionString;
-                                configuration.UseJson = true;
-                                configuration.DatabaseNumber = 1;
-                            }))
-                        .ConfigureApplicationParts(parts =>
-                            parts.AddApplicationPart(typeof(IEventGrain).Assembly).WithReferences());
-                }
-            });
+            services.AddSingleton<IEventState, EventState.EventState>();
         }
 
         #endregion
 
+        #region RabbitMQ
+
+        public static void AddRabbitMq(this IServiceCollection services, IConfigurationSection rabbitConfiguration)
+        {
+            var settings = new RabbitMqSettings()
+            {
+                Host = rabbitConfiguration["Host"],
+                Username = rabbitConfiguration["User"],
+                Password = rabbitConfiguration["Password"]
+            };
+            services.AddSingleton(settings);
+            services.AddSingleton<IEventBus, EventBus>();
+            services.AddHostedService<RabbitMqHostedService>();
+        }
+
+        #endregion
+        
         #region WebSocket
 
         public static void AddSenders(this IServiceCollection services)
@@ -283,12 +235,18 @@ namespace Vpiska.Infrastructure
 
         public static void AddWebSockets(this IServiceCollection services)
         {
-            var options = new WebSocketsOptions();
+            services.AddWebSocketExceptionHandler<ExceptionHandler>();
+            
             var idGenerators = new Dictionary<string, Func<string>> { { "Id", () => Guid.NewGuid().ToString() } };
-            services.AddVSocket<ChatListener>(options, "/event", new[] { "Id", "Name", "ImageId" },
-                new[] { "eventId" }, idGenerators);
-            services.AddVSocket<RangeListener>(options, "/range", Array.Empty<string>(), Array.Empty<string>());
-            services.AddSingleton(options);
+
+            services.AddVSocket<ChatListener>("/event",
+                new[] { "Id", "Name", "ImageId" },
+                new[] { "eventId" },
+                idGenerators);
+
+            services.AddVSocket<RangeListener>("/range",
+                Array.Empty<string>(),
+                Array.Empty<string>());
         }
 
         #endregion

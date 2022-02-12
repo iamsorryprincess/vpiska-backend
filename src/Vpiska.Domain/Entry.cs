@@ -3,15 +3,12 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Vpiska.Domain.Common;
 using Vpiska.Domain.Event.Commands.AddMediaCommand;
-using Vpiska.Domain.Event.Commands.AddRangeListenerCommand;
 using Vpiska.Domain.Event.Commands.AddUserCommand;
 using Vpiska.Domain.Event.Commands.ChangeLocationCommand;
 using Vpiska.Domain.Event.Commands.ChangeUserPositionCommand;
-using Vpiska.Domain.Event.Commands.ChatMessageCommand;
 using Vpiska.Domain.Event.Commands.CloseEventCommand;
 using Vpiska.Domain.Event.Commands.CreateEventCommand;
 using Vpiska.Domain.Event.Commands.RemoveMediaCommand;
-using Vpiska.Domain.Event.Commands.RemoveRangeListenerCommand;
 using Vpiska.Domain.Event.Commands.RemoveUserCommand;
 using Vpiska.Domain.Event.Events.ChatMessageEvent;
 using Vpiska.Domain.Event.Events.EventClosedEvent;
@@ -75,8 +72,7 @@ namespace Vpiska.Domain
             services.AddTransient<ICommandHandler<CloseEventCommand>, CloseEventHandler>();
             services.AddTransient<IEventHandler<EventClosedEvent>, EventClosedHandler>();
 
-            services.AddTransient<ICommandHandler<ChatMessageCommand>, Event.Commands.ChatMessageCommand.ChatMessageHandler>();
-            services.AddTransient<IEventHandler<ChatMessageEvent>, Event.Events.ChatMessageEvent.ChatMessageHandler>();
+            services.AddTransient<IEventHandler<ChatMessageEvent>, ChatMessageHandler>();
 
             services.AddTransient<ICommandHandler<AddUserCommand>, AddUserHandler>();
             services.AddTransient<IEventHandler<UserConnectedEvent>, UserConnectedHandler>();
@@ -92,9 +88,7 @@ namespace Vpiska.Domain
             services.AddTransient<ICommandHandler<RemoveMediaCommand>, RemoveMediaHandler>();
             services.AddTransient<IEventHandler<MediaRemovedEvent>, MediaRemovedHandler>();
 
-            services.AddTransient<ICommandHandler<AddRangeListenerCommand>, AddRangeListenerHandler>();
             services.AddTransient<ICommandHandler<ChangeUserPositionCommand>, ChangeUserPositionHandler>();
-            services.AddTransient<ICommandHandler<RemoveRangeListenerCommand>, RemoveRangeListenerHandler>();
 
             services.AddTransient<IValidator<ChangeLocationCommand>, ChangeLocationValidator>();
             services.AddTransient<ICommandHandler<ChangeLocationCommand>, ChangeLocationHandler>();

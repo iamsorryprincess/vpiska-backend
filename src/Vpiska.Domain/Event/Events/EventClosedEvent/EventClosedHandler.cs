@@ -12,18 +12,21 @@ namespace Vpiska.Domain.Event.Events.EventClosedEvent
         private readonly IEventSender _eventSender;
         private readonly IUserConnectionsStorage _userConnectionsStorage;
         private readonly IUserSender _userSender;
+        private readonly IEventState _eventState;
 
         public EventClosedHandler(ILogger<EventClosedHandler> logger,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,
             IUserConnectionsStorage userConnectionsStorage,
-            IUserSender userSender)
+            IUserSender userSender,
+            IEventState eventState)
         {
             _logger = logger;
             _eventConnectionsStorage = eventConnectionsStorage;
             _eventSender = eventSender;
             _userConnectionsStorage = userConnectionsStorage;
             _userSender = userSender;
+            _eventState = eventState;
         }
 
         public async Task Handle(EventClosedEvent domainEvent)
@@ -49,6 +52,8 @@ namespace Vpiska.Domain.Event.Events.EventClosedEvent
             {
                 await _userSender.SendEventClosed(rangeConnections, domainEvent.EventId);
             }
+            
+            await _eventState.RemoveData(domainEvent.EventId);
         }
     }
 }

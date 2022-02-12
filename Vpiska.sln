@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9995CCD9-8B5A-44D4-A354-AD3145B29AFD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F7B1EDA3-95EE-4E7B-B2A1-6869C42756EE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F7B1EDA3-95EE-4E7B-B2A1-6869C42756EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.WebSocket", "src\Vpiska.WebSocket\Vpiska.WebSocket.csproj", "{395A62B3-7D3F-4D38-BBC6-A73B7A4E1705}"
 EndProject

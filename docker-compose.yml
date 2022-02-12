@@ -25,12 +25,11 @@ services:
           memory: 512M
           cpus: "0.5"
 
-  redis:
-    image: redis:6.2
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: on-failure
     ports:
-      - "6379:6379"
-    volumes:
-      - /home/vpiska/data/redis:/data
+      - "15672:15672"
     deploy:
       replicas: 1
       restart_policy:
@@ -40,10 +39,10 @@ services:
         delay: 10s
       resources:
         limits:
-          memory: 4096M
+          memory: 1024M
           cpus: "1.0"
         reservations:
-          memory: 2048M
+          memory: 512M
           cpus: "0.5"
 
   api:
@@ -58,10 +57,9 @@ services:
       - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
       - Mongo__DatabaseName=vpiska
       - Firebase__BucketName=vpiska-a6e65.appspot.com
-      - Orleans__ClusterId=dev
-      - Orleans__ServiceId=OrleansBasics
-      - Orleans__Redis__Host=redis
-      - Orleans__Redis__Port=6379
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__User=guest
+      - RabbitMQ__Password=guest
     ports:
       - "5000:5000"
     deploy:
@@ -73,8 +71,8 @@ services:
         delay: 10s
       resources:
         limits:
-          memory: 8192M
+          memory: 16384M
           cpus: "4"
         reservations:
-          memory: 4096M
+          memory: 8192M
           cpus: "2"

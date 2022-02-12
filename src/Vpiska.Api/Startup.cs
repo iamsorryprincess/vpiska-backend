@@ -23,9 +23,8 @@ namespace Vpiska.Api
             services.AddJwt(_configuration.GetSection("Jwt"));
             services.AddFirebaseCloudMessaging();
             services.AddFirebaseFileStorage(_configuration.GetSection("Firebase"));
-            services.AddEventBus();
-            services.AddEventCache();
-            services.AddEventStateManager();
+            services.AddEventState();
+            services.AddRabbitMq(_configuration.GetSection("RabbitMQ"));
             services.AddWebSockets();
             services.AddSenders();
             services.AddConnectionsStorages();
