@@ -32,7 +32,8 @@ namespace Vpiska.Infrastructure.RabbitMq
         private readonly IEventBus _eventBus;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
-        private readonly RetryPolicy _retryPolicy;
+        private readonly RetryPolicy _connectionRetryPolicy;
+        private readonly RetryPolicy _producerRetryPolicy;
         private readonly List<IDisposable> _subscriptions;
         private readonly List<IModel> _producers;
         private readonly List<IModel> _consumers;
@@ -55,11 +56,17 @@ namespace Vpiska.Infrastructure.RabbitMq
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
-            _retryPolicy = Policy
+            _connectionRetryPolicy = Policy
+                .Handle<BrokerUnreachableException>()
+                .Or<SocketException>()
+                .WaitAndRetryForever(_ => TimeSpan.FromSeconds(5),
+                    (exception, i, _) => _logger.LogError(exception, "Trying reconnect to broker. Try: {}", i));
+
+            _producerRetryPolicy = Policy
                 .Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
                 .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    (exception, _, _) => _logger.LogError(exception, "Trying reconnect to RabbitMQ"));
+                    (exception, _, _) => _logger.LogError(exception, "Trying produce message to RabbitMQ"));
 
             _subscriptions = new List<IDisposable>();
             _producers = new List<IModel>();
@@ -80,7 +87,7 @@ namespace Vpiska.Infrastructure.RabbitMq
 
         private void StartConnection()
         {
-            _retryPolicy.Execute(() =>
+            _connectionRetryPolicy.Execute(() =>
             {
                 var factory = new ConnectionFactory
                 {
@@ -156,7 +163,7 @@ namespace Vpiska.Infrastructure.RabbitMq
                 {
                     var json = JsonSerializer.Serialize(domainEvent, _jsonSerializerOptions);
                     var body = Encoding.UTF8.GetBytes(json);
-                    _retryPolicy.Execute(() =>
+                    _producerRetryPolicy.Execute(() =>
                         channel.BasicPublish(exchange: exchangeName, routingKey: "", basicProperties: null,
                             body: body));
                 }
