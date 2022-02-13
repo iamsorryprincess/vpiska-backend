@@ -27,6 +27,9 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=kekit
+      - RABBITMQ_DEFAULT_PASS=qweasdzxc
     restart: on-failure
     ports:
       - "15672:15672"
@@ -39,11 +42,11 @@ services:
         delay: 10s
       resources:
         limits:
-          memory: 1024M
-          cpus: "1.0"
+          memory: 2048M
+          cpus: "1"
         reservations:
-          memory: 512M
-          cpus: "0.5"
+          memory: 1024M
+          cpus: "1"
 
   api:
     image: api
@@ -58,8 +61,8 @@ services:
       - Mongo__DatabaseName=vpiska
       - Firebase__BucketName=vpiska-a6e65.appspot.com
       - RabbitMQ__Host=rabbitmq
-      - RabbitMQ__User=guest
-      - RabbitMQ__Password=guest
+      - RabbitMQ__User=kekit
+      - RabbitMQ__Password=qweasdzxc
     ports:
       - "5000:5000"
     deploy:
