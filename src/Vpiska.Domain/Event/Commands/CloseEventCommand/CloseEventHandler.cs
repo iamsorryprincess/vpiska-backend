@@ -11,12 +11,12 @@ namespace Vpiska.Domain.Event.Commands.CloseEventCommand
 {
     internal sealed class CloseEventHandler : ValidationCommandHandler<CloseEventCommand>
     {
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
         private readonly IEventRepository _repository;
         private readonly IEventBus _eventBus;
 
         public CloseEventHandler(IValidator<CloseEventCommand> validator,
-            IEventState eventState,
+            IEventStorage eventState,
             IEventRepository repository,
             IEventBus eventBus) : base(validator)
         {

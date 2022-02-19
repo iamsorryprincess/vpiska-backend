@@ -1,5 +1,3 @@
-using System;
-
 namespace Vpiska.Domain.User
 {
     public sealed class User

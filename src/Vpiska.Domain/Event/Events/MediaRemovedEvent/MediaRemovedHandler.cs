@@ -10,12 +10,12 @@ namespace Vpiska.Domain.Event.Events.MediaRemovedEvent
         private readonly IEventConnectionsStorage _storage;
         private readonly IEventSender _eventSender;
         private readonly IEventRepository _repository;
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
 
         public MediaRemovedHandler(IEventConnectionsStorage storage,
             IEventSender eventSender,
             IEventRepository repository,
-            IEventState eventState)
+            IEventStorage eventState)
         {
             _storage = storage;
             _eventSender = eventSender;

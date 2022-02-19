@@ -6,9 +6,9 @@ namespace Vpiska.Domain.Event.Events.UserDisconnectedEvent
 {
     internal sealed class UserDisconnectedHandler : UsersCountUpdatedHandler<UserDisconnectedEvent>
     {
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
         
-        public UserDisconnectedHandler(IEventState eventState,
+        public UserDisconnectedHandler(IEventStorage eventState,
             IEventRepository repository,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,

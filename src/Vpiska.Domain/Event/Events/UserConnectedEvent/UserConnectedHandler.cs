@@ -6,9 +6,9 @@ namespace Vpiska.Domain.Event.Events.UserConnectedEvent
 {
     internal sealed class UserConnectedHandler : UsersCountUpdatedHandler<UserConnectedEvent>
     {
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
         
-        public UserConnectedHandler(IEventState eventState,
+        public UserConnectedHandler(IEventStorage eventState,
             IEventRepository repository,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,

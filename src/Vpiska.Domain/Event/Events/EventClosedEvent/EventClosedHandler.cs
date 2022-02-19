@@ -12,14 +12,14 @@ namespace Vpiska.Domain.Event.Events.EventClosedEvent
         private readonly IEventSender _eventSender;
         private readonly IUserConnectionsStorage _userConnectionsStorage;
         private readonly IUserSender _userSender;
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
 
         public EventClosedHandler(ILogger<EventClosedHandler> logger,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,
             IUserConnectionsStorage userConnectionsStorage,
             IUserSender userSender,
-            IEventState eventState)
+            IEventStorage eventState)
         {
             _logger = logger;
             _eventConnectionsStorage = eventConnectionsStorage;

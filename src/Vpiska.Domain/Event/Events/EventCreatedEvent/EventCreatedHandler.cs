@@ -8,11 +8,11 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
     {
         private readonly IUserConnectionsStorage _storage;
         private readonly IUserSender _sender;
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
 
         public EventCreatedHandler(IUserConnectionsStorage storage,
             IUserSender sender,
-            IEventState eventState)
+            IEventStorage eventState)
         {
             _storage = storage;
             _sender = sender;

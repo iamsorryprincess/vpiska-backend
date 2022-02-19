@@ -108,10 +108,10 @@ namespace Vpiska.Infrastructure.RabbitMq
             SubscribeToEvent<UserConnectedEvent>("event.user.connect");
             SubscribeToEvent<UserDisconnectedEvent>("event.user.disconnect");
 
+            _isConnectionOpened = true;
             _connection.ConnectionShutdown += OnConnectionShutdown;
             _connection.CallbackException += OnCallbackException;
             _connection.ConnectionBlocked += OnConnectionBlocked;
-            _isConnectionOpened = true;
             _logger.LogInformation("Connected to RabbitMQ host {}", _settings.Host);
         }
 
@@ -190,10 +190,10 @@ namespace Vpiska.Infrastructure.RabbitMq
             {
                 try
                 {
-                    await using var scope = _scopeFactory.CreateAsyncScope();
-                    var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
                     var json = Encoding.UTF8.GetString(args.Body.ToArray());
                     var domainEvent = JsonSerializer.Deserialize<TEvent>(json, _jsonSerializerOptions);
+                    await using var scope = _scopeFactory.CreateAsyncScope();
+                    var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
                     await handler.Handle(domainEvent);
                 }
                 catch (Exception ex)

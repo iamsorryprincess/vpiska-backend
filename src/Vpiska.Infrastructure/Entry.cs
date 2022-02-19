@@ -193,11 +193,11 @@ namespace Vpiska.Infrastructure
 
         #endregion
 
-        #region EventState
+        #region EventStorage
 
-        public static void AddEventState(this IServiceCollection services)
+        public static void AddEventStorage(this IServiceCollection services)
         {
-            services.AddSingleton<IEventState, EventState.EventState>();
+            services.AddSingleton<IEventStorage, EventState.EventStorage>();
         }
 
         #endregion

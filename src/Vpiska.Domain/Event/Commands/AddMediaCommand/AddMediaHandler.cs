@@ -15,13 +15,13 @@ namespace Vpiska.Domain.Event.Commands.AddMediaCommand
     {
         private readonly IEventRepository _repository;
         private readonly IFileStorage _fileStorage;
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
         private readonly IEventBus _eventBus;
 
         public AddMediaHandler(IValidator<AddMediaCommand> validator,
             IEventRepository repository,
             IFileStorage fileStorage,
-            IEventState eventState,
+            IEventStorage eventState,
             IEventBus eventBus) : base(validator)
         {
             _repository = repository;

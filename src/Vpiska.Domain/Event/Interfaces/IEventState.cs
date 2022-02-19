@@ -5,7 +5,7 @@ using Vpiska.Domain.Event.Responses;
 
 namespace Vpiska.Domain.Event.Interfaces
 {
-    public interface IEventState
+    public interface IEventStorage
     {
         Task<List<EventShortResponse>> GetDataByRange(double xLeft, double xRight, double yBottom, double yTop);
         

@@ -7,14 +7,14 @@ namespace Vpiska.Domain.Event.Common
 {
     internal abstract class UsersCountUpdatedHandler<TEvent> : IEventHandler<TEvent> where TEvent : IDomainEvent
     {
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
         private readonly IEventRepository _repository;
         private readonly IEventConnectionsStorage _eventConnectionsStorage;
         private readonly IEventSender _eventSender;
         private readonly IUserConnectionsStorage _userConnectionsStorage;
         private readonly IUserSender _userSender;
 
-        protected UsersCountUpdatedHandler(IEventState eventState,
+        protected UsersCountUpdatedHandler(IEventStorage eventState,
             IEventRepository repository,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,

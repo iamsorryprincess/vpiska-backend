@@ -6,7 +6,7 @@ namespace Vpiska.Domain.Event.Common
 {
     internal static class Extensions
     {
-        public static async Task<Event> GetEvent(this IEventState state, IEventRepository repository, string eventId,
+        public static async Task<Event> GetEvent(this IEventStorage state, IEventRepository repository, string eventId,
             CancellationToken cancellationToken = default)
         {
             var model = await state.GetData(eventId);

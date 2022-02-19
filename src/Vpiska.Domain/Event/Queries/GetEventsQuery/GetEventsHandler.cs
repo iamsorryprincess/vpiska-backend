@@ -10,9 +10,9 @@ namespace Vpiska.Domain.Event.Queries.GetEventsQuery
 {
     internal sealed class GetEventsHandler : ValidationQueryHandler<GetEventsQuery, List<EventShortResponse>>
     {
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
 
-        public GetEventsHandler(IValidator<GetEventsQuery> validator, IEventState eventState) : base(validator)
+        public GetEventsHandler(IValidator<GetEventsQuery> validator, IEventStorage eventState) : base(validator)
         {
             _eventState = eventState;
         }

@@ -12,12 +12,12 @@ namespace Vpiska.Domain.Event.Commands.ChangeLocationCommand
     internal sealed class ChangeLocationHandler : ValidationCommandHandler<ChangeLocationCommand>
     {
         private readonly IEventRepository _repository;
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
         private readonly IEventBus _eventBus;
 
         public ChangeLocationHandler(IValidator<ChangeLocationCommand> validator,
             IEventRepository repository,
-            IEventState eventState,
+            IEventStorage eventState,
             IEventBus eventBus) : base(validator)
         {
             _repository = repository;

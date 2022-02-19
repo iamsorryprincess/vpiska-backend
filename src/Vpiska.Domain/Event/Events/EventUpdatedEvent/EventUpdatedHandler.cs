@@ -11,12 +11,12 @@ namespace Vpiska.Domain.Event.Events.EventUpdatedEvent
         private readonly IUserConnectionsStorage _storage;
         private readonly IUserSender _sender;
         private readonly IEventRepository _repository;
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
 
         public EventUpdatedHandler(IUserConnectionsStorage storage,
             IUserSender sender,
             IEventRepository repository,
-            IEventState eventState)
+            IEventStorage eventState)
         {
             _storage = storage;
             _sender = sender;

@@ -42,10 +42,10 @@ services:
         delay: 10s
       resources:
         limits:
-          memory: 2048M
-          cpus: "1"
+          memory: 5120M
+          cpus: "2"
         reservations:
-          memory: 1024M
+          memory: 2048M
           cpus: "1"
 
   api:
@@ -74,8 +74,8 @@ services:
         delay: 10s
       resources:
         limits:
-          memory: 16384M
-          cpus: "4"
+          memory: 10240M
+          cpus: "3"
         reservations:
-          memory: 8192M
-          cpus: "2"
+          memory: 5120M
+          cpus: "1.5"

@@ -10,11 +10,11 @@ namespace Vpiska.Domain.Event.Queries.GetByIdQuery
 {
     internal sealed class GetByIdHandler : ValidationQueryHandler<GetByIdQuery, EventResponse>
     {
-        private readonly IEventState _eventState;
+        private readonly IEventStorage _eventState;
         private readonly IEventRepository _repository;
 
         public GetByIdHandler(IValidator<GetByIdQuery> validator,
-            IEventState eventState,
+            IEventStorage eventState,
             IEventRepository repository) : base(validator)
         {
             _eventState = eventState;
