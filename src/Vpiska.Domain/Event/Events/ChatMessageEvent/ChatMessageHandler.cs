@@ -10,17 +10,17 @@ namespace Vpiska.Domain.Event.Events.ChatMessageEvent
         private readonly IEventConnectionsStorage _storage;
         private readonly IEventSender _eventSender;
         private readonly IEventRepository _repository;
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
 
         public ChatMessageHandler(IEventConnectionsStorage storage,
             IEventSender eventSender,
             IEventRepository repository,
-            IEventStorage eventState)
+            IEventStorage eventStorage)
         {
             _storage = storage;
             _eventSender = eventSender;
             _repository = repository;
-            _eventState = eventState;
+            _eventStorage = eventStorage;
         }
 
         public async Task Handle(ChatMessageEvent domainEvent)
@@ -35,14 +35,14 @@ namespace Vpiska.Domain.Event.Events.ChatMessageEvent
                 }
             }
 
-            var model = await _eventState.GetEvent(_repository, domainEvent.EventId);
+            var model = await _eventStorage.GetEvent(_repository, domainEvent.EventId);
 
             if (model == null)
             {
                 return;
             }
 
-            await _eventState.AddChatMessage(domainEvent.EventId, domainEvent.ChatMessage);
+            await _eventStorage.AddChatMessage(domainEvent.EventId, domainEvent.ChatMessage);
         }
     }
 }

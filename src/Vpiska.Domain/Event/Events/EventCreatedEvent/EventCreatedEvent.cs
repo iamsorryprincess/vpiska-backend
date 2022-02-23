@@ -17,11 +17,11 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
         
         public Coordinates Coordinates { get; set; }
 
-        public List<string> MediaLinks { get; set; } = new List<string>();
+        public List<string> MediaLinks { get; set; } = new();
 
-        public List<ChatMessage> ChatData { get; set; } = new List<ChatMessage>();
+        public List<ChatMessage> ChatData { get; set; } = new();
 
-        public List<UserInfo> Users { get; set; } = new List<UserInfo>();
+        public List<UserInfo> Users { get; set; } = new();
 
         public EventShortResponse ToShortResponse() => new()
         {
@@ -31,17 +31,7 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
             UsersCount = Users.Count
         };
 
-        public Event ToModel() => new Event()
-        {
-            Id = EventId,
-            OwnerId = OwnerId,
-            Name = Name,
-            Address = Address,
-            Coordinates = Coordinates,
-            MediaLinks = MediaLinks,
-            ChatData = ChatData,
-            Users = Users
-        };
+        public Event ToModel() => new(EventId, OwnerId, Name, Address, Coordinates, MediaLinks, ChatData, Users);
 
         public static EventCreatedEvent FromModel(Event model) => new()
         {

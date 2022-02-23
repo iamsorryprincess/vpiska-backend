@@ -11,28 +11,31 @@ using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Commands.AddMediaCommand
 {
-    internal sealed class AddMediaHandler : ValidationCommandHandler<AddMediaCommand>
+    internal sealed class AddMediaHandler : ICommandHandler<AddMediaCommand>
     {
+        private readonly IValidator<AddMediaCommand> _validator;
         private readonly IEventRepository _repository;
         private readonly IFileStorage _fileStorage;
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
         private readonly IEventBus _eventBus;
 
         public AddMediaHandler(IValidator<AddMediaCommand> validator,
             IEventRepository repository,
             IFileStorage fileStorage,
-            IEventStorage eventState,
-            IEventBus eventBus) : base(validator)
+            IEventStorage eventStorage,
+            IEventBus eventBus)
         {
+            _validator = validator;
             _repository = repository;
             _fileStorage = fileStorage;
-            _eventState = eventState;
+            _eventStorage = eventStorage;
             _eventBus = eventBus;
         }
 
-        protected override async Task Handle(AddMediaCommand command, CancellationToken cancellationToken)
+        public async Task HandleAsync(AddMediaCommand command, CancellationToken cancellationToken = default)
         {
-            var model = await _eventState.GetEvent(_repository, command.EventId, cancellationToken: cancellationToken);
+            await _validator.ValidateRequest(command, cancellationToken: cancellationToken);
+            var model = await _eventStorage.GetEvent(_repository, command.EventId, cancellationToken: cancellationToken);
 
             if (model == null)
             {

@@ -6,28 +6,32 @@ using Vpiska.Domain.Event.Common;
 using Vpiska.Domain.Event.Events.EventClosedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
+using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Commands.CloseEventCommand
 {
-    internal sealed class CloseEventHandler : ValidationCommandHandler<CloseEventCommand>
+    internal sealed class CloseEventHandler : ICommandHandler<CloseEventCommand>
     {
-        private readonly IEventStorage _eventState;
+        private readonly IValidator<CloseEventCommand> _validator;
+        private readonly IEventStorage _eventStorage;
         private readonly IEventRepository _repository;
         private readonly IEventBus _eventBus;
 
         public CloseEventHandler(IValidator<CloseEventCommand> validator,
-            IEventStorage eventState,
+            IEventStorage eventStorage,
             IEventRepository repository,
-            IEventBus eventBus) : base(validator)
+            IEventBus eventBus)
         {
-            _eventState = eventState;
+            _validator = validator;
+            _eventStorage = eventStorage;
             _repository = repository;
             _eventBus = eventBus;
         }
 
-        protected override async Task Handle(CloseEventCommand command, CancellationToken cancellationToken)
+        public async Task HandleAsync(CloseEventCommand command, CancellationToken cancellationToken = default)
         {
-            var model = await _eventState.GetEvent(_repository, command.EventId, cancellationToken: cancellationToken);
+            await _validator.ValidateRequest(command, cancellationToken: cancellationToken);
+            var model = await _eventStorage.GetEvent(_repository, command.EventId, cancellationToken: cancellationToken);
 
             if (model == null)
             {

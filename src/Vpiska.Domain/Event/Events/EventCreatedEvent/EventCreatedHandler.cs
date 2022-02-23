@@ -6,29 +6,29 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
 {
     internal sealed class EventCreatedHandler : IEventHandler<EventCreatedEvent>
     {
-        private readonly IUserConnectionsStorage _storage;
+        private readonly IUserConnectionsStorage _usersStorage;
         private readonly IUserSender _sender;
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
 
-        public EventCreatedHandler(IUserConnectionsStorage storage,
+        public EventCreatedHandler(IUserConnectionsStorage usersStorage,
             IUserSender sender,
-            IEventStorage eventState)
+            IEventStorage eventStorage)
         {
-            _storage = storage;
+            _usersStorage = usersStorage;
             _sender = sender;
-            _eventState = eventState;
+            _eventStorage = eventStorage;
         }
 
         public async Task Handle(EventCreatedEvent domainEvent)
         {
-            var connections = _storage.GetConnectionsByRange(domainEvent.Coordinates.X, domainEvent.Coordinates.Y);
+            var connections = _usersStorage.GetConnectionsByRange(domainEvent.Coordinates.X, domainEvent.Coordinates.Y);
 
             if (connections.Any())
             { 
                 await _sender.SendEventCreated(connections, domainEvent.ToShortResponse());
             }
 
-            await _eventState.SetData(domainEvent.ToModel());
+            await _eventStorage.SetData(domainEvent.ToModel());
         }
     }
 }

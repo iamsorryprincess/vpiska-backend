@@ -9,18 +9,18 @@ namespace Vpiska.Domain.Event.Commands.ChangeUserPositionCommand
     internal sealed class ChangeUserPositionHandler : ICommandHandler<ChangeUserPositionCommand>
     {
         private readonly ILogger<ChangeUserPositionHandler> _logger;
-        private readonly IUserConnectionsStorage _storage;
+        private readonly IUserConnectionsStorage _usersStorage;
 
         public ChangeUserPositionHandler(ILogger<ChangeUserPositionHandler> logger,
-            IUserConnectionsStorage storage)
+            IUserConnectionsStorage usersStorage)
         {
             _logger = logger;
-            _storage = storage;
+            _usersStorage = usersStorage;
         }
 
         public Task HandleAsync(ChangeUserPositionCommand command, CancellationToken cancellationToken = default)
         {
-            if (!_storage.SetRange(command.ConnectionId, command.PositionInfo.Coordinates.X,
+            if (!_usersStorage.SetRange(command.ConnectionId, command.PositionInfo.Coordinates.X,
                 command.PositionInfo.Coordinates.Y, command.PositionInfo.HorizontalRange,
                 command.PositionInfo.VerticalRange))
             {

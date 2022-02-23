@@ -5,20 +5,35 @@ namespace Vpiska.Domain.Event
 {
     public sealed class Event
     {
-        public string Id { get; set; }
+        public string Id { get; }
 
-        public string OwnerId { get; set; }
+        public string OwnerId { get; }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
         public string Address { get; set; }
 
         public Coordinates Coordinates { get; set; }
 
-        public List<string> MediaLinks { get; set; } = new List<string>();
+        public List<string> MediaLinks { get; }
 
-        public List<ChatMessage> ChatData { get; set; } = new List<ChatMessage>();
+        public List<ChatMessage> ChatData { get; }
 
-        public List<UserInfo> Users { get; set; } = new List<UserInfo>();
+        public List<UserInfo> Users { get; }
+
+        public Event(string id, string ownerId, string name, string address, Coordinates coordinates,
+            List<string> mediaLinks,
+            List<ChatMessage> chatData,
+            List<UserInfo> users)
+        {
+            Id = id;
+            OwnerId = ownerId;
+            Name = name;
+            Address = address;
+            Coordinates = coordinates;
+            MediaLinks = mediaLinks;
+            ChatData = chatData;
+            Users = users;
+        }
     }
 }

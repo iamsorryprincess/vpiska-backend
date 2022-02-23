@@ -12,7 +12,7 @@ namespace Vpiska.Domain.Event.Responses
 
         public int UsersCount { get; set; }
 
-        public static EventShortResponse FromModel(Event model) => new EventShortResponse()
+        public static EventShortResponse FromModel(Event model) => new()
         {
             Id = model.Id,
             Name = model.Name,

@@ -8,25 +8,25 @@ namespace Vpiska.Domain.Event.Events.EventUpdatedEvent
 {
     internal sealed class EventUpdatedHandler : IEventHandler<EventUpdatedEvent>
     {
-        private readonly IUserConnectionsStorage _storage;
+        private readonly IUserConnectionsStorage _usersStorage;
         private readonly IUserSender _sender;
         private readonly IEventRepository _repository;
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
 
-        public EventUpdatedHandler(IUserConnectionsStorage storage,
+        public EventUpdatedHandler(IUserConnectionsStorage usersStorage,
             IUserSender sender,
             IEventRepository repository,
-            IEventStorage eventState)
+            IEventStorage eventStorage)
         {
-            _storage = storage;
+            _usersStorage = usersStorage;
             _sender = sender;
             _repository = repository;
-            _eventState = eventState;
+            _eventStorage = eventStorage;
         }
 
         public async Task Handle(EventUpdatedEvent domainEvent)
         {
-            var connections = _storage.GetConnectionsByRange(domainEvent.Coordinates.X, domainEvent.Coordinates.Y);
+            var connections = _usersStorage.GetConnectionsByRange(domainEvent.Coordinates.X, domainEvent.Coordinates.Y);
 
             if (connections.Any())
             {
@@ -40,14 +40,14 @@ namespace Vpiska.Domain.Event.Events.EventUpdatedEvent
                     });
             }
 
-            var model = await _eventState.GetEvent(_repository, domainEvent.EventId);
+            var model = await _eventStorage.GetEvent(_repository, domainEvent.EventId);
 
             if (model == null)
             {
                 return;
             }
             
-            await _eventState.UpdateLocation(domainEvent.EventId, domainEvent.Address, domainEvent.Coordinates);
+            await _eventStorage.UpdateLocation(domainEvent.EventId, domainEvent.Address, domainEvent.Coordinates);
         }
     }
 }

@@ -3,14 +3,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using Vpiska.Domain.Common;
+using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.User.Exceptions;
 using Vpiska.Domain.User.Interfaces;
 using Vpiska.Domain.User.Responses;
 
 namespace Vpiska.Domain.User.Commands.CreateUserCommand
 {
-    internal sealed class CreateUserHandler : ValidationCommandHandler<CreateUserCommand, LoginResponse>
+    internal sealed class CreateUserHandler : ICommandHandler<CreateUserCommand, LoginResponse>
     {
+        private readonly IValidator<CreateUserCommand> _validator;
         private readonly IUserRepository _repository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IIdentityService _identityService;
@@ -18,15 +20,17 @@ namespace Vpiska.Domain.User.Commands.CreateUserCommand
         public CreateUserHandler(IValidator<CreateUserCommand> validator,
             IUserRepository repository,
             IPasswordHasher passwordHasher,
-            IIdentityService identityService) : base(validator)
+            IIdentityService identityService)
         {
+            _validator = validator;
             _repository = repository;
             _passwordHasher = passwordHasher;
             _identityService = identityService;
         }
 
-        protected override async Task<LoginResponse> Handle(CreateUserCommand command, CancellationToken cancellationToken)
+        public async Task<LoginResponse> HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
         {
+            await _validator.ValidateRequest(command, cancellationToken: cancellationToken);
             var checkResult = await _repository.CheckPhoneAndName(command.Phone, command.Name, cancellationToken);
             switch (checkResult.IsNameExist)
             {

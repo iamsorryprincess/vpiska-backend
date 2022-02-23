@@ -7,27 +7,28 @@ using Vpiska.Domain.Event.Events.EventCreatedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Responses;
+using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Commands.CreateEventCommand
 {
-    internal sealed class CreateEventHandler : ValidationCommandHandler<CreateEventCommand, EventResponse>
+    internal sealed class CreateEventHandler : ICommandHandler<CreateEventCommand, EventResponse>
     {
+        private readonly IValidator<CreateEventCommand> _validator;
         private readonly IEventRepository _repository;
-        private readonly IEventStorage _eventState;
         private readonly IEventBus _eventBus;
 
         public CreateEventHandler(IValidator<CreateEventCommand> validator,
             IEventRepository repository,
-            IEventStorage eventState,
-            IEventBus eventBus) : base(validator)
+            IEventBus eventBus)
         {
+            _validator = validator;
             _repository = repository;
-            _eventState = eventState;
             _eventBus = eventBus;
         }
 
-        protected override async Task<EventResponse> Handle(CreateEventCommand command, CancellationToken cancellationToken)
+        public async Task<EventResponse> HandleAsync(CreateEventCommand command, CancellationToken cancellationToken = default)
         {
+            await _validator.ValidateRequest(command, cancellationToken: cancellationToken);
             var isExist = await _repository.CheckByFieldAsync("ownerId", command.OwnerId, cancellationToken);
 
             if (isExist)

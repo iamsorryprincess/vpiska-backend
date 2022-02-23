@@ -6,28 +6,32 @@ using Vpiska.Domain.Event.Common;
 using Vpiska.Domain.Event.Events.EventUpdatedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
+using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Commands.ChangeLocationCommand
 {
-    internal sealed class ChangeLocationHandler : ValidationCommandHandler<ChangeLocationCommand>
+    internal sealed class ChangeLocationHandler : ICommandHandler<ChangeLocationCommand>
     {
+        private readonly IValidator<ChangeLocationCommand> _validator;
         private readonly IEventRepository _repository;
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
         private readonly IEventBus _eventBus;
 
         public ChangeLocationHandler(IValidator<ChangeLocationCommand> validator,
             IEventRepository repository,
-            IEventStorage eventState,
-            IEventBus eventBus) : base(validator)
+            IEventStorage eventStorage,
+            IEventBus eventBus)
         {
+            _validator = validator;
             _repository = repository;
-            _eventState = eventState;
+            _eventStorage = eventStorage;
             _eventBus = eventBus;
         }
 
-        protected override async Task Handle(ChangeLocationCommand command, CancellationToken cancellationToken)
+        public async Task HandleAsync(ChangeLocationCommand command, CancellationToken cancellationToken = default)
         {
-            var model = await _eventState.GetEvent(_repository, command.EventId, cancellationToken: cancellationToken);
+            await _validator.ValidateRequest(command, cancellationToken: cancellationToken);
+            var model = await _eventStorage.GetEvent(_repository, command.EventId, cancellationToken: cancellationToken);
 
             if (model == null)
             {

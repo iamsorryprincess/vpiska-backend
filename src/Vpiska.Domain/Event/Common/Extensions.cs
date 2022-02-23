@@ -6,10 +6,10 @@ namespace Vpiska.Domain.Event.Common
 {
     internal static class Extensions
     {
-        public static async Task<Event> GetEvent(this IEventStorage state, IEventRepository repository, string eventId,
+        public static async Task<Event> GetEvent(this IEventStorage storage, IEventRepository repository, string eventId,
             CancellationToken cancellationToken = default)
         {
-            var model = await state.GetData(eventId);
+            var model = await storage.GetData(eventId);
 
             if (model != null)
             {
@@ -23,7 +23,7 @@ namespace Vpiska.Domain.Event.Common
                 return null;
             }
 
-            await state.SetData(model);
+            await storage.SetData(model);
             return model;
         }
     }

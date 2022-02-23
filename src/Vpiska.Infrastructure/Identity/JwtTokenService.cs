@@ -11,7 +11,7 @@ namespace Vpiska.Infrastructure.Identity
     internal sealed class JwtTokenService : IIdentityService
     {
         private readonly IdentitySettings _settings;
-        private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
+        private readonly JwtSecurityTokenHandler _tokenHandler = new();
 
         public JwtTokenService(IdentitySettings settings)
         {

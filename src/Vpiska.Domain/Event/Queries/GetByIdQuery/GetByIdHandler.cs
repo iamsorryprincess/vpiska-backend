@@ -5,25 +5,29 @@ using Vpiska.Domain.Common;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Responses;
+using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Queries.GetByIdQuery
 {
-    internal sealed class GetByIdHandler : ValidationQueryHandler<GetByIdQuery, EventResponse>
+    internal sealed class GetByIdHandler : IQueryHandler<GetByIdQuery, EventResponse>
     {
-        private readonly IEventStorage _eventState;
+        private readonly IValidator<GetByIdQuery> _validator;
+        private readonly IEventStorage _eventStorage;
         private readonly IEventRepository _repository;
 
         public GetByIdHandler(IValidator<GetByIdQuery> validator,
-            IEventStorage eventState,
-            IEventRepository repository) : base(validator)
+            IEventStorage eventStorage,
+            IEventRepository repository)
         {
-            _eventState = eventState;
+            _validator = validator;
+            _eventStorage = eventStorage;
             _repository = repository;
         }
 
-        protected override async Task<EventResponse> Handle(GetByIdQuery query, CancellationToken cancellationToken)
+        public async Task<EventResponse> HandleAsync(GetByIdQuery query, CancellationToken cancellationToken = default)
         {
-            var model = await _eventState.GetData(query.EventId);
+            await _validator.ValidateRequest(query, cancellationToken: cancellationToken);
+            var model = await _eventStorage.GetData(query.EventId);
 
             if (model != null)
             {
@@ -37,7 +41,7 @@ namespace Vpiska.Domain.Event.Queries.GetByIdQuery
                 throw new EventNotFoundException();
             }
 
-            await _eventState.SetData(model);
+            await _eventStorage.SetData(model);
             return EventResponse.FromModel(model);
         }
     }

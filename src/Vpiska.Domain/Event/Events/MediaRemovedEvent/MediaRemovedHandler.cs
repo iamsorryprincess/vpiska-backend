@@ -7,27 +7,27 @@ namespace Vpiska.Domain.Event.Events.MediaRemovedEvent
 {
     internal sealed class MediaRemovedHandler : IEventHandler<MediaRemovedEvent>
     {
-        private readonly IEventConnectionsStorage _storage;
+        private readonly IEventConnectionsStorage _eventConnectionsStorage;
         private readonly IEventSender _eventSender;
         private readonly IEventRepository _repository;
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
 
-        public MediaRemovedHandler(IEventConnectionsStorage storage,
+        public MediaRemovedHandler(IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,
             IEventRepository repository,
-            IEventStorage eventState)
+            IEventStorage eventStorage)
         {
-            _storage = storage;
+            _eventConnectionsStorage = eventConnectionsStorage;
             _eventSender = eventSender;
             _repository = repository;
-            _eventState = eventState;
+            _eventStorage = eventStorage;
         }
 
         public async Task Handle(MediaRemovedEvent domainEvent)
         {
-            if (_storage.IsEventGroupExist(domainEvent.EventId))
+            if (_eventConnectionsStorage.IsEventGroupExist(domainEvent.EventId))
             {
-                var connections = _storage.GetConnections(domainEvent.EventId);
+                var connections = _eventConnectionsStorage.GetConnections(domainEvent.EventId);
 
                 if (connections.Any())
                 {
@@ -35,14 +35,14 @@ namespace Vpiska.Domain.Event.Events.MediaRemovedEvent
                 }
             }
 
-            var model = await _eventState.GetEvent(_repository, domainEvent.EventId);
+            var model = await _eventStorage.GetEvent(_repository, domainEvent.EventId);
 
             if (model == null)
             {
                 return;
             }
             
-            await _eventState.RemoveMediaLink(domainEvent.EventId, domainEvent.MediaId);
+            await _eventStorage.RemoveMediaLink(domainEvent.EventId, domainEvent.MediaId);
         }
     }
 }

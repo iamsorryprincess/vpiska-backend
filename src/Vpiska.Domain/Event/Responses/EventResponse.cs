@@ -17,11 +17,11 @@ namespace Vpiska.Domain.Event.Responses
 
         public Coordinates Coordinates { get; set; }
 
-        public List<string> MediaLinks { get; set; } = new List<string>();
+        public List<string> MediaLinks { get; set; } = new();
 
-        public List<ChatMessage> ChatData { get; set; } = new List<ChatMessage>();
+        public List<ChatMessage> ChatData { get; set; } = new();
 
-        public static EventResponse FromModel(Event model) => new EventResponse()
+        public static EventResponse FromModel(Event model) => new()
         {
             Id = model.Id,
             OwnerId = model.OwnerId,

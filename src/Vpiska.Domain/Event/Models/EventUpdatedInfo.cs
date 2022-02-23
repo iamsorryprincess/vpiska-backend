@@ -10,7 +10,7 @@ namespace Vpiska.Domain.Event.Models
 
         public Coordinates Coordinates { get; set; }
 
-        public static EventUpdatedInfo FromModel(Event model) => new EventUpdatedInfo()
+        public static EventUpdatedInfo FromModel(Event model) => new()
         {
             EventId = model.Id,
             Address = model.Address,

@@ -7,21 +7,21 @@ namespace Vpiska.Domain.Event.Common
 {
     internal abstract class UsersCountUpdatedHandler<TEvent> : IEventHandler<TEvent> where TEvent : IDomainEvent
     {
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
         private readonly IEventRepository _repository;
         private readonly IEventConnectionsStorage _eventConnectionsStorage;
         private readonly IEventSender _eventSender;
         private readonly IUserConnectionsStorage _userConnectionsStorage;
         private readonly IUserSender _userSender;
 
-        protected UsersCountUpdatedHandler(IEventStorage eventState,
+        protected UsersCountUpdatedHandler(IEventStorage eventStorage,
             IEventRepository repository,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,
             IUserConnectionsStorage userConnectionsStorage,
             IUserSender userSender)
         {
-            _eventState = eventState;
+            _eventStorage = eventStorage;
             _repository = repository;
             _eventConnectionsStorage = eventConnectionsStorage;
             _eventSender = eventSender;
@@ -31,7 +31,7 @@ namespace Vpiska.Domain.Event.Common
 
         public virtual async Task Handle(TEvent domainEvent)
         {
-            var model = await _eventState.GetEvent(_repository, domainEvent.EventId);
+            var model = await _eventStorage.GetEvent(_repository, domainEvent.EventId);
 
             if (model == null)
             {

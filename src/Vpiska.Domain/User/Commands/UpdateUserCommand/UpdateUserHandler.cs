@@ -9,21 +9,24 @@ using Vpiska.Domain.User.Interfaces;
 
 namespace Vpiska.Domain.User.Commands.UpdateUserCommand
 {
-    internal sealed class UpdateUserHandler : ValidationCommandHandler<UpdateUserCommand, ImageIdResponse>
+    internal sealed class UpdateUserHandler : ICommandHandler<UpdateUserCommand, ImageIdResponse>
     {
+        private readonly IValidator<UpdateUserCommand> _validator;
         private readonly IUserRepository _repository;
         private readonly IFileStorage _fileStorage;
         
         public UpdateUserHandler(IValidator<UpdateUserCommand> validator,
             IUserRepository repository,
-            IFileStorage fileStorage) : base(validator)
+            IFileStorage fileStorage)
         {
+            _validator = validator;
             _repository = repository;
             _fileStorage = fileStorage;
         }
 
-        protected override async Task<ImageIdResponse> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
+        public async Task<ImageIdResponse> HandleAsync(UpdateUserCommand command, CancellationToken cancellationToken = default)
         {
+            await _validator.ValidateRequest(command, cancellationToken: cancellationToken);
             if (string.IsNullOrWhiteSpace(command.Name) && string.IsNullOrWhiteSpace(command.Phone) &&
                 command.ImageStream == null)
             {

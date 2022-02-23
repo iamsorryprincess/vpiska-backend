@@ -6,21 +6,21 @@ namespace Vpiska.Domain.Event.Events.UserConnectedEvent
 {
     internal sealed class UserConnectedHandler : UsersCountUpdatedHandler<UserConnectedEvent>
     {
-        private readonly IEventStorage _eventState;
+        private readonly IEventStorage _eventStorage;
         
-        public UserConnectedHandler(IEventStorage eventState,
+        public UserConnectedHandler(IEventStorage eventStorage,
             IEventRepository repository,
             IEventConnectionsStorage eventConnectionsStorage,
             IEventSender eventSender,
             IUserConnectionsStorage userConnectionsStorage,
-            IUserSender userSender) : base(eventState, repository, eventConnectionsStorage, eventSender, userConnectionsStorage, userSender)
+            IUserSender userSender) : base(eventStorage, repository, eventConnectionsStorage, eventSender, userConnectionsStorage, userSender)
         {
-            _eventState = eventState;
+            _eventStorage = eventStorage;
         }
 
         public override async Task Handle(UserConnectedEvent domainEvent)
         {
-            await _eventState.AddUserInfo(domainEvent.EventId, domainEvent.UserInfo);
+            await _eventStorage.AddUserInfo(domainEvent.EventId, domainEvent.UserInfo);
             await base.Handle(domainEvent);
         }
     }
