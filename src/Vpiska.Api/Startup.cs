@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Vpiska.Api.Filters;
@@ -44,6 +45,10 @@ namespace Vpiska.Api
             app.UseEndpoints(endpoints => endpoints.MapControllers());
             app.UseWebSockets();
             app.UseVSocket();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
         }
     }
 }
