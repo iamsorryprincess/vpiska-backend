@@ -239,12 +239,12 @@ namespace Vpiska.Infrastructure
             
             var idGenerators = new Dictionary<string, Func<string>> { { "Id", () => Guid.NewGuid().ToString() } };
 
-            services.AddVSocket<ChatListener>("/event",
+            services.AddVSocket<ChatListener>("/websockets/event",
                 new[] { "Id", "Name", "ImageId" },
                 new[] { "eventId" },
                 idGenerators);
 
-            services.AddVSocket<RangeListener>("/range",
+            services.AddVSocket<RangeListener>("/websockets/range",
                 Array.Empty<string>(),
                 Array.Empty<string>());
         }
