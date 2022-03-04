@@ -93,7 +93,7 @@ namespace Vpiska.Infrastructure
                         IssuerSigningKey = settings.GetKey(),
                         ValidateIssuerSigningKey = true
                     };
-                    options.AddJwtForWebSocket("access_token", "/chat");
+                    options.AddJwtForWebSocket("access_token", "/websockets/event");
                 });
             services.AddAuthorization();
             services.AddSingleton(settings);

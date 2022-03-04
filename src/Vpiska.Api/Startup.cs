@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Vpiska.Api.Filters;
 using Vpiska.Domain;
+using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Infrastructure;
 using Vpiska.WebSocket;
 
@@ -35,7 +36,7 @@ namespace Vpiska.Api
             services.AddControllers(options => options.Filters.Add<ExceptionFilter>());
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IEventRepository eventRepository, IEventStorage eventStorage)
         {
             app.UseRouting();
             app.UseSwagger();
@@ -49,6 +50,12 @@ namespace Vpiska.Api
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
+
+            var events = eventRepository.GetAll().GetAwaiter().GetResult();
+            foreach (var eventData in events)
+            {
+                eventStorage.SetData(eventData).Wait();
+            }
         }
     }
 }

@@ -22,8 +22,8 @@ namespace Vpiska.Infrastructure.Identity
         {
             var claims = new List<Claim>()
             {
-                new Claim("Id", user.Id),
-                new Claim("Name", user.Name)
+                new("Id", user.Id),
+                new("Name", user.Name)
             };
 
             if (!string.IsNullOrWhiteSpace(user.ImageId))

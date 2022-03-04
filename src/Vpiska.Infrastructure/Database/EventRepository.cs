@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using Vpiska.Domain.Event;
 using Vpiska.Domain.Event.Interfaces;
-using Vpiska.Domain.Event.Responses;
 
 namespace Vpiska.Infrastructure.Database
 {
@@ -15,22 +14,10 @@ namespace Vpiska.Infrastructure.Database
         {
         }
 
-        public Task<List<EventShortResponse>> GetByRange(
-            double xLeft,
-            double xRight,
-            double yLeft,
-            double yRight,
-            CancellationToken cancellationToken = default)
+        public Task<List<Event>> GetAll(CancellationToken cancellationToken = default)
         {
-            var leftHorizontalFilter = Builders<Event>.Filter.Gte(x => x.Coordinates.X, xLeft);
-            var rightHorizontalFilter = Builders<Event>.Filter.Lte(x => x.Coordinates.X, xRight);
-            var leftVerticalFilter = Builders<Event>.Filter.Gte(x => x.Coordinates.Y, yLeft);
-            var rightVerticalFilter = Builders<Event>.Filter.Lte(x => x.Coordinates.Y, yRight);
-            var filter = Builders<Event>.Filter.And(leftHorizontalFilter, rightHorizontalFilter, leftVerticalFilter,
-                rightVerticalFilter);
-            return Collection.Find(filter)
-                .Project(model => EventShortResponse.FromModel(model))
-                .ToListAsync(cancellationToken: cancellationToken);
+            var filter = Builders<Event>.Filter.Empty;
+            return Collection.Find(filter).ToListAsync(cancellationToken: cancellationToken);
         }
 
         public async Task<bool> AddMediaLink(string eventId, string mediaLink, CancellationToken cancellationToken = default)
