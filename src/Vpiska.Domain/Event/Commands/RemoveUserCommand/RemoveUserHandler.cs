@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Vpiska.Domain.Event.Events.UserDisconnectedEvent;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
 
@@ -31,8 +30,7 @@ namespace Vpiska.Domain.Event.Commands.RemoveUserCommand
                 return Task.CompletedTask;
             }
             
-            var domainEvent = new UserDisconnectedEvent() { EventId = command.EventId, UserId = command.UserId };
-            _eventBus.Publish(domainEvent);
+            _eventBus.Publish(command.ToEvent());
             return Task.CompletedTask;
         }
     }

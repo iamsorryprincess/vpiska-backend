@@ -42,11 +42,15 @@ namespace Vpiska.Domain.User.Commands.CreateUserCommand
                     throw new UserPhoneAndNameAlreadyExistException();
                 default:
                 {
-                    var user = new User(Guid.NewGuid().ToString(),
-                        command.Name, "+7",
-                        command.Phone, null,
-                        _passwordHasher.HashPassword(command.Password), 0);
-                    
+                    var user = new User()
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = command.Name,
+                        Phone = command.Phone,
+                        PhoneCode = "+7",
+                        Password = _passwordHasher.HashPassword(command.Password)
+                    };
+
                     await _repository.InsertAsync(user, cancellationToken);
 
                     var response = new LoginResponse()

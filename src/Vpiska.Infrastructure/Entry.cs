@@ -34,8 +34,7 @@ namespace Vpiska.Infrastructure
         {
             var conventionPack = new ConventionPack()
             {
-                new CamelCaseElementNameConvention(),
-                new ImmutableTypeClassMapConvention()
+                new CamelCaseElementNameConvention()
             };
             ConventionRegistry.Register("default", conventionPack, _ => true);
             

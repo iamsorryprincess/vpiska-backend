@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Vpiska.Domain.Common;
 using Vpiska.Domain.Event.Common;
-using Vpiska.Domain.Event.Events.MediaRemovedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
@@ -53,7 +52,7 @@ namespace Vpiska.Domain.Event.Commands.RemoveMediaCommand
 
             await _fileStorage.DeleteFileAsync(command.MediaId, cancellationToken);
             await _repository.RemoveMediaLink(command.EventId, command.MediaId, cancellationToken);
-            _eventBus.Publish(new MediaRemovedEvent() { EventId = command.EventId, MediaId = command.MediaId });
+            _eventBus.Publish(command.ToEvent());
         }
     }
 }

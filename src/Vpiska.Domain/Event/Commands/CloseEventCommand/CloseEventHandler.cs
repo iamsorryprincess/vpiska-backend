@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Vpiska.Domain.Common;
 using Vpiska.Domain.Event.Common;
-using Vpiska.Domain.Event.Events.EventClosedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
@@ -43,7 +42,7 @@ namespace Vpiska.Domain.Event.Commands.CloseEventCommand
                 throw new UserIsNotOwnerException();
             }
 
-            _eventBus.Publish(new EventClosedEvent() { EventId = command.EventId, Coordinates = model.Coordinates });
+            _eventBus.Publish(command.ToEvent(model.Coordinates));
             await _repository.RemoveByFieldAsync("_id", command.EventId, cancellationToken);
         }
     }

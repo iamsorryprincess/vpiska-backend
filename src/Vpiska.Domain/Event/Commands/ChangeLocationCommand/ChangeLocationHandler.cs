@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Vpiska.Domain.Common;
 using Vpiska.Domain.Event.Common;
-using Vpiska.Domain.Event.Events.EventUpdatedEvent;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
@@ -37,15 +36,8 @@ namespace Vpiska.Domain.Event.Commands.ChangeLocationCommand
             {
                 throw new EventNotFoundException();
             }
-            
-            var newCoordinates = command.Coordinates.ToModel();
-            _eventBus.Publish(new EventUpdatedEvent()
-            {
-                EventId = command.EventId,
-                Address = command.Address,
-                UsersCount = model.Users.Count,
-                Coordinates = newCoordinates
-            });
+
+            _eventBus.Publish(command.ToEvent(model.Users.Count));
         }
     }
 }

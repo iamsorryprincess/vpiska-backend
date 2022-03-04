@@ -31,7 +31,17 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
             UsersCount = Users.Count
         };
 
-        public Event ToModel() => new(EventId, OwnerId, Name, Address, Coordinates, MediaLinks, ChatData, Users);
+        public Event ToModel() => new()
+        {
+            Id = EventId,
+            OwnerId = OwnerId,
+            Name = Name,
+            Address = Address,
+            Coordinates = Coordinates,
+            ChatData = ChatData,
+            Users = Users,
+            MediaLinks = MediaLinks
+        };
 
         public static EventCreatedEvent FromModel(Event model) => new()
         {

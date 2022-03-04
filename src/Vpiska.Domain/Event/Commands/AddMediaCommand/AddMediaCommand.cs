@@ -1,4 +1,5 @@
 using System.IO;
+using Vpiska.Domain.Event.Events.MediaAddedEvent;
 
 namespace Vpiska.Domain.Event.Commands.AddMediaCommand
 {
@@ -11,5 +12,11 @@ namespace Vpiska.Domain.Event.Commands.AddMediaCommand
         public string ContentType { get; set; }
 
         public Stream MediaStream { get; set; }
+
+        public MediaAddedEvent ToEvent(string uploadResult) => new()
+        {
+            EventId = EventId,
+            MediaId = uploadResult
+        };
     }
 }

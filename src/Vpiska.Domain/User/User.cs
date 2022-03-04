@@ -2,29 +2,18 @@ namespace Vpiska.Domain.User
 {
     public sealed class User
     {
-        public string Id { get; }
+        public string Id { get; set; }
 
-        public string Name { get; }
+        public string Name { get; set; }
 
-        public string PhoneCode { get; }
+        public string PhoneCode { get; set; }
 
-        public string Phone { get; }
+        public string Phone { get; set; }
 
-        public string ImageId { get; }
+        public string ImageId { get; set; }
 
-        public string Password { get; }
+        public string Password { get; set; }
 
-        public int VerificationCode { get; }
-
-        public User(string id, string name, string phoneCode, string phone, string imageId, string password, int verificationCode)
-        {
-            Id = id;
-            Name = name;
-            PhoneCode = phoneCode;
-            Phone = phone;
-            ImageId = imageId;
-            Password = password;
-            VerificationCode = verificationCode;
-        }
+        public int VerificationCode { get; set; }
     }
 }
