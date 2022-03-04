@@ -7,8 +7,6 @@ namespace Vpiska.Domain.Event.Interfaces
     public interface IEventSender
     {
         Task SendUsersCountUpdate(Guid[] connections, int usersCount);
-        
-        Task SendChatMessageToUser(Guid connectionId, ChatMessage chatMessage);
 
         Task SendChatMessageToConnections(Guid[] connectionIds, ChatMessage chatMessage);
 

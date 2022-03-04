@@ -23,9 +23,6 @@ namespace Vpiska.Infrastructure.WebSocket
                 _webSocketInteracting.SendRawMessage(connectionId, "usersCountUpdated", message)));
         }
 
-        public Task SendChatMessageToUser(Guid connectionId, ChatMessage chatMessage) =>
-            _webSocketInteracting.SendMessage(connectionId, "chatMessage", chatMessage);
-
         public Task SendChatMessageToConnections(Guid[] connectionIds, ChatMessage chatMessage) =>
             Task.WhenAll(connectionIds.Select(connectionId =>
                 _webSocketInteracting.SendMessage(connectionId, "chatMessage", chatMessage)));
