@@ -4,7 +4,7 @@ ____
 ## WebSocket эвента
 ____
 
-Url для подключения - **ws://185.189.167.147:5000/event?access_token=qweasd&eventId=E9F6D9A2-2FF4-4A15-96EB-7C13F47F9CA8**    
+Url для подключения - **wss://vp1ska.ru/websockets/event?access_token=qweasd&eventId=E9F6D9A2-2FF4-4A15-96EB-7C13F47F9CA8**    
 access_token - jwt token юзера, если он есть, если нет (юзер не зареган), то не передавать параметр токена    
 eventId - id эвента    
 
@@ -41,7 +41,7 @@ ____
 ## WebSocket range событий
 ____
 
-Url для подключения - **ws://185.189.167.147:5000/range**
+Url для подключения - **wss://vp1ska.ru/websockets/range**
 
 ### сообщения приходящие с бэка
 ____
