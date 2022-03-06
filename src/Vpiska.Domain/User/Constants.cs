@@ -1,6 +1,6 @@
 namespace Vpiska.Domain.User
 {
-    internal static class Constants
+    public static class Constants
     {
         public const string PhoneRegex = @"^\d{10}\b$";
         public const int PasswordLength = 6;

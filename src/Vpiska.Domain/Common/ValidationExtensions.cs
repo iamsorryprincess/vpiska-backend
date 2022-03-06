@@ -6,7 +6,7 @@ using ValidationException = Vpiska.Domain.Common.Exceptions.ValidationException;
 
 namespace Vpiska.Domain.Common
 {
-    internal static class ValidationExtensions
+    public static class ValidationExtensions
     {
         public static async Task ValidateRequest<TRequest>(this IValidator<TRequest> validator, TRequest request,
             CancellationToken cancellationToken = default)
