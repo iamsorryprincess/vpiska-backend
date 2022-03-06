@@ -25,11 +25,11 @@ namespace Vpiska.Infrastructure.WebSocket
 
         public Task OnDisconnect(WebSocketContext socketContext)
         {
-            var logger = socketContext.ServiceProvider.GetRequiredService<ILogger<RangeListener>>();
             var storage = socketContext.ServiceProvider.GetRequiredService<IUserConnectionsStorage>();
             
             if (!storage.RemoveConnection(socketContext.ConnectionId))
             {
+                var logger = socketContext.ServiceProvider.GetRequiredService<ILogger<RangeListener>>();
                 logger.LogWarning("Can't remove user connection {}", socketContext.ConnectionId);
             }
             

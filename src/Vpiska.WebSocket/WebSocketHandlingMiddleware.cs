@@ -62,18 +62,25 @@ namespace Vpiska.WebSocket
 
                 while (webSocket.State == WebSocketState.Open)
                 {
-                    var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-
-                    switch (result.MessageType)
+                    try
                     {
-                        case WebSocketMessageType.Text:
-                            await hub.ReceiveMessage(connectionId, buffer[..result.Count].ToArray(), identityParams, queryParams);
-                            break;
-                        case WebSocketMessageType.Close:
-                            await hub.TryCloseConnection(connectionId, identityParams, queryParams);
-                            break;
-                        default:
-                            throw new InvalidOperationException("Unknown WebSocketMessageType");
+                        var result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+
+                        switch (result.MessageType)
+                        {
+                            case WebSocketMessageType.Text:
+                                await hub.ReceiveMessage(connectionId, buffer[..result.Count].ToArray(), identityParams, queryParams);
+                                break;
+                            case WebSocketMessageType.Close:
+                                await hub.TryCloseConnection(connectionId, identityParams, queryParams);
+                                break;
+                            default:
+                                throw new InvalidOperationException("Unknown WebSocketMessageType");
+                        }
+                    }
+                    catch (WebSocketException)
+                    {
+                        await hub.TryCloseConnection(connectionId, identityParams, queryParams);
                     }
                 }
             }
