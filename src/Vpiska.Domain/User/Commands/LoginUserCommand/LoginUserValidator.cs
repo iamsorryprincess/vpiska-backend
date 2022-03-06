@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.User.Commands.LoginUserCommand
 {
-    internal sealed class LoginUserValidator : AbstractValidator<LoginUserCommand>
+    public sealed class LoginUserValidator : AbstractValidator<LoginUserCommand>
     {
         public LoginUserValidator()
         {

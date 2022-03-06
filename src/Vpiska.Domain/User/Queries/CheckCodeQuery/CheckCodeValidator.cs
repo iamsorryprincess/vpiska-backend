@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.User.Queries.CheckCodeQuery
 {
-    internal sealed class CheckCodeValidator : AbstractValidator<CheckCodeQuery>
+    public sealed class CheckCodeValidator : AbstractValidator<CheckCodeQuery>
     {
         public CheckCodeValidator()
         {

@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.User.Commands.SetCodeCommand
 {
-    internal sealed class SetCodeValidator : AbstractValidator<SetCodeCommand>
+    public sealed class SetCodeValidator : AbstractValidator<SetCodeCommand>
     {
         public SetCodeValidator()
         {

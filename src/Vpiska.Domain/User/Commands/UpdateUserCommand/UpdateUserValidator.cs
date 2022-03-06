@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.User.Commands.UpdateUserCommand
 {
-    internal sealed class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
+    public sealed class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
     {
         public UpdateUserValidator()
         {

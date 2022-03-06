@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.User.Commands.ChangePasswordCommand
 {
-    internal sealed class ChangePasswordValidator : AbstractValidator<ChangePasswordCommand>
+    public sealed class ChangePasswordValidator : AbstractValidator<ChangePasswordCommand>
     {
         public ChangePasswordValidator()
         {
