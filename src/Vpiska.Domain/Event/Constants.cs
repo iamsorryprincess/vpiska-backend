@@ -1,6 +1,6 @@
 namespace Vpiska.Domain.Event
 {
-    internal static class Constants
+    public static class Constants
     {
         #region ValidationErrors
 

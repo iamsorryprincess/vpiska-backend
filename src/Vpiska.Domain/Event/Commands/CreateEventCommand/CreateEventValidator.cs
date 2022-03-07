@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.Event.Commands.CreateEventCommand
 {
-    internal sealed class CreateEventValidator : AbstractValidator<CreateEventCommand>
+    public sealed class CreateEventValidator : AbstractValidator<CreateEventCommand>
     {
         public CreateEventValidator()
         {
