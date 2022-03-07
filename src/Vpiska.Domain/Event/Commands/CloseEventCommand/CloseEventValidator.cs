@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.Event.Commands.CloseEventCommand
 {
-    internal sealed class CloseEventValidator : AbstractValidator<CloseEventCommand>
+    public sealed class CloseEventValidator : AbstractValidator<CloseEventCommand>
     {
         public CloseEventValidator()
         {

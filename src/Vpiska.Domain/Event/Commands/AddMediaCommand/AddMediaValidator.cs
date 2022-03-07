@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.Event.Commands.AddMediaCommand
 {
-    internal sealed class AddMediaValidator : AbstractValidator<AddMediaCommand>
+    public sealed class AddMediaValidator : AbstractValidator<AddMediaCommand>
     {
         public AddMediaValidator()
         {
@@ -16,11 +16,11 @@ namespace Vpiska.Domain.Event.Commands.AddMediaCommand
 
             RuleFor(x => x.ContentType)
                 .NotEmpty()
-                .WithMessage(Constants.MediaContentTypeIsEmpty);
+                .WithErrorCode(Constants.MediaContentTypeIsEmpty);
             
             RuleFor(x => x.MediaStream)
                 .NotEmpty()
-                .WithMessage(Constants.MediaIsEmpty);
+                .WithErrorCode(Constants.MediaIsEmpty);
         }
     }
 }

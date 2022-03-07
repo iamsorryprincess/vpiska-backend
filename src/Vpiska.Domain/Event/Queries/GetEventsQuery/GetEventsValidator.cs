@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.Event.Queries.GetEventsQuery
 {
-    internal sealed class GetEventsValidator : AbstractValidator<GetEventsQuery>
+    public sealed class GetEventsValidator : AbstractValidator<GetEventsQuery>
     {
         public GetEventsValidator()
         {

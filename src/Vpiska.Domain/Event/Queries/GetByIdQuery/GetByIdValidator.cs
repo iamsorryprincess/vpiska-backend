@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.Event.Queries.GetByIdQuery
 {
-    internal sealed class GetByIdValidator : AbstractValidator<GetByIdQuery>
+    public sealed class GetByIdValidator : AbstractValidator<GetByIdQuery>
     {
         public GetByIdValidator()
         {

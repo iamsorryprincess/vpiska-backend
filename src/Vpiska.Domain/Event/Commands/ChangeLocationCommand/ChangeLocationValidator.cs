@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Vpiska.Domain.Event.Commands.ChangeLocationCommand
 {
-    internal sealed class ChangeLocationValidator : AbstractValidator<ChangeLocationCommand>
+    public sealed class ChangeLocationValidator : AbstractValidator<ChangeLocationCommand>
     {
         public ChangeLocationValidator()
         {
