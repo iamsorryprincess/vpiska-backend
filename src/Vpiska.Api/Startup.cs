@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Vpiska.Api.Filters;
 using Vpiska.Domain;
 using Vpiska.Domain.Event.Interfaces;
+using Vpiska.Domain.Media;
 using Vpiska.Infrastructure;
 using Vpiska.WebSocket;
 
@@ -24,7 +25,8 @@ namespace Vpiska.Api
             services.AddMongoDb(_configuration.GetSection("Mongo"));
             services.AddJwt(_configuration.GetSection("Jwt"));
             services.AddFirebaseCloudMessaging();
-            services.AddFirebaseFileStorage(_configuration.GetSection("Firebase"));
+            services.AddFileStorage();
+            services.AddCache<Media>();
             services.AddEventStorage();
             services.AddRabbitMq(_configuration.GetSection("RabbitMQ"));
             services.AddWebSockets();
@@ -32,6 +34,7 @@ namespace Vpiska.Api
             services.AddConnectionsStorages();
             services.AddUserDomain();
             services.AddEventDomain();
+            services.AddMediaDomain();
             services.AddSwagger();
             services.AddControllers(options => options.Filters.Add<ExceptionFilter>());
         }

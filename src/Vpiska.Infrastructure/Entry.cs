@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -15,14 +16,18 @@ using MongoDB.Driver;
 using Vpiska.Domain.Event;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
+using Vpiska.Domain.Media;
+using Vpiska.Domain.Media.Interfaces;
 using Vpiska.Domain.User;
 using Vpiska.Domain.User.Interfaces;
+using Vpiska.Infrastructure.Cache;
 using Vpiska.Infrastructure.Database;
 using Vpiska.Infrastructure.Firebase;
 using Vpiska.Infrastructure.Identity;
 using Vpiska.Infrastructure.RabbitMq;
 using Vpiska.Infrastructure.WebSocket;
 using Vpiska.WebSocket;
+using Constants = Vpiska.Domain.Media.Constants;
 
 namespace Vpiska.Infrastructure
 {
@@ -40,6 +45,7 @@ namespace Vpiska.Infrastructure
             
             services.AddMongoDbUserConfiguration();
             services.AddMongoDbEventConfiguration();
+            services.AddMongoDbMediaConfigurations();
             var client = new MongoClient(mongoSection["ConnectionString"]);
             var settings = new MongoSettings(mongoSection["DatabaseName"]);
             services.AddSingleton<IMongoClient>(client);
@@ -66,6 +72,17 @@ namespace Vpiska.Infrastructure
             });
 
             services.AddTransient<IEventRepository, EventRepository>();
+        }
+
+        private static void AddMongoDbMediaConfigurations(this IServiceCollection services)
+        {
+            BsonClassMap.RegisterClassMap<Media>(options =>
+            {
+                options.AutoMap();
+                options.MapIdMember(x => x.Id);
+            });
+
+            services.AddTransient<IMediaRepository, MediaRepository>();
         }
         
         #endregion
@@ -177,7 +194,7 @@ namespace Vpiska.Infrastructure
             services.AddSingleton(settings);
             var storageClient = StorageClient.Create(GoogleCredential.FromFile(GetSettingsPath()));
             services.AddSingleton(storageClient);
-            services.AddTransient<IFileStorage, FileStorage>();
+            services.AddTransient<IFileStorage, Firebase.FileStorage>();
         }
 
         private static string GetSettingsPath()
@@ -188,6 +205,28 @@ namespace Vpiska.Infrastructure
             const string path = "Firebase/settings.json";
 #endif
             return path;
+        }
+
+        #endregion
+
+        #region Cache
+
+        public static void AddCache<T>(this IServiceCollection services) where T : class, new()
+        {
+            services.AddSingleton<ICache<T>, Cache<T>>();
+        }
+
+        #endregion
+        
+        #region FileStorage
+
+        public static void AddFileStorage(this IServiceCollection services)
+        {
+            if (!Directory.Exists(Constants.Path))
+            {
+                Directory.CreateDirectory(Constants.Path);
+            }
+            services.AddTransient<IFileStorage, FileStorage.FileStorage>();
         }
 
         #endregion
