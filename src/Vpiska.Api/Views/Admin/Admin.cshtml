@@ -1,0 +1,26 @@
+@model PagedResponse;
+
+<div class="table container">
+  <div class="header padding-header">
+    <h3 class="header-color">Storage</h3>
+    <span class="header-color font-size-18">Кол-во файлов: @Model.TotalItems</span>
+    <form asp-controller="Media"
+          asp-action="UploadFileForm"
+          asp-route-page="@Model.Page"
+          asp-route-size="@Model.ItemsPerPage"
+          enctype="multipart/form-data">
+      <input id="file" type="file" name="file" hidden>
+      <label class="button" for="file">Загрузить файл</label>
+    </form>
+  </div>
+  <div class="row-header row-flex padding-row header-color">
+    <input class="hover-pointer" type="checkbox">
+    <span class="hover-pointer row-flex-width1">Имя</span>
+    <span class="hover-pointer row-flex-width2">Размер</span>
+    <span class="hover-pointer row-flex-width2">Тип</span>
+    <span class="hover-pointer row-flex-width3">Дата</span>
+  </div>
+  <div>
+    @await Html.PartialAsync("~/Views/Admin/PagedFiles.cshtml", Model)
+  </div>
+</div>

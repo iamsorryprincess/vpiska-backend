@@ -1,0 +1,32 @@
+@model PagedResponse;
+
+@{
+  var pageNext = Model.Page + 1;
+  var pageBack = Model.Page - 1;
+}
+
+@foreach (var metadata in Model.FilesMetadata)
+{
+  <div class="row-item padding-row">
+    <div class="row-flex">
+      <input class="hover-pointer" type="checkbox">
+      <span class="row-flex-width1">@metadata.Name</span>
+      <span class="row-item-font row-flex-width2">@metadata.Size</span>
+      <span class="row-item-font row-flex-width2">@metadata.Type</span>
+      <span class="row-item-font row-flex-width3">@metadata.LastModified</span>
+    </div>
+  </div>
+}
+<div class="pager" data-page="@Model.Page" data-total="@Model.TotalPages">
+  <a asp-controller="Media"
+     asp-action="AdminPage"
+     asp-route-page="@pageBack"
+     id="back"
+     class="link header-color">←</a>
+  <spawn class="page-text header-color">@Model.Page из @Model.TotalPages</spawn>
+  <a asp-controller="Media"
+     asp-action="AdminPage"
+     asp-route-page="@pageNext"
+     id="next"
+     class="link header-color">→</a>
+</div>

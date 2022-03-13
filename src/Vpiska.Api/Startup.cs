@@ -36,11 +36,12 @@ namespace Vpiska.Api
             services.AddEventDomain();
             services.AddMediaDomain();
             services.AddSwagger();
-            services.AddControllers(options => options.Filters.Add<ExceptionFilter>());
+            services.AddControllersWithViews(options => options.Filters.Add<ExceptionFilter>());
         }
 
         public void Configure(IApplicationBuilder app, IEventRepository eventRepository, IEventStorage eventStorage)
         {
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "api"));
