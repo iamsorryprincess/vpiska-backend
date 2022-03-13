@@ -74,6 +74,8 @@ services:
 
   api:
     image: api
+    volumes:
+      - /home/vpiska/data/media:/app/media
     build:
       context: .
       dockerfile: src/Vpiska.Api/Dockerfile
