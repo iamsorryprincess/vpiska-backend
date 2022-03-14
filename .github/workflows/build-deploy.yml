@@ -12,4 +12,4 @@ jobs:
       - name: build
         run: docker-compose build api
       - name: deploy
-        run: docker service update --force r27p1yu7klif
+        run: docker service update --force k0cfcava6t1x

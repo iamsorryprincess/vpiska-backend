@@ -85,7 +85,6 @@ services:
       - Jwt__Key=vpiska_secretkey!123
       - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
       - Mongo__DatabaseName=vpiska
-      - Firebase__BucketName=vpiska-a6e65.appspot.com
       - RabbitMQ__Host=rabbitmq
       - RabbitMQ__User=kekit
       - RabbitMQ__Password=qweasdzxc
