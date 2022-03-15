@@ -35,6 +35,10 @@ body {
   font-size: 18px;
 }
 
+.width-24 {
+  width: 24%;
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -50,14 +54,21 @@ body {
   font-size: 16px;
   padding: 7px;
   color: #FFFFFF;
-  background-color: #1A73E8;
   border: none;
   border-radius: 5px;
   transition-duration: .3s;
 }
 
+.button-blue {
+  background-color: #1A73E8;
+}
+
+.button-red {
+  background-color: #E0534E;
+}
+
 .button:hover {
-  background-color: #0b55b7;
+  opacity: .7;
 }
 
 .row-flex {
@@ -133,4 +144,57 @@ body {
 
 .disabled {
   pointer-events: none;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.img-container {
+  height: 250px;
+  text-align: center;
+}
+
+.img-content {
+  display: inline-block;
+  width: 60%;
+  height: 100%;
+}
+
+@media screen and (max-width: 480px) {
+  .table {
+    font-size: 6px;
+  }
+  
+  .font-size-18 {
+    font-size: 14px;
+  }
+
+  .button {
+    font-size: 6px;
+  }
+
+  .link {
+    font-size: 25px;
+  }
+
+  .page-text {
+    font-size: 14px;
+  }
+
+  .row-flex-width1 {
+    width: auto;
+  }
+
+  .row-flex-width2 {
+    width: auto;
+  }
+
+  .row-flex-width3 {
+    width: auto;
+  }
+
+  .img-content {
+    height: 100px;
+  }
 }

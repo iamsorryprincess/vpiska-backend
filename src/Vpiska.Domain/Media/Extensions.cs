@@ -15,7 +15,7 @@ namespace Vpiska.Domain.Media
                 "image/svg+xml" => "svg",
                 "image/webp" => "webp",
                 "video/mp4" => "mp4",
-                "video/webm" => "video/webm",
+                "video/webm" => "webm",
                 _ => throw new ContentTypeNotSupportedException()
             };
         }

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Vpiska.Api.Responses;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.Media;
+using Vpiska.Domain.Media.Commands.RemoveMediaCommand;
 using Vpiska.Domain.Media.Commands.UploadMediaCommand;
 using Vpiska.Domain.Media.Interfaces;
 using Vpiska.Domain.Media.Models;
@@ -46,6 +48,19 @@ namespace Vpiska.Api.Controllers
                 Body = buffer
             };
             await commandHandler.HandleAsync(command, cancellationToken);
+            return RedirectToAction("AdminPage", new { page, size });
+        }
+
+        [HttpPost("delete")]
+        [Produces("text/html")]
+        public async Task<IActionResult> DeleteFiles(
+            [FromServices] ICommandHandler<RemoveMediaCommand> commandHandler,
+            [FromForm] string[] names,
+            int page,
+            int size)
+        {
+            var tasks = names.Select(name => commandHandler.HandleAsync(new RemoveMediaCommand() { Name = name }));
+            await Task.WhenAll(tasks);
             return RedirectToAction("AdminPage", new { page, size });
         }
 
