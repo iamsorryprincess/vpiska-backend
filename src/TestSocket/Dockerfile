@@ -5,7 +5,7 @@ EXPOSE 9090
 FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
 WORKDIR /src
 COPY . .
-RUN dotnet publish src/Vpiska.Api/Vpiska.Api.csproj -c Release -o /app
+RUN dotnet publish src/TestSocket/TestSocket.csproj -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
