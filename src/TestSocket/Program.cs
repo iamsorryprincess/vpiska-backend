@@ -9,14 +9,18 @@ namespace TestSocket
         private static void Main(string[] args)
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Bind(new IPEndPoint(IPAddress.Any, 9090));
+            socket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9090));
             socket.Listen(10);
             Console.WriteLine("Listening");
 
             while (true)
             {
                 var handler = socket.Accept();
-                var body = $"<body><h1>${handler.RemoteEndPoint}</h1></body>";
+                Console.WriteLine($"{socket.LocalEndPoint}");
+                Console.WriteLine($"{socket.RemoteEndPoint}");
+                Console.WriteLine($"{handler.LocalEndPoint}");
+                Console.WriteLine($"{handler.RemoteEndPoint}");
+                var body = $"<body><h1>{handler.RemoteEndPoint}</h1></body>";
 
                 var response = @$"HTTP/1.1 200 Ok
 Server: test
