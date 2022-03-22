@@ -11,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
     deploy:
-      replicas: 1
+      replicas: 0
       restart_policy:
         condition: on-failure
       update_config:
@@ -89,7 +89,7 @@ services:
       - RabbitMQ__User=kekit
       - RabbitMQ__Password=qweasdzxc
     deploy:
-      replicas: 1
+      replicas: 0
       restart_policy:
         condition: on-failure
       update_config:
@@ -102,3 +102,25 @@ services:
         reservations:
           memory: 5120M
           cpus: "1.5"
+
+  test:
+    image: testSocket
+    ports:
+      - "9090:9090"
+    build:
+      context: .
+      dockerfile: src/TestSocket/Dockerfile
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+        reservations:
+          memory: 128M
+          cpus: "0.25"
