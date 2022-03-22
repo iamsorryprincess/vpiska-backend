@@ -102,25 +102,3 @@ services:
         reservations:
           memory: 5120M
           cpus: "1.5"
-
-  test:
-    image: test
-    ports:
-      - "9090:9090"
-    build:
-      context: .
-      dockerfile: src/TestSocket/Dockerfile
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-      update_config:
-        parallelism: 1
-        delay: 10s
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.5"
-        reservations:
-          memory: 128M
-          cpus: "0.25"
