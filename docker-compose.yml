@@ -104,7 +104,7 @@ services:
           cpus: "1.5"
 
   test:
-    image: testSocket
+    image: test
     ports:
       - "9090:9090"
     build:
