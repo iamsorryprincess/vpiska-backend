@@ -36,7 +36,7 @@ namespace Vpiska.Api
             services.AddEventDomain();
             services.AddMediaDomain();
             services.AddSwagger();
-            services.AddControllersWithViews(options => options.Filters.Add<ExceptionFilter>());
+            services.AddControllers(options => options.Filters.Add<ExceptionFilter>());
         }
 
         public void Configure(IApplicationBuilder app, IEventRepository eventRepository, IEventStorage eventStorage)

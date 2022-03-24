@@ -25,7 +25,9 @@ using Vpiska.Domain.Event.Responses;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.Media.Commands;
 using Vpiska.Domain.Media.Commands.UploadMediaCommand;
+using Vpiska.Domain.Media.Models;
 using Vpiska.Domain.Media.Queries.GetByNameQuery;
+using Vpiska.Domain.Media.Queries.PageQuery;
 using Vpiska.Domain.User.Commands.ChangePasswordCommand;
 using Vpiska.Domain.User.Commands.CreateUserCommand;
 using Vpiska.Domain.User.Commands.LoginUserCommand;
@@ -100,11 +102,12 @@ namespace Vpiska.Domain
 
         public static void AddMediaDomain(this IServiceCollection services)
         {
-            services.AddTransient<ICommandHandler<UploadMediaCommand>, UploadMediaHandler>();
+            services.AddTransient<ICommandHandler<UploadMediaCommand, MetadataViewModel>, UploadMediaHandler>();
             services
                 .AddTransient<ICommandHandler<Media.Commands.RemoveMediaCommand.RemoveMediaCommand>,
                     Media.Commands.RemoveMediaCommand.RemoveMediaHandler>();
             services.AddTransient<IQueryHandler<GetByNameQuery, Media.Media>, GetByNameHandler>();
+            services.AddTransient<IQueryHandler<PageQuery, PagedResponse>, PageQueryHandler>();
         }
     }
 }

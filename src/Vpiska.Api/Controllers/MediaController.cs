@@ -9,59 +9,68 @@ using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.Media;
 using Vpiska.Domain.Media.Commands.RemoveMediaCommand;
 using Vpiska.Domain.Media.Commands.UploadMediaCommand;
-using Vpiska.Domain.Media.Interfaces;
 using Vpiska.Domain.Media.Models;
 using Vpiska.Domain.Media.Queries.GetByNameQuery;
+using Vpiska.Domain.Media.Queries.PageQuery;
 
 namespace Vpiska.Api.Controllers
 {
     [Route("api/media")]
-    public sealed class MediaController : Controller
+    public sealed class MediaController : ControllerBase
     {
         [HttpGet("/admin")]
         [Produces("text/html")]
-        public async Task<IActionResult> AdminPage([FromServices] IMediaRepository repository,
-            int page = 1,
-            int size = 20)
+        public IActionResult AdminPage()
         {
-            var filesMetadata = await repository.GetPagedFilesMetadata(page, size);
-            return View("~/Views/Admin/Admin.cshtml", filesMetadata);
+            return File("index.html", "text/html");
+        }
+
+        [HttpGet]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse>), 200)]
+        public async Task<IActionResult> GetPagedList(
+            [FromServices] IQueryHandler<PageQuery, PagedResponse> queryHandler,
+            [FromQuery] PageQuery query,
+            CancellationToken cancellationToken)
+        {
+            var data = await queryHandler.HandleAsync(query, cancellationToken);
+            return Ok(ApiResponse<PagedResponse>.Success(data));
         }
 
         [HttpPost]
-        [Produces("text/html")]
-        public async Task<IActionResult> UploadFileForm(
-            [FromServices] ICommandHandler<UploadMediaCommand> commandHandler,
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ApiResponse<MetadataViewModel>), 200)]
+        public async Task<IActionResult> PostFile(
+            [FromServices] ICommandHandler<UploadMediaCommand, MetadataViewModel> commandHandler,
             IFormFile file,
-            int page,
-            int size,
             CancellationToken cancellationToken)
         {
-            var buffer = new byte[file.Length];
+            var body = new byte[file.Length];
             var stream = file.OpenReadStream();
-            await stream.ReadAsync(buffer, cancellationToken);
+            await stream.ReadAsync(body, cancellationToken);
             await stream.DisposeAsync();
             var command = new UploadMediaCommand()
             {
                 Name = file.FileName,
                 ContentType = file.ContentType,
-                Body = buffer
+                Body = body
             };
-            await commandHandler.HandleAsync(command, cancellationToken);
-            return RedirectToAction("AdminPage", new { page, size });
+            var response = await commandHandler.HandleAsync(command, cancellationToken);
+            return Ok(ApiResponse<MetadataViewModel>.Success(response));
         }
 
-        [HttpPost("delete")]
-        [Produces("text/html")]
+        [HttpDelete]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ApiResponse), 200)]
         public async Task<IActionResult> DeleteFiles(
             [FromServices] ICommandHandler<RemoveMediaCommand> commandHandler,
             [FromForm] string[] names,
-            int page,
-            int size)
+            CancellationToken cancellationToken)
         {
-            var tasks = names.Select(name => commandHandler.HandleAsync(new RemoveMediaCommand() { Name = name }));
+            var tasks = names.Select(name =>
+                commandHandler.HandleAsync(new RemoveMediaCommand() { Name = name }, cancellationToken));
             await Task.WhenAll(tasks);
-            return RedirectToAction("AdminPage", new { page, size });
+            return Ok(ApiResponse.Success());
         }
 
         [HttpGet("metadata/{name}")]

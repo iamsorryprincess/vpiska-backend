@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/styles.css" rel="stylesheet">
+  <title>Админка файлов</title>
+</head>
+<body>
+<div class="table container">
+  <div class="header padding-header">
+    <h3 class="header-color">Storage</h3>
+    <span class="header-color font-size-18">Кол-во файлов:</span>
+    <div class="row-flex width-24">
+      <form class="hidden">
+        <button type="button" class="button button-red">Удалить</button>
+      </form>
+      <form>
+        <input id="file" type="file" name="file" hidden>
+        <label class="button button-blue" for="file">Загрузить файл</label>
+      </form>
+    </div>
+  </div>
+  <div class="row-header row-flex padding-row header-color">
+    <input class="hover-pointer" type="checkbox">
+    <span class="hover-pointer row-flex-width1">Имя</span>
+    <span class="hover-pointer row-flex-width2">Размер</span>
+    <span class="hover-pointer row-flex-width2">Тип</span>
+    <span class="hover-pointer row-flex-width3">Дата</span>
+  </div>
+  <div id="items-container"></div>
+  <div class="pager">
+    <a id="back" class="link header-color">←</a>
+    <span class="page-text header-color">1 из 1</span>
+    <a id="next" class="link header-color">→</a>
+  </div>
+</div>
+<template id="row-item">
+  <div>
+    <div class="row-item row-flex padding-row">
+      <input class="hover-pointer" type="checkbox">
+      <span class="row-flex-width1"></span>
+      <span class="row-item-font row-flex-width2"></span>
+      <span class="row-item-font row-flex-width2"></span>
+      <span class="row-item-font row-flex-width3"></span>
+    </div>
+    <div class="img-container" hidden>
+    </div>
+  </div>
+</template>
+</body>
+<script src="js/http.js" type="module"></script>
+<script src="js/item.js" type="module"></script>
+<script src="js/pagination.js" type="module"></script>
+<script src="js/index.js" type="module"></script>
+</html>

@@ -7,6 +7,7 @@ using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.Media.Commands.RemoveMediaCommand;
 using Vpiska.Domain.Media.Commands.UploadMediaCommand;
 using Vpiska.Domain.Media.Exceptions;
+using Vpiska.Domain.Media.Models;
 
 namespace Vpiska.Infrastructure.FileStorage
 {
@@ -31,7 +32,7 @@ namespace Vpiska.Infrastructure.FileStorage
                 ContentType = contentType,
                 Body = buffer
             };
-            var commandHandler = _serviceProvider.GetRequiredService<ICommandHandler<UploadMediaCommand>>();
+            var commandHandler = _serviceProvider.GetRequiredService<ICommandHandler<UploadMediaCommand, MetadataViewModel>>();
             await commandHandler.HandleAsync(command, cancellationToken);
             return filename;
         }
