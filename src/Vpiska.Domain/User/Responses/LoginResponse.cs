@@ -9,5 +9,7 @@ namespace Vpiska.Domain.User.Responses
         public string UserName { get; set; }
 
         public string ImageId { get; set; }
+
+        public string EventId { get; set; }
     }
 }
