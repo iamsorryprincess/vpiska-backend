@@ -43,8 +43,7 @@ namespace Vpiska.WebSocket
 
                 var queryParams = socketOptions.QueryParams
                     .Where(paramName => context.Request.Query.ContainsKey(paramName))
-                    .Select(paramName => new KeyValuePair<string, string>(paramName, context.Request.Query[paramName]))
-                    .ToDictionary(x => x.Key, x => x.Value);
+                    .ToDictionary(paramName => paramName, paramName => (string)context.Request.Query[paramName]);
 
                 if (queryParams.Count != socketOptions.QueryParams.Count)
                 {
@@ -58,7 +57,7 @@ namespace Vpiska.WebSocket
                 
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 var connectionId = await hub.AddConnection(webSocket, identityParams, queryParams);
-                var buffer = new ArraySegment<byte>(new byte[1024 * 4]);
+                var buffer = new byte[1024 * 4];
 
                 while (webSocket.State == WebSocketState.Open)
                 {
@@ -69,7 +68,7 @@ namespace Vpiska.WebSocket
                         switch (result.MessageType)
                         {
                             case WebSocketMessageType.Text:
-                                await hub.ReceiveMessage(connectionId, buffer[..result.Count].ToArray(), identityParams, queryParams);
+                                await hub.ReceiveMessage(connectionId, buffer[..result.Count], identityParams, queryParams);
                                 break;
                             case WebSocketMessageType.Close:
                                 await hub.TryCloseConnection(connectionId, identityParams, queryParams);

@@ -22,7 +22,8 @@ namespace Vpiska.WebSocket
             _listenerType = typeof(TListener);
         }
 
-        public async Task<Guid> AddConnection(System.Net.WebSockets.WebSocket webSocket, Dictionary<string, string> identityParams,
+        public async Task<Guid> AddConnection(System.Net.WebSockets.WebSocket webSocket,
+            Dictionary<string, string> identityParams,
             Dictionary<string, string> queryParams)
         {
             var connectionId = Guid.NewGuid();

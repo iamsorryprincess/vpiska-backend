@@ -202,7 +202,7 @@ namespace Vpiska.Infrastructure.RabbitMq
                 }
             };
 
-            channel.BasicConsume(queue: queue, autoAck: false, consumer: consumer);
+            channel.BasicConsume(queue: queue, autoAck: true, consumer: consumer);
             _consumers.Add(channel);
         }
         
