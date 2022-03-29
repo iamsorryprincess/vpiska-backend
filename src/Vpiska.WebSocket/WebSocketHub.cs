@@ -118,7 +118,8 @@ namespace Vpiska.WebSocket
         {
             if (_connections.TryRemove(connectionId, out var socket))
             {
-                return socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "close connection", CancellationToken.None);
+                return CloseSafeAsync(socket, WebSocketCloseStatus.NormalClosure, "close connection",
+                    CancellationToken.None);
             }
 
             throw new InvalidOperationException($"Can't find connection {connectionId}");
@@ -133,7 +134,7 @@ namespace Vpiska.WebSocket
         {
             try
             {
-                await socket.CloseAsync(socketCloseStatus, statusDescription, CancellationToken.None);
+                await CloseSafeAsync(socket, socketCloseStatus, statusDescription, CancellationToken.None);
                 await using var scope = _serviceScopeFactory.CreateAsyncScope();
                 var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
                                ?? throw new InvalidOperationException(
@@ -155,6 +156,20 @@ namespace Vpiska.WebSocket
             var exceptionHandler = scope.ServiceProvider.GetService<IWebSocketExceptionHandler>();
             exceptionHandler?.Handle(
                 new WebSocketContext(connectionId, queryParams, identityParams, scope.ServiceProvider), ex);
+        }
+        
+        private static async Task CloseSafeAsync(System.Net.WebSockets.WebSocket webSocket,
+            WebSocketCloseStatus closeStatus,
+            string statusDescription,
+            CancellationToken cancellationToken)
+        {
+            if (webSocket.State == WebSocketState.Aborted)
+            {
+                webSocket.Dispose();
+                return;
+            }
+
+            await webSocket.CloseAsync(closeStatus, statusDescription, cancellationToken);
         }
     }
 }
