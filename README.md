@@ -50,7 +50,7 @@ ____
 обновление инфы по эвенту, после слэша json
 ____
 
-**eventCreated/{"eventId": "qweasd", "name": "test" "usersCount": 2, "coordinates": {"x": 24.03441142, "y": 24.03441142}}**: 
+**eventCreated/{"eventId": "qweasd", "name": "test", "address": "moskvagovno", "usersCount": 2, "coordinates": {"x": 24.03441142, "y": 24.03441142}}**: 
 создан эвент, после слэша json
 ____
 

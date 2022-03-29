@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Models;
-using Vpiska.Domain.Event.Responses;
 using Vpiska.WebSocket;
 
 namespace Vpiska.Infrastructure.WebSocket
@@ -21,9 +20,9 @@ namespace Vpiska.Infrastructure.WebSocket
             connections.Select(connectionId =>
                 _webSocketInteracting.SendMessage(connectionId, "eventUpdated", eventUpdatedInfo)));
 
-        public Task SendEventCreated(Guid[] connections, EventShortResponse eventShortResponse) => Task.WhenAll(
+        public Task SendEventCreated(Guid[] connections, EventCreatedInfo eventCreatedInfo) => Task.WhenAll(
             connections.Select(connectionId =>
-                _webSocketInteracting.SendMessage(connectionId, "eventCreated", eventShortResponse)));
+                _webSocketInteracting.SendMessage(connectionId, "eventCreated", eventCreatedInfo)));
 
         public Task SendEventClosed(Guid[] connections, string eventId) => Task.WhenAll(
             connections.Select(connectionId =>

@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Vpiska.Domain.Event.Models;
-using Vpiska.Domain.Event.Responses;
 
 namespace Vpiska.Domain.Event.Interfaces
 {
@@ -9,7 +8,7 @@ namespace Vpiska.Domain.Event.Interfaces
     {
         Task SendEventUpdatedInfo(Guid[] connections, EventUpdatedInfo eventUpdatedInfo);
 
-        Task SendEventCreated(Guid[] connections, EventShortResponse eventShortResponse);
+        Task SendEventCreated(Guid[] connections, EventCreatedInfo eventCreatedInfo);
 
         Task SendEventClosed(Guid[] connections, string eventId);
     }

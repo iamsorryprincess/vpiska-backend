@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Event.Models;
-using Vpiska.Domain.Event.Responses;
 
 namespace Vpiska.Domain.Event.Events.EventCreatedEvent
 {
@@ -23,12 +22,13 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
 
         public List<UserInfo> Users { get; set; } = new();
 
-        public EventShortResponse ToShortResponse() => new()
+        public EventCreatedInfo ToShortModel() => new()
         {
-            Id = EventId,
+            EventId = EventId,
             Name = Name,
-            Coordinates = Coordinates,
-            UsersCount = Users.Count
+            Address = Address,
+            UsersCount = Users.Count,
+            Coordinates = Coordinates
         };
 
         public Event ToModel() => new()

@@ -25,7 +25,7 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
 
             if (connections.Any())
             { 
-                await _sender.SendEventCreated(connections, domainEvent.ToShortResponse());
+                await _sender.SendEventCreated(connections, domainEvent.ToShortModel());
             }
 
             await _eventStorage.SetData(domainEvent.ToModel());
