@@ -7,7 +7,7 @@ using Vpiska.Domain.Event.Interfaces;
 
 namespace Vpiska.Infrastructure.Database
 {
-    internal sealed class EventRepository : RepositoryBase<Event>, IEventRepository
+    public sealed class EventRepository : RepositoryBase<Event>, IEventRepository
     {
         public EventRepository(IMongoClient mongoClient, MongoSettings settings) : base(mongoClient,
             settings.DatabaseName, "events")

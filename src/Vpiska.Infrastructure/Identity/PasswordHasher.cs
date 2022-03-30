@@ -4,7 +4,7 @@ using Vpiska.Domain.User.Interfaces;
 
 namespace Vpiska.Infrastructure.Identity
 {
-    internal sealed class PasswordHasher : IPasswordHasher
+    public sealed class PasswordHasher : IPasswordHasher
     {
         public string HashPassword(string password) => Convert.ToBase64String(Encoding.UTF8.GetBytes(password));
 

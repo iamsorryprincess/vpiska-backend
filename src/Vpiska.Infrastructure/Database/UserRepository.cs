@@ -8,7 +8,7 @@ using Vpiska.Domain.User.Models;
 
 namespace Vpiska.Infrastructure.Database
 {
-    internal sealed class UserRepository : RepositoryBase<User>, IUserRepository
+    public sealed class UserRepository : RepositoryBase<User>, IUserRepository
     {
         public UserRepository(IMongoClient mongoClient, MongoSettings settings) : base(mongoClient,
             settings.DatabaseName, "users")

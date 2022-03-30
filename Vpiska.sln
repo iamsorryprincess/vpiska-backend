@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.Api", "src\Vpiska.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.UnitTests", "test\Vpiska.UnitTests\Vpiska.UnitTests.csproj", "{20808AC3-C1A6-4D90-BE61-E6DD21E89679}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.IntegrationTests", "test\Vpiska.IntegrationTests\Vpiska.IntegrationTests.csproj", "{7FEB8152-D92B-4460-BDA0-CD62503961AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,7 @@ Global
 		{69403395-8E71-41C3-BBE9-BD9FA270D066} = {9995CCD9-8B5A-44D4-A354-AD3145B29AFD}
 		{5051C79E-DF01-4641-B138-0F59587F1BC6} = {9995CCD9-8B5A-44D4-A354-AD3145B29AFD}
 		{20808AC3-C1A6-4D90-BE61-E6DD21E89679} = {F7B1EDA3-95EE-4E7B-B2A1-6869C42756EE}
+		{7FEB8152-D92B-4460-BDA0-CD62503961AC} = {F7B1EDA3-95EE-4E7B-B2A1-6869C42756EE}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{395A62B3-7D3F-4D38-BBC6-A73B7A4E1705}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -53,5 +56,9 @@ Global
 		{20808AC3-C1A6-4D90-BE61-E6DD21E89679}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20808AC3-C1A6-4D90-BE61-E6DD21E89679}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20808AC3-C1A6-4D90-BE61-E6DD21E89679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FEB8152-D92B-4460-BDA0-CD62503961AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FEB8152-D92B-4460-BDA0-CD62503961AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FEB8152-D92B-4460-BDA0-CD62503961AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FEB8152-D92B-4460-BDA0-CD62503961AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

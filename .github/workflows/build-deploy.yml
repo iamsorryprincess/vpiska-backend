@@ -9,7 +9,9 @@ jobs:
     runs-on: [self-hosted, linux, X64]
     steps:
       - uses: actions/checkout@v2
+      - name: test
+        run: sh tests.sh
       - name: build
         run: docker-compose build api
       - name: deploy
-        run: docker service update --force asty3wc6v75q
+        run: docker service update --force mz6rp0vxj126

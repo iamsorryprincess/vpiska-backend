@@ -21,8 +21,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Vpiska.Domain\Vpiska.Domain.csproj" />
-      <ProjectReference Include="..\..\src\Vpiska.Infrastructure\Vpiska.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\src\Vpiska.Api\Vpiska.Api.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="testsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

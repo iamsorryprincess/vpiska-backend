@@ -5,7 +5,7 @@ using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Infrastructure.Database
 {
-    internal abstract class RepositoryBase<TEntity> : IRepository<TEntity>
+    public abstract class RepositoryBase<TEntity> : IRepository<TEntity>
     {
         protected readonly IMongoCollection<TEntity> Collection;
 

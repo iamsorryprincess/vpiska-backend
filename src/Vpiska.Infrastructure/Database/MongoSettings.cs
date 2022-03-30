@@ -1,6 +1,6 @@
 namespace Vpiska.Infrastructure.Database
 {
-    internal sealed class MongoSettings
+    public sealed class MongoSettings
     {
         public string DatabaseName { get; }
 
