@@ -21,17 +21,16 @@ namespace Vpiska.Domain.Event.Commands.RemoveUserCommand
             _eventBus = eventBus;
         }
         
-        public Task HandleAsync(RemoveUserCommand command, CancellationToken cancellationToken = default)
+        public async Task HandleAsync(RemoveUserCommand command, CancellationToken cancellationToken = default)
         {
             if (!_storage.RemoveConnection(command.EventId, command.ConnectionId))
             {
                 _logger.LogWarning("Can't remove connection. EventId: {}, UserId: {}", command.EventId,
                     command.UserId);
-                return Task.CompletedTask;
+                return;
             }
             
-            _eventBus.Publish(command.ToEvent());
-            return Task.CompletedTask;
+            await _eventBus.PublishAsync(command.ToEvent());
         }
     }
 }

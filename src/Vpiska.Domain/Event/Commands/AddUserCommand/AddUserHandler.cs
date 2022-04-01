@@ -54,7 +54,7 @@ namespace Vpiska.Domain.Event.Commands.AddUserCommand
                 throw new UserToEventConnectionException();
             }
             
-            _eventBus.Publish(command.ToEvent());
+            await _eventBus.PublishAsync(command.ToEvent());
         }
     }
 }

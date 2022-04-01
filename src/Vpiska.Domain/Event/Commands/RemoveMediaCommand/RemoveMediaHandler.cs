@@ -52,7 +52,7 @@ namespace Vpiska.Domain.Event.Commands.RemoveMediaCommand
 
             await _fileStorage.DeleteFileAsync(command.MediaId, cancellationToken);
             await _repository.RemoveMediaLink(command.EventId, command.MediaId, cancellationToken);
-            _eventBus.Publish(command.ToEvent());
+            await _eventBus.PublishAsync(command.ToEvent());
         }
     }
 }

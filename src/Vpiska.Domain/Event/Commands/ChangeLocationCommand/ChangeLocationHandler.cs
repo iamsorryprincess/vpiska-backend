@@ -37,7 +37,7 @@ namespace Vpiska.Domain.Event.Commands.ChangeLocationCommand
                 throw new EventNotFoundException();
             }
 
-            _eventBus.Publish(command.ToEvent(model.Users.Count));
+            await _eventBus.PublishAsync(command.ToEvent(model.Users.Count));
         }
     }
 }

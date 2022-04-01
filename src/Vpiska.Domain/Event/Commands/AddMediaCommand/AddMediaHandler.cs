@@ -49,7 +49,7 @@ namespace Vpiska.Domain.Event.Commands.AddMediaCommand
             var uploadResult = await _fileStorage.SaveFileAsync(Guid.NewGuid().ToString(), command.ContentType,
                 command.MediaStream, cancellationToken);
             await _repository.AddMediaLink(command.EventId, uploadResult, cancellationToken);
-            _eventBus.Publish(command.ToEvent(uploadResult));
+            await _eventBus.PublishAsync(command.ToEvent(uploadResult));
         }
     }
 }

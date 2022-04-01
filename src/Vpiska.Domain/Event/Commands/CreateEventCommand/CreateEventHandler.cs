@@ -40,7 +40,7 @@ namespace Vpiska.Domain.Event.Commands.CreateEventCommand
             var model = command.ToModel(eventId);
             await _repository.InsertAsync(model, cancellationToken);
             var domainEvent = EventCreatedEvent.FromModel(model);
-            _eventBus.Publish(domainEvent);
+            await _eventBus.PublishAsync(domainEvent);
             return command.ToEventResponse(eventId);
         }
     }

@@ -1,20 +1,18 @@
-using System;
-using System.Reactive.Subjects;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Vpiska.Domain.Event.Interfaces;
 
 namespace Vpiska.Infrastructure.RabbitMq
 {
     internal sealed class EventBus : IEventBus
     {
-        private readonly Subject<IDomainEvent> _subject;
+        private readonly Channel<IDomainEvent> _channel;
 
-        public IObservable<IDomainEvent> EventStream => _subject;
-
-        public EventBus()
+        public EventBus(Channel<IDomainEvent> channel)
         {
-            _subject = new Subject<IDomainEvent>();
+            _channel = channel;
         }
 
-        public void Publish(IDomainEvent domainEvent) => _subject.OnNext(domainEvent);
+        public ValueTask PublishAsync(IDomainEvent domainEvent) => _channel.Writer.WriteAsync(domainEvent);
     }
 }

@@ -42,7 +42,7 @@ namespace Vpiska.Domain.Event.Commands.CloseEventCommand
                 throw new UserIsNotOwnerException();
             }
 
-            _eventBus.Publish(command.ToEvent(model.Coordinates));
+            await _eventBus.PublishAsync(command.ToEvent(model.Coordinates));
             await _repository.RemoveByFieldAsync("_id", command.EventId, cancellationToken);
         }
     }

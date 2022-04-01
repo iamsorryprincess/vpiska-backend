@@ -1,11 +1,9 @@
-using System;
+using System.Threading.Tasks;
 
 namespace Vpiska.Domain.Event.Interfaces
 {
     public interface IEventBus
     {
-        IObservable<IDomainEvent> EventStream { get; }
-
-        void Publish(IDomainEvent domainEvent);
+        ValueTask PublishAsync(IDomainEvent domainEvent);
     }
 }

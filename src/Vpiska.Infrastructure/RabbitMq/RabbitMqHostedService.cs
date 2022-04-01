@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,30 +27,30 @@ using Vpiska.Domain.Event.Interfaces;
 
 namespace Vpiska.Infrastructure.RabbitMq
 {
-    internal sealed class RabbitMqHostedService : IHostedService
+    internal sealed class RabbitMqHostedService : BackgroundService
     {
         private readonly ILogger<RabbitMqHostedService> _logger;
         private readonly RabbitMqSettings _settings;
-        private readonly IEventBus _eventBus;
+        private readonly Channel<IDomainEvent> _channel;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly RetryPolicy _connectionRetryPolicy;
         private readonly RetryPolicy _producerRetryPolicy;
-        private readonly List<IDisposable> _subscriptions;
-        private readonly List<IModel> _producers;
+        private readonly Dictionary<string, (string exchangeName, IModel producer)> _producerRegistrations;
         private readonly List<IModel> _consumers;
+        private readonly ConcurrentQueue<IDomainEvent> _eventsQueue;
 
         private IConnection _connection;
         private bool _isConnectionOpened;
 
         public RabbitMqHostedService(ILogger<RabbitMqHostedService> logger,
             RabbitMqSettings settings,
-            IEventBus eventBus,
+            Channel<IDomainEvent> channel,
             IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _settings = settings;
-            _eventBus = eventBus;
+            _channel = channel;
             _scopeFactory = scopeFactory;
             
             _jsonSerializerOptions = new JsonSerializerOptions()
@@ -68,21 +70,31 @@ namespace Vpiska.Infrastructure.RabbitMq
                 .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     (exception, _, _) => _logger.LogError(exception, "Trying produce message to RabbitMQ"));
 
-            _subscriptions = new List<IDisposable>();
-            _producers = new List<IModel>();
+            _producerRegistrations = new Dictionary<string, (string exchangeName, IModel producer)>();
             _consumers = new List<IModel>();
+            _eventsQueue = new ConcurrentQueue<IDomainEvent>();
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             StartConnection();
-            return Task.CompletedTask;
+            await foreach (var domainEvent in _channel.Reader.ReadAllAsync(stoppingToken))
+            {
+                if (_isConnectionOpened)
+                {
+                    Produce(domainEvent);
+                }
+                else
+                {
+                    _eventsQueue.Enqueue(domainEvent);
+                }
+            }
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public override Task StopAsync(CancellationToken cancellationToken)
         {
             CloseConnection();
-            return Task.CompletedTask;
+            return base.StopAsync(cancellationToken);
         }
 
         private void StartConnection()
@@ -112,6 +124,12 @@ namespace Vpiska.Infrastructure.RabbitMq
             _connection.ConnectionShutdown += OnConnectionShutdown;
             _connection.CallbackException += OnCallbackException;
             _connection.ConnectionBlocked += OnConnectionBlocked;
+
+            while (_eventsQueue.TryDequeue(out var domainEvent))
+            {
+                Produce(domainEvent);
+            }
+            
             _logger.LogInformation("Connected to RabbitMQ host {}", _settings.Host);
         }
 
@@ -119,6 +137,7 @@ namespace Vpiska.Infrastructure.RabbitMq
         {
             if (_isConnectionOpened)
             {
+                _isConnectionOpened = false;
                 _connection.ConnectionShutdown -= OnConnectionShutdown;
                 _connection.CallbackException -= OnCallbackException;
                 _connection.ConnectionBlocked -= OnConnectionBlocked;
@@ -128,49 +147,58 @@ namespace Vpiska.Infrastructure.RabbitMq
                     consumer?.Close();
                 }
 
-                foreach (var producer in _producers)
+                foreach (var producerRegistration in _producerRegistrations)
                 {
-                    producer?.Close();
-                }
-
-                foreach (var subscription in _subscriptions)
-                {
-                    subscription?.Dispose();
+                    producerRegistration.Value.producer?.Close();
                 }
             
                 _consumers.Clear();
-                _producers.Clear();
-                _subscriptions.Clear();
+                _producerRegistrations.Clear();
                 _connection.Close();
-                _isConnectionOpened = false;
             }
         }
-
+        
         private void SubscribeToEvent<TEvent>(string eventName) where TEvent : class, IDomainEvent, new()
         {
             SubscribeProducer<TEvent>(eventName);
             SubscribeConsumer<TEvent>(eventName);
+        }
+
+        private void Produce(IDomainEvent domainEvent)
+        {
+            if (_producerRegistrations.TryGetValue(domainEvent.GetType().Name, out var tuple))
+            {
+                var json = JsonSerializer.Serialize(domainEvent as object, _jsonSerializerOptions);
+                var body = Encoding.UTF8.GetBytes(json);
+
+                try
+                {
+                    _producerRetryPolicy.Execute(() => tuple.producer.BasicPublish(
+                        exchange: tuple.exchangeName,
+                        routingKey: "",
+                        basicProperties: null,
+                        body: body));
+                }
+                catch (BrokerUnreachableException)
+                {
+                    _eventsQueue.Enqueue(domainEvent);
+                }
+                catch (SocketException)
+                {
+                    _eventsQueue.Enqueue(domainEvent);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "producing to RabbitMQ: {}", json);
+                }
+            }
         }
         
         private void SubscribeProducer<TEvent>(string exchangeName) where TEvent : class, IDomainEvent, new()
         {
             var channel = _connection.CreateModel();
             channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Fanout);
-
-            var subscription = _eventBus.EventStream.Subscribe(data =>
-            {
-                if (data is TEvent domainEvent)
-                {
-                    var json = JsonSerializer.Serialize(domainEvent, _jsonSerializerOptions);
-                    var body = Encoding.UTF8.GetBytes(json);
-                    _producerRetryPolicy.Execute(() =>
-                        channel.BasicPublish(exchange: exchangeName, routingKey: "", basicProperties: null,
-                            body: body));
-                }
-            });
-
-            _subscriptions.Add(subscription);
-            _producers.Add(channel);
+            _producerRegistrations.Add(typeof(TEvent).Name, (exchangeName, channel));
         }
 
         private void SubscribeConsumer<TEvent>(string exchangeName, string queueName = null)
@@ -195,14 +223,16 @@ namespace Vpiska.Infrastructure.RabbitMq
                     await using var scope = _scopeFactory.CreateAsyncScope();
                     var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
                     await handler.Handle(domainEvent);
+                    channel.BasicAck(args.DeliveryTag, false);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error while consuming event {}", typeof(TEvent).FullName);
+                    channel.BasicReject(args.DeliveryTag, false);
                 }
             };
 
-            channel.BasicConsume(queue: queue, autoAck: true, consumer: consumer);
+            channel.BasicConsume(queue: queue, autoAck: false, consumer: consumer);
             _consumers.Add(channel);
         }
         

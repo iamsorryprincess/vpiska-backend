@@ -37,7 +37,7 @@ namespace Vpiska.Infrastructure.WebSocket
             return commandHandler.HandleAsync(command);
         }
 
-        public Task Receive(WebSocketContext socketContext, string route, string message)
+        public async Task Receive(WebSocketContext socketContext, string route, string message)
         {
             switch (route)
             {
@@ -55,13 +55,13 @@ namespace Vpiska.Infrastructure.WebSocket
                             Message = message
                         }
                     };
-                    eventBus.Publish(domainEvent);
-                    return Task.CompletedTask;
+                    await eventBus.PublishAsync(domainEvent);
+                    return;
                 }
                 default:
                     var logger = socketContext.ServiceProvider.GetRequiredService<ILogger<ChatListener>>();
                     logger.LogWarning("Unknown receiver route {}", route);
-                    return Task.CompletedTask;
+                    return;
             }
         }
     }

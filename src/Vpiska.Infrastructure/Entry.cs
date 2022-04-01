@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -251,6 +252,10 @@ namespace Vpiska.Infrastructure
                 Password = rabbitConfiguration["Password"]
             };
             services.AddSingleton(settings);
+            services.AddSingleton(Channel.CreateUnbounded<IDomainEvent>(new UnboundedChannelOptions()
+            {
+                SingleReader = true
+            }));
             services.AddSingleton<IEventBus, EventBus>();
             services.AddHostedService<RabbitMqHostedService>();
         }
