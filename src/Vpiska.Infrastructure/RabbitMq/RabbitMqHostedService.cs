@@ -15,14 +15,6 @@ using Polly.Retry;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using Vpiska.Domain.Event.Events.ChatMessageEvent;
-using Vpiska.Domain.Event.Events.EventClosedEvent;
-using Vpiska.Domain.Event.Events.EventCreatedEvent;
-using Vpiska.Domain.Event.Events.EventUpdatedEvent;
-using Vpiska.Domain.Event.Events.MediaAddedEvent;
-using Vpiska.Domain.Event.Events.MediaRemovedEvent;
-using Vpiska.Domain.Event.Events.UserConnectedEvent;
-using Vpiska.Domain.Event.Events.UserDisconnectedEvent;
 using Vpiska.Domain.Event.Interfaces;
 
 namespace Vpiska.Infrastructure.RabbitMq
@@ -96,6 +88,12 @@ namespace Vpiska.Infrastructure.RabbitMq
             CloseConnection();
             return base.StopAsync(cancellationToken);
         }
+        
+        public void SubscribeToEvent<TEvent>(string exchangeName, string queueName = null) where TEvent : class, IDomainEvent, new()
+        {
+            SubscribeProducer<TEvent>(exchangeName);
+            SubscribeConsumer<TEvent>(exchangeName, queueName);
+        }
 
         private void StartConnection()
         {
@@ -110,16 +108,8 @@ namespace Vpiska.Infrastructure.RabbitMq
                 };
                 _connection = factory.CreateConnection();
             });
-            
-            SubscribeToEvent<ChatMessageEvent>("event.chat");
-            SubscribeToEvent<EventClosedEvent>("event.close");
-            SubscribeToEvent<EventCreatedEvent>("event.create");
-            SubscribeToEvent<EventUpdatedEvent>("event.update");
-            SubscribeToEvent<MediaAddedEvent>("event.media.add");
-            SubscribeToEvent<MediaRemovedEvent>("event.media.remove");
-            SubscribeToEvent<UserConnectedEvent>("event.user.connect");
-            SubscribeToEvent<UserDisconnectedEvent>("event.user.disconnect");
 
+            _settings.SetupAction.Invoke(this);
             _isConnectionOpened = true;
             _connection.ConnectionShutdown += OnConnectionShutdown;
             _connection.CallbackException += OnCallbackException;
@@ -157,13 +147,14 @@ namespace Vpiska.Infrastructure.RabbitMq
                 _connection.Close();
             }
         }
-        
-        private void SubscribeToEvent<TEvent>(string eventName) where TEvent : class, IDomainEvent, new()
-        {
-            SubscribeProducer<TEvent>(eventName);
-            SubscribeConsumer<TEvent>(eventName);
-        }
 
+        private void SubscribeProducer<TEvent>(string exchangeName) where TEvent : class, IDomainEvent, new()
+        {
+            var channel = _connection.CreateModel();
+            channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Fanout);
+            _producerRegistrations.Add(typeof(TEvent).Name, (exchangeName, channel));
+        }
+        
         private void Produce(IDomainEvent domainEvent)
         {
             if (_producerRegistrations.TryGetValue(domainEvent.GetType().Name, out var tuple))
@@ -173,11 +164,20 @@ namespace Vpiska.Infrastructure.RabbitMq
 
                 try
                 {
-                    _producerRetryPolicy.Execute(() => tuple.producer.BasicPublish(
-                        exchange: tuple.exchangeName,
-                        routingKey: "",
-                        basicProperties: null,
-                        body: body));
+                    _producerRetryPolicy.Execute(() =>
+                    {
+                        if (tuple.producer.IsOpen)
+                        {
+                            tuple.producer.BasicPublish(
+                                exchange: tuple.exchangeName,
+                                routingKey: "",
+                                basicProperties: null,
+                                body: body);
+                            return;
+                        }
+                        
+                        _eventsQueue.Enqueue(domainEvent);
+                    });
                 }
                 catch (BrokerUnreachableException)
                 {
@@ -193,13 +193,6 @@ namespace Vpiska.Infrastructure.RabbitMq
                 }
             }
         }
-        
-        private void SubscribeProducer<TEvent>(string exchangeName) where TEvent : class, IDomainEvent, new()
-        {
-            var channel = _connection.CreateModel();
-            channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Fanout);
-            _producerRegistrations.Add(typeof(TEvent).Name, (exchangeName, channel));
-        }
 
         private void SubscribeConsumer<TEvent>(string exchangeName, string queueName = null)
             where TEvent : class, IDomainEvent, new()
@@ -209,7 +202,7 @@ namespace Vpiska.Infrastructure.RabbitMq
             
             var queue = queueName == null
                 ? channel.QueueDeclare().QueueName
-                : channel.QueueDeclare(queue: queueName).QueueName;
+                : channel.QueueDeclare(queue: queueName, durable: true).QueueName;
             
             channel.QueueBind(exchange: exchangeName, queue: queue, routingKey: "");
             var consumer = new AsyncEventingBasicConsumer(channel);

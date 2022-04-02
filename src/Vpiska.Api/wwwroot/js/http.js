@@ -7,17 +7,6 @@ export function getJson(url) {
   }).then(response => response.json());
 }
 
-export function postJson(url, body) {
-  return fetch(url, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  }).then(response => response.json());
-}
-
 export function postFile(url, file) {
   const formData = new FormData();
   formData.append('file', file);

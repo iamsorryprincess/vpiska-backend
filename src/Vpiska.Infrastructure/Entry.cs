@@ -15,6 +15,14 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using Vpiska.Domain.Event;
+using Vpiska.Domain.Event.Events.ChatMessageEvent;
+using Vpiska.Domain.Event.Events.EventClosedEvent;
+using Vpiska.Domain.Event.Events.EventCreatedEvent;
+using Vpiska.Domain.Event.Events.EventUpdatedEvent;
+using Vpiska.Domain.Event.Events.MediaAddedEvent;
+using Vpiska.Domain.Event.Events.MediaRemovedEvent;
+using Vpiska.Domain.Event.Events.UserConnectedEvent;
+using Vpiska.Domain.Event.Events.UserDisconnectedEvent;
 using Vpiska.Domain.Event.Interfaces;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.Media;
@@ -245,18 +253,27 @@ namespace Vpiska.Infrastructure
 
         public static void AddRabbitMq(this IServiceCollection services, IConfigurationSection rabbitConfiguration)
         {
-            var settings = new RabbitMqSettings()
-            {
-                Host = rabbitConfiguration["Host"],
-                Username = rabbitConfiguration["User"],
-                Password = rabbitConfiguration["Password"]
-            };
+            var settings = new RabbitMqSettings(
+                rabbitConfiguration["Host"],
+                rabbitConfiguration["User"],
+                rabbitConfiguration["Password"],
+                hostedService =>
+                {
+                    hostedService.SubscribeToEvent<ChatMessageEvent>("event.chat");
+                    hostedService.SubscribeToEvent<EventClosedEvent>("event.close");
+                    hostedService.SubscribeToEvent<EventCreatedEvent>("event.create");
+                    hostedService.SubscribeToEvent<EventUpdatedEvent>("event.update");
+                    hostedService.SubscribeToEvent<MediaAddedEvent>("event.media.add");
+                    hostedService.SubscribeToEvent<MediaRemovedEvent>("event.media.remove");
+                    hostedService.SubscribeToEvent<UserConnectedEvent>("event.user.connect");
+                    hostedService.SubscribeToEvent<UserDisconnectedEvent>("event.user.disconnect");
+                });
             services.AddSingleton(settings);
             services.AddSingleton(Channel.CreateUnbounded<IDomainEvent>(new UnboundedChannelOptions()
             {
                 SingleReader = true
             }));
-            services.AddSingleton<IEventBus, EventBus>();
+            services.AddTransient<IEventBus, EventBus>();
             services.AddHostedService<RabbitMqHostedService>();
         }
 
