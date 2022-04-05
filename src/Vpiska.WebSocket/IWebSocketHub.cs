@@ -14,7 +14,7 @@ namespace Vpiska.WebSocket
             Dictionary<string, string> identityParams,
             Dictionary<string, string> queryParams);
 
-        Task ReceiveMessage(Guid connectionId, byte[] data,
+        Task ReceiveMessage(Guid connectionId, Span<byte> data,
             Dictionary<string, string> identityParams,
             Dictionary<string, string> queryParams);
     }

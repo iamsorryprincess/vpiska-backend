@@ -211,7 +211,7 @@ namespace Vpiska.Infrastructure.RabbitMq
             {
                 try
                 {
-                    var json = Encoding.UTF8.GetString(args.Body.ToArray());
+                    var json = Encoding.UTF8.GetString(args.Body.Span);
                     var domainEvent = JsonSerializer.Deserialize<TEvent>(json, _jsonSerializerOptions);
                     await using var scope = _scopeFactory.CreateAsyncScope();
                     var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();

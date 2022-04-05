@@ -68,7 +68,7 @@ namespace Vpiska.WebSocket
             return false;
         }
 
-        public async Task ReceiveMessage(Guid connectionId, byte[] data,
+        public Task ReceiveMessage(Guid connectionId, Span<byte> data,
             Dictionary<string, string> identityParams,
             Dictionary<string, string> queryParams)
         {
@@ -76,17 +76,11 @@ namespace Vpiska.WebSocket
             {
                 if (_connections.ContainsKey(connectionId))
                 {
-                    await using var scope = _serviceScopeFactory.CreateAsyncScope();
                     var strData = Encoding.UTF8.GetString(data);
                     var splitIndex = strData.IndexOf('/');
                     var route = strData[..splitIndex];
                     var message = strData[(splitIndex + 1)..];
-                    var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
-                                   ?? throw new InvalidOperationException(
-                                       $"Can't resolve listener {_listenerType.FullName}");
-                    await listener.Receive(
-                        new WebSocketContext(connectionId, queryParams, identityParams, scope.ServiceProvider), route,
-                        message);
+                    return HandleMessage(connectionId, identityParams, queryParams, route, message);
                 }
             }
             catch (Exception ex)
@@ -95,13 +89,15 @@ namespace Vpiska.WebSocket
                 
                 if (_connections.TryRemove(connectionId, out var socket))
                 {
-                    await CloseConnection(socket, "error while receive message",
+                    return CloseConnection(socket, "error while receive message",
                         WebSocketCloseStatus.InternalServerError,
                         connectionId,
                         identityParams,
                         queryParams);
                 }
             }
+            
+            return Task.CompletedTask;
         }
 
         public Task SendMessage(Guid connectionId, byte[] data)
@@ -123,6 +119,20 @@ namespace Vpiska.WebSocket
             }
 
             throw new InvalidOperationException($"Can't find connection {connectionId}");
+        }
+        
+        private async Task HandleMessage(Guid connectionId,
+            Dictionary<string, string> identityParams,
+            Dictionary<string, string> queryParams,
+            string route,
+            string message)
+        {
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+            var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
+                           ?? throw new InvalidOperationException(
+                               $"Can't resolve listener {_listenerType.FullName}");
+            await listener.Receive(
+                new WebSocketContext(connectionId, queryParams, identityParams, scope.ServiceProvider), route, message);
         }
         
         private async Task<bool> CloseConnection(System.Net.WebSockets.WebSocket socket,

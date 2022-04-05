@@ -68,7 +68,7 @@ namespace Vpiska.WebSocket
                         switch (result.MessageType)
                         {
                             case WebSocketMessageType.Text:
-                                await hub.ReceiveMessage(connectionId, buffer[..result.Count], identityParams, queryParams);
+                                await hub.ReceiveMessage(connectionId, buffer.AsSpan()[..result.Count], identityParams, queryParams);
                                 break;
                             case WebSocketMessageType.Close:
                                 await hub.TryCloseConnection(connectionId, identityParams, queryParams);
