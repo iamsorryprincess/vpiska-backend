@@ -107,7 +107,7 @@ async function handle(route, message) {
 }
 
 function connect() {
-  ws = new WebSocket('ws://localhost:5000/websockets/signaling');
+  ws = new WebSocket('wss://vp1ska.ru/websockets/signaling');
 
   ws.addEventListener('open', function () {
     console.log('connected');

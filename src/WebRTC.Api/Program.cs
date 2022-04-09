@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Vpiska.WebSocket;
 using WebRTC.Api.Controllers;
 
@@ -12,5 +13,9 @@ app.UseRouting();
 app.MapControllers();
 app.UseWebSockets();
 app.UseVSocket();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.Run();
