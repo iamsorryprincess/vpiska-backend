@@ -19,8 +19,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.UnitTests", "test\Vp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vpiska.IntegrationTests", "test\Vpiska.IntegrationTests\Vpiska.IntegrationTests.csproj", "{7FEB8152-D92B-4460-BDA0-CD62503961AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RtclightWeb", "src\RtclightWeb\RtclightWeb.csproj", "{CE868AC8-A77F-4B93-9DA5-C63B1D65E198}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,7 +34,6 @@ Global
 		{5051C79E-DF01-4641-B138-0F59587F1BC6} = {9995CCD9-8B5A-44D4-A354-AD3145B29AFD}
 		{20808AC3-C1A6-4D90-BE61-E6DD21E89679} = {F7B1EDA3-95EE-4E7B-B2A1-6869C42756EE}
 		{7FEB8152-D92B-4460-BDA0-CD62503961AC} = {F7B1EDA3-95EE-4E7B-B2A1-6869C42756EE}
-		{CE868AC8-A77F-4B93-9DA5-C63B1D65E198} = {9995CCD9-8B5A-44D4-A354-AD3145B29AFD}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{395A62B3-7D3F-4D38-BBC6-A73B7A4E1705}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -63,9 +60,5 @@ Global
 		{7FEB8152-D92B-4460-BDA0-CD62503961AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FEB8152-D92B-4460-BDA0-CD62503961AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FEB8152-D92B-4460-BDA0-CD62503961AC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CE868AC8-A77F-4B93-9DA5-C63B1D65E198}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE868AC8-A77F-4B93-9DA5-C63B1D65E198}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CE868AC8-A77F-4B93-9DA5-C63B1D65E198}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CE868AC8-A77F-4B93-9DA5-C63B1D65E198}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
