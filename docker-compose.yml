@@ -107,10 +107,7 @@ services:
     image: webrtc
     build:
       context: .
-      dockerfile: src/RtclightWeb/Dockerfile
-    environment:
-      - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
-      - Mongo__DatabaseName=vpiska
+      dockerfile: src/WebRTC.Api/Dockerfile
     deploy:
       replicas: 0
       restart_policy:

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -36,7 +37,8 @@ namespace Vpiska.WebSocket
                     var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
                                    ?? throw new InvalidOperationException(
                                        $"Can't resolve listener {_listenerType.FullName}");
-                    await listener.OnConnect(new WebSocketContext(connectionId, queryParams, identityParams,
+                    await listener.OnConnect(new WebSocketContext(connectionId, _connections.Select(x => x.Key).ToArray(),
+                        queryParams, identityParams,
                         scope.ServiceProvider));
                     return connectionId;
                 }
@@ -132,7 +134,8 @@ namespace Vpiska.WebSocket
                            ?? throw new InvalidOperationException(
                                $"Can't resolve listener {_listenerType.FullName}");
             await listener.Receive(
-                new WebSocketContext(connectionId, queryParams, identityParams, scope.ServiceProvider), route, message);
+                new WebSocketContext(connectionId, _connections.Select(x => x.Key).ToArray(),
+                    queryParams, identityParams, scope.ServiceProvider), route, message);
         }
         
         private async Task<bool> CloseConnection(System.Net.WebSockets.WebSocket socket,
@@ -149,7 +152,8 @@ namespace Vpiska.WebSocket
                 var listener = scope.ServiceProvider.GetRequiredService(_listenerType) as IWebSocketListener
                                ?? throw new InvalidOperationException(
                                    $"Can't resolve listener {_listenerType.FullName}");
-                await listener.OnDisconnect(new WebSocketContext(connectionId, queryParams, identityParams,
+                await listener.OnDisconnect(new WebSocketContext(connectionId, _connections.Select(x => x.Key).ToArray(),
+                    queryParams, identityParams,
                     scope.ServiceProvider));
                 return true;
             }
@@ -165,7 +169,8 @@ namespace Vpiska.WebSocket
             using var scope = _serviceScopeFactory.CreateScope();
             var exceptionHandler = scope.ServiceProvider.GetService<IWebSocketExceptionHandler>();
             exceptionHandler?.Handle(
-                new WebSocketContext(connectionId, queryParams, identityParams, scope.ServiceProvider), ex);
+                new WebSocketContext(connectionId, _connections.Select(x => x.Key).ToArray(),
+                    queryParams, identityParams, scope.ServiceProvider), ex);
         }
         
         private static async Task CloseSafeAsync(System.Net.WebSockets.WebSocket webSocket,

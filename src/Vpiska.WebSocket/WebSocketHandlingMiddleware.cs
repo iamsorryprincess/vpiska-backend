@@ -57,7 +57,7 @@ namespace Vpiska.WebSocket
                 
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 var connectionId = await hub.AddConnection(webSocket, identityParams, queryParams);
-                var buffer = new byte[1024 * 4];
+                var buffer = new byte[10240000 * 4];
 
                 while (webSocket.State == WebSocketState.Open)
                 {
