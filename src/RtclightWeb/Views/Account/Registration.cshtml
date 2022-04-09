@@ -1,0 +1,18 @@
+@model RegisterModel
+
+<form asp-controller="Account" asp-action="Registration">
+  <label>
+    <input asp-for="Name" type="text" placeholder="name">
+    <span>Name</span>
+  </label>
+  <label>
+    <input asp-for="Password" type="password" placeholder="password">
+    <span>Password</span>
+  </label>
+  <label>
+    <input asp-for="ConfirmPassword" type="password" placeholder="password">
+    <span>Confirm password</span>
+  </label>
+  <button>Register</button>
+</form>
+<a asp-controller="Account" asp-action="Login">Back to start page</a>

@@ -58,7 +58,7 @@ services:
     ports:
       - "15672:15672"
     deploy:
-      replicas: 1
+      replicas: 0
       restart_policy:
         condition: on-failure
       update_config:
@@ -102,3 +102,26 @@ services:
         reservations:
           memory: 5120M
           cpus: "1.5"
+
+  webrtc:
+    image: webrtc
+    build:
+      context: .
+      dockerfile: src/RtclightWeb/Dockerfile
+    environment:
+      - Mongo__ConnectionString=mongodb://kekit*:qweasd123*@mongo:27017
+      - Mongo__DatabaseName=vpiska
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1"
+        reservations:
+          memory: 256M
+          cpus: "0.5"
