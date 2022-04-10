@@ -156,14 +156,14 @@ startButton.addEventListener('click', async function () {
     }
   };
 
-  const stream = await navigator.mediaDevices.getUserMedia(creteConstraints(false, true, 300, 300));
+  const stream = await navigator.mediaDevices.getUserMedia(creteConstraints(true, true, 300, 300));
   
   stream.getTracks().forEach(function (track) {
     peerConnection.addTrack(track);
   });
   
+  ownerVideo.muted = true;
   ownerVideo.srcObject = stream;
-
   offer = await peerConnection.createOffer();
   console.log(offer.sdp);
   await peerConnection.setLocalDescription(offer);
