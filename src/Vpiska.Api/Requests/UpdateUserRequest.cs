@@ -13,7 +13,7 @@ namespace Vpiska.Api.Requests
 
         public IFormFile Image { get; set; }
 
-        public UpdateUserCommand ToCommand() => new UpdateUserCommand()
+        public UpdateUserCommand ToCommand() => new()
         {
             Id = Id,
             Phone = Phone,

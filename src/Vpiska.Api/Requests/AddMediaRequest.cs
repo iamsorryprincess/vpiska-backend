@@ -9,7 +9,7 @@ namespace Vpiska.Api.Requests
 
         public IFormFile Media { get; set; }
 
-        public AddMediaCommand ToCommand(string ownerId) => new AddMediaCommand()
+        public AddMediaCommand ToCommand(string ownerId) => new()
         {
             EventId = EventId,
             OwnerId = ownerId,

@@ -6,7 +6,7 @@ namespace Vpiska.Api.Requests
     {
         public string EventId { get; set; }
 
-        public CloseEventCommand ToCloseEventCommand(string ownerId) => new CloseEventCommand()
+        public CloseEventCommand ToCloseEventCommand(string ownerId) => new()
         {
             EventId = EventId,
             OwnerId = ownerId

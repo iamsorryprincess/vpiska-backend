@@ -27,6 +27,9 @@ namespace Vpiska.Api.Filters
                 case DomainException ex:
                     context.Result = new ObjectResult(ApiResponse.Error(ex.ErrorsCodes)) { StatusCode = 200 };
                     break;
+                case TaskCanceledException:
+                    context.Result = new OkResult();
+                    break;
                 default:
                     _logger.LogError(context.Exception, "Unknown error while handling http request");
                     context.Result = new ObjectResult(ApiResponse.Error("InternalError")) { StatusCode = 200 };

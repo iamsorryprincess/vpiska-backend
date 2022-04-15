@@ -52,16 +52,7 @@ namespace Vpiska.Domain.User.Commands.CreateUserCommand
                     };
 
                     await _repository.InsertAsync(user, cancellationToken);
-
-                    var response = new LoginResponse()
-                    {
-                        UserId = user.Id,
-                        UserName = user.Name,
-                        ImageId = user.ImageId,
-                        AccessToken = _identityService.GetAccessToken(user)
-                    };
-
-                    return response;
+                    return new LoginResponse(_identityService.GetAccessToken(user), null, user);
                 }
             }
         }

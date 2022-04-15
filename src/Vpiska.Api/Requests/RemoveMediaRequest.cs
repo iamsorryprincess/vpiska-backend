@@ -8,7 +8,7 @@ namespace Vpiska.Api.Requests
 
         public string MediaId { get; set; }
 
-        public RemoveMediaCommand ToCommand(string ownerId) => new RemoveMediaCommand()
+        public RemoveMediaCommand ToCommand(string ownerId) => new()
         {
             EventId = EventId,
             OwnerId = ownerId,

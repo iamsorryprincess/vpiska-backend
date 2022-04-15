@@ -39,13 +39,7 @@ namespace Vpiska.Domain.User.Queries.CheckCodeQuery
                 throw new InvalidCodeException();
             }
 
-            return new LoginResponse()
-            {
-                UserId = user.Id,
-                UserName = user.Name,
-                ImageId = user.ImageId,
-                AccessToken = _identityService.GetAccessToken(user)
-            };
+            return new LoginResponse(_identityService.GetAccessToken(user), null, user);
         }
     }
 }

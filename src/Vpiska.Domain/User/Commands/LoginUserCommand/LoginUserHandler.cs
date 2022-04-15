@@ -47,15 +47,7 @@ namespace Vpiska.Domain.User.Commands.LoginUserCommand
             }
 
             var eventData = await _eventRepository.GetByFieldAsync("ownerId", user.Id, cancellationToken);
-
-            return new LoginResponse()
-            {
-                UserId = user.Id,
-                UserName = user.Name,
-                ImageId = user.ImageId,
-                AccessToken = _identityService.GetAccessToken(user),
-                EventId = eventData?.Id
-            };
+            return new LoginResponse(_identityService.GetAccessToken(user), eventData?.Id, user);
         }
     }
 }

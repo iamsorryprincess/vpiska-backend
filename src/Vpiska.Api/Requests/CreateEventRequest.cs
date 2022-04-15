@@ -11,7 +11,7 @@ namespace Vpiska.Api.Requests
 
         public CoordinatesDto Coordinates { get; set; }
 
-        public CreateEventCommand ToCommand(string ownerId) => new CreateEventCommand()
+        public CreateEventCommand ToCommand(string ownerId) => new()
         {
             OwnerId = ownerId,
             Name = Name,
