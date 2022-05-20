@@ -45,8 +45,8 @@ namespace Vpiska.Infrastructure.EventState
         public Task<bool> RemoveUserInfo(string eventId, string userId) =>
             Task.FromResult(_events.TryGetValue(eventId, out var state) && state.RemoveUserInfo(userId));
 
-        public Task<bool> AddMediaLink(string eventId, string mediaLink) =>
-            Task.FromResult(_events.TryGetValue(eventId, out var state) && state.AddMediaLink(mediaLink));
+        public Task<bool> AddMediaLink(string eventId, MediaInfo mediaInfo) =>
+            Task.FromResult(_events.TryGetValue(eventId, out var state) && state.AddMediaLink(mediaInfo));
 
         public Task<bool> RemoveMediaLink(string eventId, string mediaLink) =>
             Task.FromResult(_events.TryGetValue(eventId, out var state) && state.RemoveMediaLink(mediaLink));

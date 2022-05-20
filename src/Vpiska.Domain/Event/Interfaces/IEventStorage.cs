@@ -19,7 +19,7 @@ namespace Vpiska.Domain.Event.Interfaces
 
         Task<bool> RemoveUserInfo(string eventId, string userId);
 
-        Task<bool> AddMediaLink(string eventId, string mediaLink);
+        Task<bool> AddMediaLink(string eventId, MediaInfo mediaInfo);
 
         Task<bool> RemoveMediaLink(string eventId, string mediaLink);
 

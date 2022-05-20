@@ -18,23 +18,23 @@ namespace Vpiska.IntegrationTests.Event
                    x.Name == y.Name &&
                    x.Address == y.Address &&
                    CheckCoordinates(x.Coordinates, y.Coordinates) &&
-                   CheckMediaLinks(x.MediaLinks, y.MediaLinks) &&
+                   CheckMediaLinks(x.Media, y.Media) &&
                    CheckChatData(x.ChatData, y.ChatData) &&
                    CheckUsersInfo(x.Users, y.Users);
         }
 
         public int GetHashCode(Domain.Event.Event obj)
         {
-            return HashCode.Combine(obj.Id, obj.OwnerId, obj.Name, obj.Address, obj.Coordinates, obj.MediaLinks, obj.ChatData, obj.Users);
+            return HashCode.Combine(obj.Id, obj.OwnerId, obj.Name, obj.Address, obj.Coordinates, obj.Media, obj.ChatData, obj.Users);
         }
 
         private static bool CheckCoordinates(Coordinates coordinates1, Coordinates coordinates2) =>
             Math.Abs(coordinates1.X - coordinates2.X) < Math.E &&
             Math.Abs(coordinates1.Y - coordinates2.Y) < Math.E;
 
-        private static bool CheckMediaLinks(List<string> mediaLinks1, List<string> mediaLinks2) =>
+        private static bool CheckMediaLinks(List<MediaInfo> mediaLinks1, List<MediaInfo> mediaLinks2) =>
             mediaLinks1.Count == mediaLinks2.Count &&
-            mediaLinks1.All(mediaLinks2.Contains);
+            mediaLinks1.All(a => mediaLinks2.Exists(b => CheckMediaInfo(a, b)));
 
         private static bool CheckChatData(List<ChatMessage> chatMessages1, List<ChatMessage> chatMessages2) =>
             chatMessages1.Count == chatMessages2.Count &&
@@ -51,5 +51,9 @@ namespace Vpiska.IntegrationTests.Event
             chatMessage1.Message == chatMessage2.Message;
 
         private static bool CheckUserInfo(UserInfo userInfo1, UserInfo userInfo2) => userInfo1.UserId == userInfo2.UserId;
+
+        private static bool CheckMediaInfo(MediaInfo mediaInfo1, MediaInfo mediaInfo2) =>
+            mediaInfo1.Id == mediaInfo2.Id &&
+            mediaInfo1.ContentType == mediaInfo2.ContentType;
     }
 }

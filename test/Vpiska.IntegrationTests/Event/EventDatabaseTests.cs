@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization;
 using Vpiska.Domain.Event.Interfaces;
@@ -100,11 +101,16 @@ namespace Vpiska.IntegrationTests.Event
 
         private async Task MediaLinksTest()
         {
-            var isSuccess1 = await _repository.AddMediaLink(_event1.Id, "testmedia1");
+            var mediaInfo = new MediaInfo()
+            {
+                Id = "testmedia1",
+                ContentType = "image/jpeg"
+            };
+            var isSuccess1 = await _repository.AddMediaLink(_event1.Id, mediaInfo);
             Assert.True(isSuccess1);
             var event1 = await _repository.GetByFieldAsync("_id", _event1.Id);
-            Assert.Contains("testmedia1", event1.MediaLinks);
-            var isSuccess2 = await _repository.AddMediaLink(Guid.NewGuid().ToString(), "testmedia1");
+            Assert.Contains(event1.Media, x => x.Id == "testmedia1");
+            var isSuccess2 = await _repository.AddMediaLink(Guid.NewGuid().ToString(), mediaInfo);
             Assert.False(isSuccess2);
             var isSuccess3 = await _repository.RemoveMediaLink(_event1.Id, "testmedia1");
             Assert.True(isSuccess3);

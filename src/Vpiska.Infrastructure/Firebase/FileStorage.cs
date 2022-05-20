@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Google;
 using Google.Cloud.Storage.V1;
+using Vpiska.Domain.Common;
 using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Infrastructure.Firebase
@@ -19,7 +20,7 @@ namespace Vpiska.Infrastructure.Firebase
             _storageClient = storageClient;
         }
         
-        public async Task<string> SaveFileAsync(string filename, string contentType, Stream fileStream,
+        public async Task<MediaResult> SaveFileAsync(string filename, string contentType, Stream fileStream,
             CancellationToken cancellationToken = default)
         {
             var result = await _storageClient.UploadObjectAsync(_settings.BucketName, filename, contentType, fileStream,
@@ -28,7 +29,11 @@ namespace Vpiska.Infrastructure.Firebase
             {
                 await fileStream.DisposeAsync();
             }
-            return result.Name;
+            return new MediaResult()
+            {
+                Id = result.Name,
+                ContentType = contentType
+            };
         }
 
         public async Task<bool> DeleteFileAsync(string filename, CancellationToken cancellationToken = default)

@@ -15,7 +15,7 @@ namespace Vpiska.Domain.Event
 
         public Coordinates Coordinates { get; set; }
 
-        public List<string> MediaLinks { get; set; } = new();
+        public List<MediaInfo> Media { get; set; } = new();
 
         public List<ChatMessage> ChatData { get; set; } = new();
 

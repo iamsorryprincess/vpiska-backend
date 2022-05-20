@@ -46,16 +46,16 @@ namespace Vpiska.Infrastructure.EventState
             }
         }
 
-        public bool AddMediaLink(string mediaId)
+        public bool AddMediaLink(MediaInfo mediaInfo)
         {
             lock (_mediaLocker)
             {
-                if (State.MediaLinks.Contains(mediaId))
+                if (State.Media.All(x => x.Id != mediaInfo.Id))
                 {
                     return false;
                 }
                 
-                State.MediaLinks.Add(mediaId);
+                State.Media.Add(mediaInfo);
             }
 
             return true;
@@ -65,7 +65,8 @@ namespace Vpiska.Infrastructure.EventState
         {
             lock (_mediaLocker)
             {
-                return State.MediaLinks.Contains(mediaId) && State.MediaLinks.Remove(mediaId);
+                var mediaInfo = State.Media.FirstOrDefault(x => x.Id == mediaId);
+                return mediaInfo != null && State.Media.Remove(mediaInfo);
             }
         }
 

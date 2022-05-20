@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
@@ -45,7 +46,7 @@ namespace Vpiska.Domain.Event.Commands.RemoveMediaCommand
                 throw new UserIsNotOwnerException();
             }
 
-            if (!model.MediaLinks.Contains(command.MediaId))
+            if (model.Media.All(x => x.Id != command.MediaId))
             {
                 throw new MediaNotFoundException();
             }

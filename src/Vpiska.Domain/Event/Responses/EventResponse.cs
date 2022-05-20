@@ -17,7 +17,7 @@ namespace Vpiska.Domain.Event.Responses
 
         public Coordinates Coordinates { get; set; }
 
-        public List<string> MediaLinks { get; set; } = new();
+        public List<MediaInfo> Media { get; set; } = new();
 
         public List<ChatMessage> ChatData { get; set; } = new();
 
@@ -29,7 +29,7 @@ namespace Vpiska.Domain.Event.Responses
             Address = model.Address,
             UsersCount = model.Users.Count,
             Coordinates = model.Coordinates,
-            MediaLinks = model.MediaLinks,
+            Media = model.Media,
             ChatData = model.ChatData
         };
     }

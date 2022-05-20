@@ -6,6 +6,7 @@ using Vpiska.Domain.Common;
 using Vpiska.Domain.Event.Common;
 using Vpiska.Domain.Event.Exceptions;
 using Vpiska.Domain.Event.Interfaces;
+using Vpiska.Domain.Event.Models;
 using Vpiska.Domain.Interfaces;
 
 namespace Vpiska.Domain.Event.Commands.AddMediaCommand
@@ -48,8 +49,15 @@ namespace Vpiska.Domain.Event.Commands.AddMediaCommand
 
             var uploadResult = await _fileStorage.SaveFileAsync(Guid.NewGuid().ToString(), command.ContentType,
                 command.MediaStream, cancellationToken);
-            await _repository.AddMediaLink(command.EventId, uploadResult, cancellationToken);
-            await _eventBus.PublishAsync(command.ToEvent(uploadResult));
+            
+            var mediaInfo = new MediaInfo()
+            {
+                Id = uploadResult.Id,
+                ContentType = uploadResult.ContentType
+            };
+            
+            await _repository.AddMediaLink(command.EventId, mediaInfo, cancellationToken);
+            await _eventBus.PublishAsync(command.ToEvent(mediaInfo));
         }
     }
 }

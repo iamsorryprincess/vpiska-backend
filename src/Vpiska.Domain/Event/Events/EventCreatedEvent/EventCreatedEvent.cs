@@ -16,7 +16,7 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
         
         public Coordinates Coordinates { get; set; }
 
-        public List<string> MediaLinks { get; set; } = new();
+        public List<MediaInfo> Media { get; set; } = new();
 
         public List<ChatMessage> ChatData { get; set; } = new();
 
@@ -40,7 +40,7 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
             Coordinates = Coordinates,
             ChatData = ChatData,
             Users = Users,
-            MediaLinks = MediaLinks
+            Media = Media
         };
 
         public static EventCreatedEvent FromModel(Event model) => new()
@@ -50,7 +50,7 @@ namespace Vpiska.Domain.Event.Events.EventCreatedEvent
             Name = model.Name,
             Address = model.Address,
             Coordinates = model.Coordinates,
-            MediaLinks = model.MediaLinks,
+            Media = model.Media,
             ChatData = model.ChatData,
             Users = model.Users
         };

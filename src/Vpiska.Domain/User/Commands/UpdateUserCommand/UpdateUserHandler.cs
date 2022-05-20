@@ -55,10 +55,11 @@ namespace Vpiska.Domain.User.Commands.UpdateUserCommand
                     var imageId = command.ImageStream == null
                         ? user.ImageId
                         : string.IsNullOrWhiteSpace(user.ImageId)
-                            ? await _fileStorage.SaveFileAsync(Guid.NewGuid().ToString(), command.ContentType, command.ImageStream,
-                                cancellationToken)
-                            : await _fileStorage.SaveFileAsync(user.ImageId, command.ContentType, command.ImageStream,
-                                cancellationToken);
+                            ? (await _fileStorage.SaveFileAsync(Guid.NewGuid().ToString(), command.ContentType,
+                                command.ImageStream,
+                                cancellationToken)).Id
+                            : (await _fileStorage.SaveFileAsync(user.ImageId, command.ContentType, command.ImageStream,
+                                cancellationToken)).Id;
 
                     await _repository.UpdateUser(command.Id, command.Name, command.Phone, imageId, cancellationToken);
                     return new ImageIdResponse() { ImageId = imageId };

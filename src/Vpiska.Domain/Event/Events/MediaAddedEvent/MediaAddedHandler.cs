@@ -32,7 +32,7 @@ namespace Vpiska.Domain.Event.Events.MediaAddedEvent
 
                 if (connections.Any())
                 {
-                    await _eventSender.NotifyMediaAdded(connections, domainEvent.MediaId);
+                    await _eventSender.NotifyMediaAdded(connections, domainEvent.MediaInfo.Id);
                 }
             }
 
@@ -43,7 +43,7 @@ namespace Vpiska.Domain.Event.Events.MediaAddedEvent
                 return;
             }
             
-            await _eventStorage.AddMediaLink(domainEvent.EventId, domainEvent.MediaId);
+            await _eventStorage.AddMediaLink(domainEvent.EventId, domainEvent.MediaInfo);
         }
     }
 }

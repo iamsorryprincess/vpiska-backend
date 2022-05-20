@@ -1,4 +1,5 @@
 using Vpiska.Domain.Event.Interfaces;
+using Vpiska.Domain.Event.Models;
 
 namespace Vpiska.Domain.Event.Events.MediaAddedEvent
 {
@@ -6,6 +7,6 @@ namespace Vpiska.Domain.Event.Events.MediaAddedEvent
     {
         public string EventId { get; set; }
 
-        public string MediaId { get; set; }
+        public MediaInfo MediaInfo { get; set; }
     }
 }

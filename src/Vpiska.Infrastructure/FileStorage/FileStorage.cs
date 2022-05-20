@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Vpiska.Domain.Common;
 using Vpiska.Domain.Interfaces;
 using Vpiska.Domain.Media.Commands.RemoveMediaCommand;
 using Vpiska.Domain.Media.Commands.UploadMediaCommand;
@@ -20,7 +21,7 @@ namespace Vpiska.Infrastructure.FileStorage
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<string> SaveFileAsync(string filename, string contentType, Stream fileStream,
+        public async Task<MediaResult> SaveFileAsync(string filename, string contentType, Stream fileStream,
             CancellationToken cancellationToken = default)
         {
             var buffer = new byte[fileStream.Length];
@@ -34,7 +35,11 @@ namespace Vpiska.Infrastructure.FileStorage
             };
             var commandHandler = _serviceProvider.GetRequiredService<ICommandHandler<UploadMediaCommand, MetadataViewModel>>();
             await commandHandler.HandleAsync(command, cancellationToken);
-            return filename;
+            return new MediaResult()
+            {
+                Id = filename,
+                ContentType = contentType
+            };
         }
 
         public async Task<bool> DeleteFileAsync(string filename, CancellationToken cancellationToken = default)
