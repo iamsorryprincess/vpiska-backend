@@ -12,7 +12,7 @@ namespace Vpiska.Domain.Event.Interfaces
 
         Task SendCloseStatus(Guid connectionId);
 
-        Task NotifyMediaAdded(Guid[] connections, string mediaId);
+        Task NotifyMediaAdded(Guid[] connections, MediaInfo mediaInfo);
 
         Task NotifyMediaRemoved(Guid[] connections, string mediaId);
     }

@@ -50,7 +50,7 @@ namespace Vpiska.Infrastructure.EventState
         {
             lock (_mediaLocker)
             {
-                if (State.Media.All(x => x.Id != mediaInfo.Id))
+                if (State.Media.Any(x => x.Id == mediaInfo.Id))
                 {
                     return false;
                 }

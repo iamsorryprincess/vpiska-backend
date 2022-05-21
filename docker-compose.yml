@@ -11,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
     deploy:
-      replicas: 0
+      replicas: 1
       restart_policy:
         condition: on-failure
       update_config:
@@ -89,7 +89,7 @@ services:
       - RabbitMQ__User=kekit
       - RabbitMQ__Password=qweasdzxc
     deploy:
-      replicas: 0
+      replicas: 1
       restart_policy:
         condition: on-failure
       update_config:

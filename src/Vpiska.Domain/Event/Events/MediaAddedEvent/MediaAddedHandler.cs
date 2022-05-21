@@ -32,7 +32,7 @@ namespace Vpiska.Domain.Event.Events.MediaAddedEvent
 
                 if (connections.Any())
                 {
-                    await _eventSender.NotifyMediaAdded(connections, domainEvent.MediaInfo.Id);
+                    await _eventSender.NotifyMediaAdded(connections, domainEvent.MediaInfo);
                 }
             }
 

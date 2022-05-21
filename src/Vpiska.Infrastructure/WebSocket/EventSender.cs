@@ -33,9 +33,9 @@ namespace Vpiska.Infrastructure.WebSocket
             await _webSocketInteracting.Close(connectionId);
         }
 
-        public Task NotifyMediaAdded(Guid[] connections, string mediaId) =>
+        public Task NotifyMediaAdded(Guid[] connections, MediaInfo mediaInfo) =>
             Task.WhenAll(connections.Select(connectionId =>
-                _webSocketInteracting.SendRawMessage(connectionId, "mediaAdded", mediaId)));
+                _webSocketInteracting.SendMessage(connectionId, "mediaAdded", mediaInfo)));
 
         public Task NotifyMediaRemoved(Guid[] connections, string mediaId) =>
             Task.WhenAll(connections.Select(connectionId =>
